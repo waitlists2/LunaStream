@@ -8,14 +8,14 @@ import { Movie, TVShow } from '../types';
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
 const fuseOptions = {
-  keys: ['title', 'name', 'overview'],
-  threshold: 0.4,
+  keys: ['title', 'name', 'overview'], // search in movie title or tv show name and overview
+  threshold: 0.4, // fuzzy match threshold (0 = exact, 1 = match anything)
   ignoreLocation: true,
   minMatchCharLength: 2,
 };
 
+// Extensive banned keywords list (case insensitive matching)
 const bannedKeywords = [
-  // Extreme violence & gore
   'gore',
   'extreme gore',
   'graphic violence',
@@ -29,17 +29,15 @@ const bannedKeywords = [
   'liveleak',
   'necrophilia',
 
-  // Child-related exploitation
   'child abuse',
   'child torture',
   'child exploitation',
-  'cp', // shorthand for illegal content
+  'cp',
   'infant abuse',
   'underage',
   'pedo',
   'pedophile',
 
-  // Sexual violence & disturbing sexual content
   'rape',
   'sexual assault',
   'incest',
@@ -51,12 +49,10 @@ const bannedKeywords = [
   'snuff porn',
   'rape porn',
 
-  // Animal cruelty
   'animal abuse',
   'animal cruelty',
   'animal torture',
 
-  // Real tragedy or traumatic content
   '9/11',
   'isis execution',
   'terrorist execution',
@@ -66,7 +62,6 @@ const bannedKeywords = [
   'shooting video',
   'torture video',
 
-  // Shock media genres
   'shockumentary',
   'mondo film',
   'banned horror',
@@ -76,7 +71,6 @@ const bannedKeywords = [
   'gore video',
   'disturbing footage',
 
-  // Known disturbing films (examples of banned/disturbing media)
   'august underground',
   'a serbian film',
   'guinea pig',
@@ -93,17 +87,12 @@ const bannedKeywords = [
   'snuff 102',
   'vase de noces',
 
-  // General terms
   'kill yourself',
   'kys',
   'suicide',
   'how to die',
-  'homicide',
-  'sacrifice',
   'ritual killing',
 ];
-
-
 
 const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -114,6 +103,12 @@ const SearchResults: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [warningVisible, setWarningVisible] = useState(false);
 
+  // Check if query matches any banned keywords (case insensitive)
+  const isQueryBanned = (): boolean => {
+    const lowerQuery = query.toLowerCase();
+    return bannedKeywords.some(keyword => lowerQuery.includes(keyword));
+  };
+
   useEffect(() => {
     if (!query) {
       setResults([]);
@@ -123,20 +118,10 @@ const SearchResults: React.FC = () => {
       return;
     }
 
-    const containsBannedKeyword = bannedKeywords.some(keyword =>
-      query.toLowerCase().includes(keyword)
-    );
-
-    if (containsBannedKeyword) {
-      setWarningVisible(true);
-      setResults([]);
-      setLoading(false);
-      return;
-    }
-
     let isMounted = true;
     setLoading(true);
     setError(null);
+    setWarningVisible(false); // reset warning when query changes
 
     const fetchResults = async () => {
       try {
@@ -149,12 +134,6 @@ const SearchResults: React.FC = () => {
 
         const movieItems: Movie[] = movieResults?.results || [];
         const tvItems: TVShow[] = tvResults?.results || [];
-
-        if (movieItems.length === 0 && tvItems.length === 0) {
-          setResults([]);
-          setLoading(false);
-          return;
-        }
 
         const combinedResults: MediaItem[] = [
           ...movieItems.map(m => ({
@@ -177,6 +156,10 @@ const SearchResults: React.FC = () => {
           .sort((a, b) => b.popularity - a.popularity);
 
         setResults(finalResults);
+
+        if (isQueryBanned()) {
+          setWarningVisible(true);
+        }
       } catch (err) {
         if (!isMounted) return;
         console.error('Search failed:', err);
@@ -235,7 +218,8 @@ const SearchResults: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 relative">
+      {/* Header */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -251,7 +235,33 @@ const SearchResults: React.FC = () => {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* WARNING OVERLAY */}
+      {warningVisible && (
+        <div
+          aria-live="assertive"
+          role="alert"
+          className="fixed inset-0 bg-black/80 z-[1000] flex flex-col items-center justify-center px-6 text-center text-white"
+        >
+          <h2 className="text-3xl font-bold mb-4">Haiii!</h2>
+          <p className="mb-6 max-w-lg text-lg leading-relaxed">
+            Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe.
+          </p>
+          <button
+            onClick={() => setWarningVisible(false)}
+            className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors"
+          >
+            Continue anyway
+          </button>
+        </div>
+      )}
+
+      {/* CONTENT BELOW - Blur & disable interaction if warning visible */}
+      <main
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-filter duration-300 ${
+          warningVisible ? 'blur-sm pointer-events-none select-none' : ''
+        }`}
+        aria-hidden={warningVisible}
+      >
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Search Results for "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
@@ -260,23 +270,6 @@ const SearchResults: React.FC = () => {
             Found {results.length} result{results.length !== 1 ? 's' : ''} (sorted by popularity)
           </p>
         </div>
-
-                {warningVisible ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-              <h2 className="text-xl font-bold text-red-600 mb-4">⚠️ Caution!</h2>
-              <p className="text-gray-700 mb-4">
-                Haiii! Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe 💖
-              </p>
-              <button
-                onClick={() => setWarningVisible(false)}
-                className="mt-4 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-md shadow hover:opacity-90 transition"
-              >
-                I understand, show results
-              </button>
-            </div>
-          </div>
-        ) : null}
 
         {results.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -340,7 +333,7 @@ const SearchResults: React.FC = () => {
             ))}
           </div>
         ) : (
-          !loading && !warningVisible && (
+          !loading && (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-gradient-to-r from-pink-300 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 opacity-50">
                 <Search className="w-12 h-12 text-white" />
@@ -350,7 +343,7 @@ const SearchResults: React.FC = () => {
             </div>
           )
         )}
-      </div>
+      </main>
     </div>
   );
 };
