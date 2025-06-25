@@ -9,12 +9,12 @@ type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: nu
 
 const fuseOptions = {
   keys: ['title', 'name', 'overview'], // search in movie title or tv show name and overview
-  threshold: 0.4, // fuzzy match threshold (0 = exact, 1 = match anything)
+  threshold: 0.4, // fuzzy match threshold
   ignoreLocation: true,
   minMatchCharLength: 2,
 };
 
-// Extensive banned keywords list (case insensitive matching)
+// Updated banned keywords list (removed "sacrifice", "homicide", "murder", and "death")
 const bannedKeywords = [
   'gore',
   'extreme gore',
@@ -91,7 +91,6 @@ const bannedKeywords = [
   'kys',
   'suicide',
   'how to die',
-  'ritual killing',
 ];
 
 const SearchResults: React.FC = () => {
@@ -121,7 +120,7 @@ const SearchResults: React.FC = () => {
     let isMounted = true;
     setLoading(true);
     setError(null);
-    setWarningVisible(false); // reset warning when query changes
+    setWarningVisible(false);
 
     const fetchResults = async () => {
       try {
@@ -235,27 +234,31 @@ const SearchResults: React.FC = () => {
         </div>
       </nav>
 
-      {/* WARNING OVERLAY */}
+      {/* WARNING MODAL */}
       {warningVisible && (
         <div
           aria-live="assertive"
-          role="alert"
-          className="fixed inset-0 bg-black/80 z-[1000] flex flex-col items-center justify-center px-6 text-center text-white"
+          role="alertdialog"
+          aria-modal="true"
+          tabIndex={-1}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center px-6"
         >
-          <h2 className="text-3xl font-bold mb-4">Haiii!</h2>
-          <p className="mb-6 max-w-lg text-lg leading-relaxed">
-            Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe.
-          </p>
-          <button
-            onClick={() => setWarningVisible(false)}
-            className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors"
-          >
-            Continue anyway
-          </button>
+          <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-lg text-center">
+            <h2 className="text-3xl font-bold mb-4 text-pink-600">Haiii!</h2>
+            <p className="mb-6 text-gray-700 text-lg leading-relaxed">
+              Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe.
+            </p>
+            <button
+              onClick={() => setWarningVisible(false)}
+              className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors focus:outline-none focus:ring-4 focus:ring-pink-400"
+            >
+              Continue anyway
+            </button>
+          </div>
         </div>
       )}
 
-      {/* CONTENT BELOW - Blur & disable interaction if warning visible */}
+      {/* CONTENT BELOW - blur and disable interaction if warning visible */}
       <main
         className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-filter duration-300 ${
           warningVisible ? 'blur-sm pointer-events-none select-none' : ''
