@@ -1,18 +1,17 @@
 const API_KEY = '762f9abeaf5a0a96795dee0bb3989df9';
 const BASE_URL = 'https://api.themoviedb.org/3';
-const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 export const tmdb = {
   searchMovies: async (query: string) => {
     const response = await fetch(
-      `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&sort_by=popularity.desc`
+      `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
     );
     return response.json();
   },
 
   searchTV: async (query: string) => {
     const response = await fetch(
-      `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}&sort_by=popularity.desc`
+      `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
     );
     return response.json();
   },
@@ -53,7 +52,8 @@ export const tmdb = {
   },
 
   getImageUrl: (path: string | null, size: string = 'w500') => {
-    if (!path) return 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=500&h=750&fit=crop';
+    if (!path)
+      return 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=500&h=750&fit=crop';
     return `https://image.tmdb.org/t/p/${size}${path}`;
   }
 };
