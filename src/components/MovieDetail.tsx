@@ -58,15 +58,16 @@ const MovieDetail: React.FC = () => {
     );
   }
 
-  // ✅ Prevent iframe from redirecting user
   if (isPlaying) {
-    const playerUrl = `https://player.videasy.net/movie/${movie.id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`;
+    const playerUrl = `https://player.videasy.net/movie/${movie.id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`;
+
     return (
       <div className="fixed inset-0 bg-black z-50">
         <div className="absolute top-4 right-4 z-10">
           <button
             onClick={handleClosePlayer}
             className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            aria-label="Close Player"
           >
             <X className="w-6 h-6" />
           </button>
@@ -119,7 +120,7 @@ const MovieDetail: React.FC = () => {
                 className="h-96 w-full object-cover md:h-full md:w-80"
               />
             </div>
-            
+
             {/* Content */}
             <div className="p-8">
               <div className="flex items-start justify-between mb-4">
