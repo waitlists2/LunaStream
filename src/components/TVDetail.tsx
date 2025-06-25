@@ -18,7 +18,6 @@ const TVDetail: React.FC = () => {
   useEffect(() => {
     const fetchShow = async () => {
       if (!id) return;
-      
       setLoading(true);
       try {
         const showData = await tmdb.getTVDetails(parseInt(id));
@@ -33,14 +32,12 @@ const TVDetail: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchShow();
   }, [id]);
 
   useEffect(() => {
     const fetchEpisodes = async () => {
       if (!id || selectedSeason === 0) return;
-      
       setEpisodesLoading(true);
       try {
         const seasonData = await tmdb.getTVSeasons(parseInt(id), selectedSeason);
@@ -51,7 +48,6 @@ const TVDetail: React.FC = () => {
         setEpisodesLoading(false);
       }
     };
-
     fetchEpisodes();
   }, [id, selectedSeason]);
 
@@ -75,12 +71,7 @@ const TVDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
-            <Tv className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 text-lg">Loading show details...</p>
-        </div>
+        <p className="text-lg text-gray-700">Loading show details...</p>
       </div>
     );
   }
@@ -96,9 +87,10 @@ const TVDetail: React.FC = () => {
     );
   }
 
+  // 🚫 Prevent redirecting with sandbox attribute
   if (isPlaying && currentEpisode) {
     const playerUrl = `https://player.videasy.net/tv/${show.id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`;
-    
+
     return (
       <div className="fixed inset-0 bg-black z-50">
         <div className="absolute top-4 right-4 z-10">
@@ -113,16 +105,15 @@ const TVDetail: React.FC = () => {
           src={playerUrl}
           className="w-full h-full border-0"
           allowFullScreen
-          title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
-/>
-
+          title={`Playing: ${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
+          sandbox="allow-scripts allow-same-origin" // ✅ This prevents redirect
+        />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
-      {/* Header */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -146,7 +137,6 @@ const TVDetail: React.FC = () => {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Show Details */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 overflow-hidden mb-8">
           <div className="md:flex">
             <div className="md:flex-shrink-0">
@@ -156,7 +146,6 @@ const TVDetail: React.FC = () => {
                 className="h-96 w-full object-cover md:h-full md:w-80"
               />
             </div>
-            
             <div className="p-8">
               <div className="flex items-start justify-between mb-4">
                 <h1 className="text-3xl font-bold text-gray-900">{show.name}</h1>
@@ -171,20 +160,13 @@ const TVDetail: React.FC = () => {
                   <Calendar className="w-4 h-4 mr-1" />
                   {new Date(show.first_air_date).getFullYear()}
                 </div>
-                <div>
-                  {show.number_of_seasons} Season{show.number_of_seasons !== 1 ? 's' : ''}
-                </div>
-                <div>
-                  {show.number_of_episodes} Episodes
-                </div>
+                <div>{show.number_of_seasons} Season{show.number_of_seasons !== 1 ? 's' : ''}</div>
+                <div>{show.number_of_episodes} Episodes</div>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-6">
                 {show.genres.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded-full text-sm"
-                  >
+                  <span key={genre.id} className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded-full text-sm">
                     {genre.name}
                   </span>
                 ))}
@@ -195,7 +177,7 @@ const TVDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Season Selector & Episodes */}
+        {/* Episodes Section */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Episodes</h2>
@@ -208,7 +190,7 @@ const TVDetail: React.FC = () => {
                 {show.seasons
                   .filter(season => season.season_number > 0)
                   .map((season) => (
-                    <option key={season.id} value={season.season_number} className="bg-gray-800">
+                    <option key={season.id} value={season.season_number}>
                       Season {season.season_number}
                     </option>
                   ))}
@@ -217,64 +199,47 @@ const TVDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Episodes List */}
           {episodesLoading ? (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mx-auto mb-4">
-                <Tv className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-gray-600">Loading episodes...</p>
-            </div>
+            <p className="text-center text-gray-600">Loading episodes...</p>
           ) : (
             <div className="space-y-3">
               {episodes.map((episode) => (
-                <div
-                  key={episode.id}
-                  className="group bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl border border-pink-200/50 overflow-hidden hover:shadow-lg transition-all duration-300"
-                >
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                          {episode.episode_number}
-                        </span>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-pink-600 transition-colors">
-                          {episode.name}
-                        </h3>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {episode.overview && (
-                          <button
-                            onClick={() => toggleDescription(episode.id)}
-                            className="text-gray-500 hover:text-pink-600 transition-colors p-1"
-                            title="Show description"
-                          >
-                            <Info className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleWatchEpisode(episode)}
-                          className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-2 rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
-                        >
-                          <Play className="w-4 h-4" />
-                        </button>
-                      </div>
+                <div key={episode.id} className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl border border-pink-200/50 p-4 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        {episode.episode_number}
+                      </span>
+                      <h3 className="text-gray-900 font-semibold">{episode.name}</h3>
                     </div>
-                    
-                    {episode.air_date && (
-                      <p className="text-xs text-gray-500 mb-2">
-                        Aired: {new Date(episode.air_date).toLocaleDateString()}
-                      </p>
-                    )}
-
-                    {showDescriptions[episode.id] && episode.overview && (
-                      <div className="mt-3 p-3 bg-white/60 rounded-lg border border-pink-200/30">
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {episode.overview}
-                        </p>
-                      </div>
-                    )}
+                    <div className="flex space-x-2">
+                      {episode.overview && (
+                        <button
+                          onClick={() => toggleDescription(episode.id)}
+                          title="Toggle Description"
+                          className="text-gray-500 hover:text-pink-600"
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleWatchEpisode(episode)}
+                        className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-2 rounded-lg hover:from-pink-600 hover:to-purple-700"
+                      >
+                        <Play className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
+
+                  {episode.air_date && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Aired: {new Date(episode.air_date).toLocaleDateString()}
+                    </p>
+                  )}
+
+                  {showDescriptions[episode.id] && episode.overview && (
+                    <p className="mt-2 text-sm text-gray-700">{episode.overview}</p>
+                  )}
                 </div>
               ))}
             </div>

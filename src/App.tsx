@@ -4,6 +4,7 @@ import HomePage from './components/HomePage';
 import SearchResults from './components/SearchResults';
 import MovieDetail from './components/MovieDetail';
 import TVDetail from './components/TVDetail';
+import LastUpdated from './components/LastUpdated'; 
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/search" element={<SearchResults />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/tv/:id" element={<TVDetail />} />
+        <Route path="/v" element={<LastUpdated />} /> {/* ✅ Add this line */}
       </Routes>
     </Router>
   );

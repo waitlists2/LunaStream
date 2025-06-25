@@ -13,7 +13,6 @@ const MovieDetail: React.FC = () => {
   useEffect(() => {
     const fetchMovie = async () => {
       if (!id) return;
-      
       setLoading(true);
       try {
         const movieData = await tmdb.getMovieDetails(parseInt(id));
@@ -24,7 +23,6 @@ const MovieDetail: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchMovie();
   }, [id]);
 
@@ -60,9 +58,9 @@ const MovieDetail: React.FC = () => {
     );
   }
 
+  // ✅ Prevent iframe from redirecting user
   if (isPlaying) {
     const playerUrl = `https://player.videasy.net/movie/${movie.id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`;
-    
     return (
       <div className="fixed inset-0 bg-black z-50">
         <div className="absolute top-4 right-4 z-10">
@@ -79,7 +77,7 @@ const MovieDetail: React.FC = () => {
           allowFullScreen
           sandbox="allow-scripts allow-same-origin"
           title={movie.title}
-/>
+        />
       </div>
     );
   }
