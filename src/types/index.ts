@@ -7,6 +7,7 @@ export interface Movie {
   release_date: string;
   vote_average: number;
   genre_ids: number[];
+  popularity: number;
 }
 
 export interface TVShow {
@@ -19,6 +20,7 @@ export interface TVShow {
   vote_average: number;
   genre_ids: number[];
   origin_country: string[];
+  popularity: number;
 }
 
 export interface SearchResponse {

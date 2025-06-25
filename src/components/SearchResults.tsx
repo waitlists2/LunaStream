@@ -4,7 +4,7 @@ import { Search, Film, Tv, Star, Calendar } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
 
-type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv' };
+type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
 const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -24,18 +24,20 @@ const SearchResults: React.FC = () => {
         ]);
         
         // Combine and mark media types
-        const movies: MediaItem[] = (movieResults.results || []).map((movie: Movie) => ({
+        const movies: MediaItem[] = (movieResults.results || []).map((movie: Movie & { popularity: number }) => ({
           ...movie,
-          media_type: 'movie' as const
+          media_type: 'movie' as const,
+          popularity: movie.popularity || 0
         }));
         
-        const tvShows: MediaItem[] = (tvResults.results || []).map((show: TVShow) => ({
+        const tvShows: MediaItem[] = (tvResults.results || []).map((show: TVShow & { popularity: number }) => ({
           ...show,
-          media_type: 'tv' as const
+          media_type: 'tv' as const,
+          popularity: show.popularity || 0
         }));
         
-        // Combine all results and sort by popularity/rating
-        const allResults = [...movies, ...tvShows].sort((a, b) => b.vote_average - a.vote_average);
+        // Combine all results and sort by popularity (highest first)
+        const allResults = [...movies, ...tvShows].sort((a, b) => b.popularity - a.popularity);
         
         setResults(allResults);
       } catch (error) {
@@ -101,7 +103,7 @@ const SearchResults: React.FC = () => {
             Search Results for "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
           </h1>
           <p className="text-gray-600">
-            Found {results.length} results
+            Found {results.length} results (sorted by popularity)
           </p>
         </div>
 
@@ -150,7 +152,7 @@ const SearchResults: React.FC = () => {
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <div className="flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {new Date(getReleaseDate(item)).getFullYear()}
+                      {getReleaseDate(item) ? new Date(getReleaseDate(item)).getFullYear() : 'N/A'}
                     </div>
                     <div className="flex items-center">
                       <Star className="w-3 h-3 mr-1 text-yellow-500" />
