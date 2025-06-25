@@ -8,24 +8,128 @@ import { Movie, TVShow } from '../types';
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
 const fuseOptions = {
-  keys: ['title', 'name', 'overview'], // search in movie title or tv show name and overview
-  threshold: 0.4, // fuzzy match threshold (0 = exact, 1 = match anything)
+  keys: ['title', 'name', 'overview'],
+  threshold: 0.4,
   ignoreLocation: true,
   minMatchCharLength: 2,
 };
 
+const bannedKeywords = [
+  // Extreme violence & gore
+  'gore',
+  'extreme gore',
+  'graphic violence',
+  'real death',
+  'real murder',
+  'snuff',
+  'decapitation',
+  'beheading',
+  'dismemberment',
+  'execution',
+  'liveleak',
+  'necrophilia',
+
+  // Child-related exploitation
+  'child abuse',
+  'child torture',
+  'child exploitation',
+  'cp', // shorthand for illegal content
+  'infant abuse',
+  'underage',
+  'pedo',
+  'pedophile',
+
+  // Sexual violence & disturbing sexual content
+  'rape',
+  'sexual assault',
+  'incest',
+  'bestiality',
+  'zoo',
+  'nonconsensual',
+  'molestation',
+  'forced sex',
+  'snuff porn',
+  'rape porn',
+
+  // Animal cruelty
+  'animal abuse',
+  'animal cruelty',
+  'animal torture',
+
+  // Real tragedy or traumatic content
+  '9/11',
+  'isis execution',
+  'terrorist execution',
+  'war footage',
+  'massacre',
+  'school shooting',
+  'shooting video',
+  'torture video',
+
+  // Shock media genres
+  'shockumentary',
+  'mondo film',
+  'banned horror',
+  'red room',
+  'deep web video',
+  'dark web',
+  'gore video',
+  'disturbing footage',
+
+  // Known disturbing films (examples of banned/disturbing media)
+  'august underground',
+  'a serbian film',
+  'guinea pig',
+  'tumblr gore',
+  'faces of death',
+  'traces of death',
+  'cannibal holocaust',
+  'human centipede 2',
+  'men behind the sun',
+  'salo 120 days of sodom',
+  'martyrs',
+  'grotesque',
+  'naked blood',
+  'snuff 102',
+  'vase de noces',
+
+  // General terms
+  'kill yourself',
+  'kys',
+  'suicide',
+  'how to die',
+  'homicide',
+  'sacrifice',
+  'ritual killing',
+];
+
+
+
 const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = (searchParams.get('q') || '').trim();
-  
+
   const [results, setResults] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warningVisible, setWarningVisible] = useState(false);
 
   useEffect(() => {
     if (!query) {
       setResults([]);
       setError(null);
+      setLoading(false);
+      setWarningVisible(false);
+      return;
+    }
+
+    const containsBannedKeyword = bannedKeywords.some(keyword =>
+      query.toLowerCase().includes(keyword)
+    );
+
+    if (containsBannedKeyword) {
+      setWarningVisible(true);
+      setResults([]);
       setLoading(false);
       return;
     }
@@ -43,7 +147,6 @@ const SearchResults: React.FC = () => {
 
         if (!isMounted) return;
 
-        // Check if API responses are valid
         const movieItems: Movie[] = movieResults?.results || [];
         const tvItems: TVShow[] = tvResults?.results || [];
 
@@ -53,7 +156,6 @@ const SearchResults: React.FC = () => {
           return;
         }
 
-        // Combine all results and mark media types
         const combinedResults: MediaItem[] = [
           ...movieItems.map(m => ({
             ...m,
@@ -67,11 +169,9 @@ const SearchResults: React.FC = () => {
           })),
         ];
 
-        // Use Fuse.js to do fuzzy filtering on combined results
         const fuse = new Fuse(combinedResults, fuseOptions);
         const fuzzyResults = query.length >= 2 ? fuse.search(query) : combinedResults.map(r => ({ item: r }));
 
-        // Map Fuse results to the original items and sort by popularity descending
         const finalResults = fuzzyResults
           .map(res => res.item)
           .sort((a, b) => b.popularity - a.popularity);
@@ -136,7 +236,6 @@ const SearchResults: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
-      {/* Header */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -162,7 +261,23 @@ const SearchResults: React.FC = () => {
           </p>
         </div>
 
-        {/* Results Grid */}
+                {warningVisible ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+              <h2 className="text-xl font-bold text-red-600 mb-4">⚠️ Caution!</h2>
+              <p className="text-gray-700 mb-4">
+                Haiii! Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe 💖
+              </p>
+              <button
+                onClick={() => setWarningVisible(false)}
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-md shadow hover:opacity-90 transition"
+              >
+                I understand, show results
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {results.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {results.map(item => (
@@ -225,7 +340,7 @@ const SearchResults: React.FC = () => {
             ))}
           </div>
         ) : (
-          !loading && (
+          !loading && !warningVisible && (
             <div className="text-center py-16">
               <div className="w-24 h-24 bg-gradient-to-r from-pink-300 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 opacity-50">
                 <Search className="w-12 h-12 text-white" />
