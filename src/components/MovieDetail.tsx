@@ -77,8 +77,9 @@ const MovieDetail: React.FC = () => {
           src={playerUrl}
           className="w-full h-full border-0"
           allowFullScreen
+          sandbox="allow-scripts allow-same-origin"
           title={movie.title}
-        />
+/>
       </div>
     );
   }

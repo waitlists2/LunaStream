@@ -114,7 +114,8 @@ const TVDetail: React.FC = () => {
           className="w-full h-full border-0"
           allowFullScreen
           title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
-        />
+/>
+
       </div>
     );
   }
