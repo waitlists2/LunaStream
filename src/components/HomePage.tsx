@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Film, Tv, TrendingUp } from 'lucide-react';
+import { Search, Film, Tv, TrendingUp, MessageCircle, Twitter } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
@@ -9,6 +9,7 @@ const HomePage: React.FC = () => {
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [trendingTV, setTrendingTV] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSocials, setShowSocials] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -184,6 +185,49 @@ const HomePage: React.FC = () => {
             </div>
           </>
         )}
+      </div>
+
+      {/* Socials Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <div className="relative">
+          {/* Social Links */}
+          {showSocials && (
+            <div className="absolute bottom-16 right-0 flex flex-col space-y-3 animate-in slide-in-from-bottom-2 duration-200">
+              <a
+                href="https://discord.gg/your-discord-invite"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#5865F2] hover:bg-[#4752C4] text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group"
+                title="Join our Discord"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </a>
+              <a
+                href="https://twitter.com/your-twitter"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#1DA1F2] hover:bg-[#1A91DA] text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 group"
+                title="Follow us on Twitter"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
+            </div>
+          )}
+          
+          {/* Main Button */}
+          <button
+            onClick={() => setShowSocials(!showSocials)}
+            className={`bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 ${
+              showSocials ? 'rotate-45' : ''
+            }`}
+            title="Social Links"
+          >
+            <div className="w-6 h-6 flex items-center justify-center">
+              <div className="w-1 h-6 bg-white rounded-full"></div>
+              <div className="w-6 h-1 bg-white rounded-full absolute"></div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );
