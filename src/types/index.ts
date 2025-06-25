@@ -37,6 +37,7 @@ export interface MovieDetails extends Movie {
 }
 
 export interface TVDetails extends TVShow {
+  episode_run_time: any;
   number_of_seasons: number;
   number_of_episodes: number;
   genres: { id: number; name: string }[];
