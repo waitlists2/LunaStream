@@ -191,7 +191,7 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center space-x-4">
             <a
-              href="https://discord.gg/your-discord-invite"
+              href="https://discord.gg/8ubGetGGge"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#5865F2] hover:bg-[#4752C4] text-white p-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group"
@@ -200,7 +200,7 @@ const HomePage: React.FC = () => {
               <MessageCircle className="w-4 h-4" />
             </a>
             <a
-              href="https://twitter.com/your-twitter"
+              href="https://x.com/Lunastreamwatch"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#1DA1F2] hover:bg-[#1A91DA] text-white p-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group"
