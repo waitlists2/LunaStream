@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import SearchResults from './components/SearchResults';
 import MovieDetail from './components/MovieDetail';
@@ -14,7 +14,7 @@ function App() {
         <Route path="/search" element={<SearchResults />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/tv/:id" element={<TVDetail />} />
-        <Route path="/v" element={<LastUpdated />} /> {/* ✅ Add this line */}
+        <Route path="/v" element={<LastUpdated />} />
       </Routes>
     </Router>
   );
