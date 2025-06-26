@@ -154,21 +154,41 @@ const TVDetail: React.FC = () => {
     return (
       <div className="fixed inset-0 bg-black z-50">
         {/* Player Controls */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-              {currentSource.name}
-            </span>
-            <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-              S{currentEpisode.season_number}E{currentEpisode.episode_number}
-            </span>
-            {playerError && (
-              <div className="flex items-center bg-red-600/90 text-white px-3 py-1 rounded-full text-sm">
-                <AlertTriangle className="w-4 h-4 mr-1" />
-                Player blocked
-              </div>
-            )}
+        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center space-x-2">
+              <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                {currentSource.name}
+              </span>
+              <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                S{currentEpisode.season_number}E{currentEpisode.episode_number}
+              </span>
+              {playerError && (
+                <div className="flex items-center bg-red-600/90 text-white px-3 py-1 rounded-full text-sm">
+                  <AlertTriangle className="w-4 h-4 mr-1" />
+                  Player blocked
+                </div>
+              )}
+            </div>
+            
+            {/* Player Selection Buttons - Always Visible */}
+            <div className="flex flex-wrap gap-1">
+              {videoSources.map((source, index) => (
+                <button
+                  key={index}
+                  onClick={() => switchPlayer(index)}
+                  className={`px-2 py-1 rounded text-xs transition-colors ${
+                    index === currentPlayerIndex
+                      ? 'bg-pink-600 text-white'
+                      : 'bg-black/50 text-white hover:bg-black/70'
+                  }`}
+                >
+                  {source.name}
+                </button>
+              ))}
+            </div>
           </div>
+          
           <button
             onClick={handleClosePlayer}
             className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
@@ -178,32 +198,17 @@ const TVDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* Player Selection */}
+        {/* Error Message */}
         {playerError && (
           <div className="absolute bottom-4 left-4 right-4 z-10">
-            <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4">
-              <p className="text-white text-sm mb-3">
-                This player is blocked by your network. Try another source:
+            <div className="bg-red-600/90 backdrop-blur-sm rounded-lg p-3 text-center">
+              <p className="text-white text-sm">
+                This player is blocked by your network. Try selecting a different player above.
               </p>
-              <div className="flex flex-wrap gap-2">
-                {videoSources.map((source, index) => (
-                  <button
-                    key={index}
-                    onClick={() => switchPlayer(index)}
-                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                      index === currentPlayerIndex
-                        ? 'bg-pink-600 text-white'
-                        : 'bg-gray-600 text-white hover:bg-gray-500'
-                    }`}
-                  >
-                    {source.name}
-                  </button>
-                ))}
-              </div>
               {currentPlayerIndex < videoSources.length - 1 && (
                 <button
                   onClick={nextPlayer}
-                  className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                  className="mt-2 bg-white/20 hover:bg-white/30 text-white px-4 py-1 rounded text-sm transition-colors"
                 >
                   Try Next Player
                 </button>
@@ -303,8 +308,7 @@ const TVDetail: React.FC = () => {
               {/* Network Info */}
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>Having trouble?</strong> If episodes don't load on school/work WiFi, 
-                  the player will automatically try alternative sources to bypass network restrictions.
+                  <strong>Multiple Players Available:</strong> When watching episodes, you can switch between 5 different video sources using the buttons at the top of the player. Perfect for bypassing network restrictions!
                 </p>
               </div>
             </div>
