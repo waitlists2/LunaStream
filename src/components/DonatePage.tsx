@@ -9,56 +9,42 @@ const DonatePage: React.FC = () => {
     {
       name: 'Bitcoin',
       symbol: 'BTC',
-      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      address: 'bc1qu6mr60wy4ldq9ym2zcmc57jaa5zudkgev7h5d3',
       icon: Bitcoin,
       color: 'from-orange-400 to-orange-600'
     },
     {
       name: 'Ethereum',
       symbol: 'ETH',
-      address: '0x742d35Cc6634C0532925a3b8D4C9db96590645d8',
+      address: '0xB06d3d3D778cBb57d208890ca8deBE985FD738B1',
       icon: Coins,
       color: 'from-blue-400 to-blue-600'
     },
     {
       name: 'Litecoin',
       symbol: 'LTC',
-      address: 'LTC1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
+      address: 'LSQ4Q2wAcpCXYppaDXEU4inavTi5zZdnyS',
       icon: Coins,
       color: 'from-gray-400 to-gray-600'
     },
     {
       name: 'Monero',
       symbol: 'XMR',
-      address: '4AdUndXHHZ6cfufTMvppY6JwXNouMBzSkbLYfpAV5Usx3skxNgYeYTRJ5BNjPiQCI9bA2NSKLVqRFhD7CyuFqLaRZF7A2EY',
+      address: '44V5nhNyiywe31r87WBZLP7AiKmW63tf5EwYFpqQ7BRuhts1tMzA8gvFeFEsL3pjGQ9ipnd43YUBQYWPaS7uBihKEr1kCdB',
       icon: Shield,
       color: 'from-orange-500 to-red-600'
     },
     {
-      name: 'Dogecoin',
-      symbol: 'DOGE',
-      address: 'DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L',
-      icon: Coins,
-      color: 'from-yellow-400 to-yellow-600'
-    },
-    {
-      name: 'Cardano',
-      symbol: 'ADA',
-      address: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj0vs2qd4a6gtmvnz',
-      icon: Coins,
-      color: 'from-blue-500 to-indigo-600'
-    },
-    {
       name: 'Solana',
       symbol: 'SOL',
-      address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
+      address: '2v3vFWGmR6nvLjzYZz5LGjQr73US1S3obeKkZavJjU2j',
       icon: Coins,
       color: 'from-purple-400 to-purple-600'
     },
     {
       name: 'Polygon',
       symbol: 'MATIC',
-      address: '0x742d35Cc6634C0532925a3b8D4C9db96590645d8',
+      address: '0xB06d3d3D778cBb57d208890ca8deBE985FD738B1',
       icon: Coins,
       color: 'from-purple-500 to-pink-600'
     }
