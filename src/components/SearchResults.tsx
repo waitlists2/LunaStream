@@ -7,21 +7,22 @@ import { Movie, TVShow } from '../types';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
-// Balanced fuzzy search options
+// Enhanced fuzzy search options with wildcard support
 const fuseOptions = {
   keys: [
-    { name: 'title', weight: 0.8 },
-    { name: 'name', weight: 0.8 },
-    { name: 'overview', weight: 0.1 },
-    { name: 'original_title', weight: 0.6 },
-    { name: 'original_name', weight: 0.6 }
+    { name: 'title', weight: 0.9 },
+    { name: 'name', weight: 0.9 },
+    { name: 'original_title', weight: 0.7 },
+    { name: 'original_name', weight: 0.7 },
+    { name: 'overview', weight: 0.1 }
   ],
-  threshold: 0.5, // Balanced threshold - not too loose, not too strict
+  threshold: 0.4, // More lenient for wildcard matching
   ignoreLocation: true,
-  minMatchCharLength: 2,
+  minMatchCharLength: 1,
   includeScore: true,
-  findAllMatches: false, // Reduce random matches
-  useExtendedSearch: false, // Disable extended search to reduce noise
+  findAllMatches: true,
+  useExtendedSearch: true, // Enable for wildcard patterns
+  includeMatches: true,
 };
 
 // Updated banned keywords list
@@ -103,7 +104,7 @@ const bannedKeywords = [
   'how to die',
 ];
 
-// Simplified search preprocessing
+// Enhanced search preprocessing with wildcard support
 const preprocessQuery = (query: string): string => {
   return query
     .toLowerCase()
@@ -114,6 +115,45 @@ const preprocessQuery = (query: string): string => {
     .replace(/\s+/g, ' ')
     // Handle common abbreviations
     .replace(/\b&\b/g, 'and');
+};
+
+// Create wildcard patterns for partial matching
+const createWildcardPatterns = (query: string): string[] => {
+  const patterns = [query];
+  const words = query.split(' ').filter(word => word.length > 0);
+  
+  if (words.length > 1) {
+    // Add patterns for each word individually
+    patterns.push(...words);
+    
+    // Add patterns for word combinations
+    for (let i = 0; i < words.length - 1; i++) {
+      patterns.push(words.slice(i, i + 2).join(' '));
+    }
+    
+    // Add fuzzy patterns for partial words (like "family gy" -> "family guy")
+    const fuzzyPatterns = words.map(word => {
+      if (word.length >= 3) {
+        // Create patterns for partial matches
+        return [
+          `${word}*`, // Prefix wildcard
+          `*${word}*`, // Contains wildcard
+          word.slice(0, -1) + '*', // Remove last character + wildcard
+        ];
+      }
+      return [word];
+    }).flat();
+    
+    patterns.push(...fuzzyPatterns);
+  } else if (query.length >= 3) {
+    // Single word patterns
+    patterns.push(
+      `${query}*`, // Prefix wildcard
+      `*${query}*`, // Contains wildcard
+    );
+  }
+  
+  return [...new Set(patterns)]; // Remove duplicates
 };
 
 const SearchResults: React.FC = () => {
@@ -150,7 +190,7 @@ const SearchResults: React.FC = () => {
         // Preprocess the query
         const processedQuery = preprocessQuery(query);
         
-        // Perform primary search
+        // Perform primary search with original query
         const [movieResults, tvResults] = await Promise.all([
           tmdb.searchMovies(processedQuery),
           tmdb.searchTV(processedQuery),
@@ -174,25 +214,41 @@ const SearchResults: React.FC = () => {
           })),
         ];
 
-        // Apply fuzzy search for better matching
+        // Create wildcard patterns for enhanced matching
+        const wildcardPatterns = createWildcardPatterns(processedQuery);
         const fuse = new Fuse(combinedResults, fuseOptions);
-        const fuzzyResults = processedQuery.length >= 2 
-          ? fuse.search(processedQuery) 
-          : combinedResults.map(r => ({ item: r, score: 0 }));
+        
+        // Search with multiple patterns and combine results
+        const allMatches = new Map<number, { item: MediaItem; score: number; pattern: string }>();
+        
+        wildcardPatterns.forEach((pattern, index) => {
+          const patternResults = fuse.search(pattern);
+          patternResults.forEach(result => {
+            const key = `${result.item.media_type}-${result.item.id}`;
+            const score = (result.score || 0) + (index * 0.1); // Prefer exact matches
+            
+            if (!allMatches.has(result.item.id) || allMatches.get(result.item.id)!.score > score) {
+              allMatches.set(result.item.id, {
+                item: result.item,
+                score,
+                pattern
+              });
+            }
+          });
+        });
 
         // Sort by relevance score and popularity
-        const finalResults = fuzzyResults
+        const finalResults = Array.from(allMatches.values())
           .sort((a, b) => {
             // Sort by score first (lower is better), then by popularity
-            const scoreA = a.score || 0;
-            const scoreB = b.score || 0;
-            if (Math.abs(scoreA - scoreB) > 0.1) {
-              return scoreA - scoreB;
+            const scoreDiff = a.score - b.score;
+            if (Math.abs(scoreDiff) > 0.05) {
+              return scoreDiff;
             }
             return b.item.popularity - a.item.popularity;
           })
           .map(r => r.item)
-          .slice(0, 30); // Limit to top 30 results to reduce noise
+          .slice(0, 40); // Increased limit for better wildcard results
 
         setResults(finalResults);
 

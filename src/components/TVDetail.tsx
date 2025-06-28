@@ -72,6 +72,16 @@ const TVDetail: React.FC = () => {
     }));
   };
 
+  const formatAirDate = (dateString: string) => {
+    if (!dateString) return 'TBA';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 flex items-center justify-center">
@@ -246,11 +256,11 @@ const TVDetail: React.FC = () => {
                         </h3>
                       </div>
                       <div className="flex items-center space-x-2">
-                        {episode.overview && (
+                        {(episode.overview || episode.air_date) && (
                           <button
                             onClick={() => toggleDescription(episode.id)}
                             className="text-gray-500 hover:text-pink-600 transition-colors p-1"
-                            title="Show description"
+                            title="Show episode info"
                           >
                             <Info className="w-5 h-5" />
                           </button>
@@ -265,8 +275,19 @@ const TVDetail: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                    {showDescriptions[episode.id] && episode.overview && (
-                      <p className="mt-2 text-gray-700 text-sm leading-relaxed">{episode.overview}</p>
+                    {showDescriptions[episode.id] && (
+                      <div className="mt-3 p-3 bg-white/60 rounded-lg border border-pink-200/30">
+                        {episode.air_date && (
+                          <div className="flex items-center text-sm text-gray-600 mb-2">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            <span className="font-medium">Aired:</span>
+                            <span className="ml-1">{formatAirDate(episode.air_date)}</span>
+                          </div>
+                        )}
+                        {episode.overview && (
+                          <p className="text-gray-700 text-sm leading-relaxed">{episode.overview}</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
