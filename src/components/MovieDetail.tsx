@@ -77,7 +77,8 @@ const MovieDetail: React.FC = () => {
           src={`https://player.videasy.net/movie/${id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`}
           className="w-full h-full border-0"
           allowFullScreen
-          sandbox="allow-scripts allow-same-origin allow-forms"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
           title={movie.title}
           referrerPolicy="no-referrer"
         />

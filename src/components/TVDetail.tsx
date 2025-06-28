@@ -125,7 +125,8 @@ const TVDetail: React.FC = () => {
           src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`}
           className="w-full h-full border-0"
           allowFullScreen
-          sandbox="allow-scripts allow-same-origin allow-forms"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
           title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
           referrerPolicy="no-referrer"
         />

@@ -6,6 +6,7 @@ import MovieDetail from './components/MovieDetail';
 import TVDetail from './components/TVDetail';
 import LastUpdated from './components/LastUpdated';
 import DonatePage from './components/DonatePage';
+import VersionPage from './components/VersionPage';
 
 function App() {
   return (
@@ -15,7 +16,8 @@ function App() {
         <Route path="/search" element={<SearchResults />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/tv/:id" element={<TVDetail />} />
-        <Route path="/v" element={<LastUpdated />} />
+        <Route path="/v" element={<VersionPage />} />
+        <Route path="/last-updated" element={<LastUpdated />} />
         <Route path="/donate" element={<DonatePage />} />
       </Routes>
     </Router>
