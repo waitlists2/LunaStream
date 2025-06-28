@@ -11,7 +11,7 @@ const VersionPage: React.FC = () => {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   // Configure your GitHub repository here
-  const GITHUB_OWNER = 'your-username'; // Replace with your GitHub username
+  const GITHUB_OWNER = 'Waitlists'; // Replace with your GitHub username
   const GITHUB_REPO = 'lunastream'; // Replace with your repository name
   const GITHUB_BRANCH = 'main'; // Replace with your default branch if different
 
