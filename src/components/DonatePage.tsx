@@ -98,7 +98,7 @@ const DonatePage: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Help us keep LunaStream free and accessible for everyone. Your donations directly support our mission to provide the best streaming experience.
+            Help me keep LunaStream free and available for everyone. Your donations directly support my website to provide the best streaming experience.
           </p>
         </div>
 
@@ -112,29 +112,17 @@ const DonatePage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Server Costs:</strong> Maintaining fast, reliable servers for seamless streaming</p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Content Updates:</strong> Keeping our movie and TV show database current and comprehensive</p>
+                <p className="text-gray-700"><strong>Domain Costs:</strong> Domain renewal and alternative domains if possible.</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Development:</strong> Adding new features and improving user experience</p>
+                <p className="text-gray-700"><strong>Development:</strong> Hiring someone to help out. contact x@fbi.monster</p>
               </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Security:</strong> Implementing advanced security measures and privacy protection</p>
-              </div>
-              <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
                 <p className="text-gray-700"><strong>Accessibility:</strong> Ensuring LunaStream remains free for users worldwide</p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Innovation:</strong> Researching and implementing cutting-edge streaming technologies</p>
               </div>
             </div>
           </div>
