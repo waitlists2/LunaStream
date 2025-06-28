@@ -433,7 +433,7 @@ const SearchResults: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <Star className="w-3 h-3 mr-1 text-yellow-500" />
-                      {item.vote_average.toFixed(1)}
+                      {(item.vote_average ?? 0).toFixed(1)}
                     </div>
                   </div>
                 </div>
