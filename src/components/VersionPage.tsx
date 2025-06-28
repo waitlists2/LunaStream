@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Film, Clock, GitBranch, Calendar, Code, RefreshCw, ExternalLink, User, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Film, Clock, GitBranch, Calendar, Code, RefreshCw, ExternalLink, User, AlertCircle, Info } from 'lucide-react';
 import { github, GitHubCommit, GitHubRepo } from '../services/github';
 
 const VersionPage: React.FC = () => {
   const [commitInfo, setCommitInfo] = useState<GitHubCommit | null>(null);
   const [repoInfo, setRepoInfo] = useState<GitHubRepo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
@@ -14,6 +14,9 @@ const VersionPage: React.FC = () => {
   const GITHUB_OWNER = 'your-username'; // Replace with your GitHub username
   const GITHUB_REPO = 'lunastream'; // Replace with your repository name
   const GITHUB_BRANCH = 'main'; // Replace with your default branch if different
+
+  // Check if GitHub integration is properly configured
+  const isGitHubConfigured = GITHUB_OWNER !== 'your-username' && GITHUB_OWNER.trim() !== '';
 
   const currentTime = new Date();
   const lastModified = new Date(document.lastModified);
@@ -25,6 +28,11 @@ const VersionPage: React.FC = () => {
   };
 
   const fetchGitHubData = async () => {
+    if (!isGitHubConfigured) {
+      setError('GitHub integration not configured. Please update GITHUB_OWNER in the code.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
@@ -46,7 +54,9 @@ const VersionPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchGitHubData();
+    if (isGitHubConfigured) {
+      fetchGitHubData();
+    }
   }, []);
 
   const formatDate = (date: Date) => {
@@ -76,14 +86,16 @@ const VersionPage: React.FC = () => {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={fetchGitHubData}
-                disabled={loading}
-                className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </button>
+              {isGitHubConfigured && (
+                <button
+                  onClick={fetchGitHubData}
+                  disabled={loading}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+              )}
               <Link
                 to="/"
                 className="flex items-center text-gray-600 hover:text-pink-600 transition-colors"
@@ -116,8 +128,27 @@ const VersionPage: React.FC = () => {
           </p>
         </div>
 
+        {/* GitHub Configuration Notice */}
+        {!isGitHubConfigured && (
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8">
+            <div className="flex items-start space-x-3">
+              <Info className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-blue-800 font-semibold">GitHub Integration Available</h3>
+                <p className="text-blue-600 text-sm mt-1">
+                  To enable real-time repository and commit information, update the <code className="bg-blue-100 px-1 rounded">GITHUB_OWNER</code> constant 
+                  in the VersionPage component with your actual GitHub username.
+                </p>
+                <p className="text-blue-500 text-xs mt-2">
+                  Current configuration: <code className="bg-blue-100 px-1 rounded">{GITHUB_OWNER}/{GITHUB_REPO}</code>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Error State */}
-        {error && (
+        {error && isGitHubConfigured && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-8">
             <div className="flex items-center space-x-3">
               <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
@@ -125,7 +156,7 @@ const VersionPage: React.FC = () => {
                 <h3 className="text-red-800 font-semibold">Failed to fetch GitHub data</h3>
                 <p className="text-red-600 text-sm mt-1">{error}</p>
                 <p className="text-red-500 text-xs mt-2">
-                  Make sure to update the GitHub repository configuration in the code.
+                  Make sure the repository exists and is publicly accessible.
                 </p>
               </div>
             </div>
@@ -287,7 +318,35 @@ const VersionPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : null}
+        ) : isGitHubConfigured ? (
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <GitBranch className="w-7 h-7 mr-3 text-purple-500" />
+              Latest Commit
+            </h2>
+            <div className="text-center py-8">
+              <GitBranch className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">No commit information available</p>
+              <p className="text-sm text-gray-500 mt-2">Check your repository configuration and try refreshing</p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <GitBranch className="w-7 h-7 mr-3 text-purple-500" />
+              Repository Integration
+            </h2>
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <GitBranch className="w-8 h-8 text-purple-500" />
+              </div>
+              <p className="text-gray-600 mb-2">Connect to GitHub for live repository data</p>
+              <p className="text-sm text-gray-500">
+                Update the GitHub configuration to see commit history, repository stats, and more
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Footer Note */}
         <div className="text-center mt-12">
@@ -296,7 +355,10 @@ const VersionPage: React.FC = () => {
               This page shows real-time deployment status and version information for LunaStream.
             </p>
             <p className="text-sm opacity-75">
-              Data is fetched directly from GitHub API and updates automatically.
+              {isGitHubConfigured 
+                ? "Data is fetched directly from GitHub API and updates automatically."
+                : "Configure GitHub integration to see live repository data."
+              }
             </p>
           </div>
         </div>
