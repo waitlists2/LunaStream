@@ -7,22 +7,21 @@ import { Movie, TVShow } from '../types';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
-// Enhanced fuzzy search options for better matching
+// Balanced fuzzy search options
 const fuseOptions = {
   keys: [
-    { name: 'title', weight: 0.7 },
-    { name: 'name', weight: 0.7 },
-    { name: 'overview', weight: 0.2 },
-    { name: 'original_title', weight: 0.5 },
-    { name: 'original_name', weight: 0.5 }
+    { name: 'title', weight: 0.8 },
+    { name: 'name', weight: 0.8 },
+    { name: 'overview', weight: 0.1 },
+    { name: 'original_title', weight: 0.6 },
+    { name: 'original_name', weight: 0.6 }
   ],
-  threshold: 0.6, // More lenient threshold for better wildcard matching
+  threshold: 0.5, // Balanced threshold - not too loose, not too strict
   ignoreLocation: true,
-  minMatchCharLength: 1,
+  minMatchCharLength: 2,
   includeScore: true,
-  includeMatches: true,
-  findAllMatches: true,
-  useExtendedSearch: true, // Enables wildcard and exact match operators
+  findAllMatches: false, // Reduce random matches
+  useExtendedSearch: false, // Disable extended search to reduce noise
 };
 
 // Updated banned keywords list
@@ -104,7 +103,7 @@ const bannedKeywords = [
   'how to die',
 ];
 
-// Enhanced search preprocessing
+// Simplified search preprocessing
 const preprocessQuery = (query: string): string => {
   return query
     .toLowerCase()
@@ -113,43 +112,8 @@ const preprocessQuery = (query: string): string => {
     .replace(/[^\w\s\-'.:]/g, ' ')
     // Normalize multiple spaces
     .replace(/\s+/g, ' ')
-    // Handle common abbreviations and variations
-    .replace(/\bst\b/g, 'saint')
-    .replace(/\bdr\b/g, 'doctor')
-    .replace(/\bmr\b/g, 'mister')
-    .replace(/\bms\b/g, 'miss')
-    .replace(/\b&\b/g, 'and')
-    .replace(/\bw\/\b/g, 'with')
-    .replace(/\bu\b/g, 'you')
-    .replace(/\br\b/g, 'are');
-};
-
-// Generate search variations for better matching
-const generateSearchVariations = (query: string): string[] => {
-  const processed = preprocessQuery(query);
-  const variations = [processed];
-  
-  // Add partial matches for longer queries
-  if (processed.length > 6) {
-    const words = processed.split(' ');
-    if (words.length > 1) {
-      // Add individual words
-      variations.push(...words.filter(word => word.length > 2));
-      // Add combinations of words
-      for (let i = 0; i < words.length - 1; i++) {
-        variations.push(words.slice(i, i + 2).join(' '));
-      }
-    }
-  }
-  
-  // Add wildcard patterns for fuzzy matching
-  if (processed.length > 3) {
-    variations.push(`'${processed}`); // Exact match
-    variations.push(`^${processed}`); // Starts with
-    variations.push(`${processed}$`); // Ends with
-  }
-  
-  return [...new Set(variations)]; // Remove duplicates
+    // Handle common abbreviations
+    .replace(/\b&\b/g, 'and');
 };
 
 const SearchResults: React.FC = () => {
@@ -183,67 +147,41 @@ const SearchResults: React.FC = () => {
 
     const fetchResults = async () => {
       try {
-        // Generate multiple search variations
-        const searchVariations = generateSearchVariations(query);
+        // Preprocess the query
+        const processedQuery = preprocessQuery(query);
         
-        // Perform searches with different variations
-        const searchPromises = searchVariations.slice(0, 3).map(async (searchTerm) => {
-          const [movieResults, tvResults] = await Promise.all([
-            tmdb.searchMovies(searchTerm),
-            tmdb.searchTV(searchTerm),
-          ]);
-          return { movieResults, tvResults };
-        });
-
-        const allSearchResults = await Promise.all(searchPromises);
+        // Perform primary search
+        const [movieResults, tvResults] = await Promise.all([
+          tmdb.searchMovies(processedQuery),
+          tmdb.searchTV(processedQuery),
+        ]);
 
         if (!isMounted) return;
 
-        // Combine all results
-        const allMovies: Movie[] = [];
-        const allTVShows: TVShow[] = [];
-
-        allSearchResults.forEach(({ movieResults, tvResults }) => {
-          if (movieResults?.results) allMovies.push(...movieResults.results);
-          if (tvResults?.results) allTVShows.push(...tvResults.results);
-        });
-
-        // Remove duplicates based on ID
-        const uniqueMovies = allMovies.filter((movie, index, self) => 
-          index === self.findIndex(m => m.id === movie.id)
-        );
-        const uniqueTVShows = allTVShows.filter((show, index, self) => 
-          index === self.findIndex(s => s.id === show.id)
-        );
+        const movieItems: Movie[] = movieResults?.results || [];
+        const tvItems: TVShow[] = tvResults?.results || [];
 
         const combinedResults: MediaItem[] = [
-          ...uniqueMovies.map(m => ({
+          ...movieItems.map(m => ({
             ...m,
             media_type: 'movie' as const,
             popularity: m.popularity || 0,
           })),
-          ...uniqueTVShows.map(t => ({
+          ...tvItems.map(t => ({
             ...t,
             media_type: 'tv' as const,
             popularity: t.popularity || 0,
           })),
         ];
 
-        // Enhanced fuzzy search with multiple patterns
+        // Apply fuzzy search for better matching
         const fuse = new Fuse(combinedResults, fuseOptions);
-        let fuzzyResults: { item: MediaItem; score?: number }[] = [];
+        const fuzzyResults = processedQuery.length >= 2 
+          ? fuse.search(processedQuery) 
+          : combinedResults.map(r => ({ item: r, score: 0 }));
 
-        // Try different search patterns
-        for (const searchTerm of searchVariations.slice(0, 5)) {
-          const searchResults = fuse.search(searchTerm);
-          fuzzyResults.push(...searchResults);
-        }
-
-        // Remove duplicates and sort by relevance
-        const uniqueResults = fuzzyResults
-          .filter((result, index, self) => 
-            index === self.findIndex(r => r.item.id === result.item.id && r.item.media_type === result.item.media_type)
-          )
+        // Sort by relevance score and popularity
+        const finalResults = fuzzyResults
           .sort((a, b) => {
             // Sort by score first (lower is better), then by popularity
             const scoreA = a.score || 0;
@@ -252,14 +190,11 @@ const SearchResults: React.FC = () => {
               return scoreA - scoreB;
             }
             return b.item.popularity - a.item.popularity;
-          });
+          })
+          .map(r => r.item)
+          .slice(0, 30); // Limit to top 30 results to reduce noise
 
-        // If fuzzy search doesn't yield good results, fall back to popularity sorting
-        const finalResults = uniqueResults.length > 0 
-          ? uniqueResults.map(r => r.item)
-          : combinedResults.sort((a, b) => b.popularity - a.popularity);
-
-        setResults(finalResults.slice(0, 50)); // Limit to top 50 results
+        setResults(finalResults);
 
         if (isQueryBanned()) {
           setWarningVisible(true);
@@ -375,7 +310,7 @@ const SearchResults: React.FC = () => {
             Search Results for "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
           </h1>
           <p className="text-gray-600">
-            Found {results.length} result{results.length !== 1 ? 's' : ''} (enhanced fuzzy matching)
+            Found {results.length} result{results.length !== 1 ? 's' : ''}
           </p>
         </div>
 
