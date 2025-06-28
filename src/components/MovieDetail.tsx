@@ -62,13 +62,13 @@ const MovieDetail: React.FC = () => {
     return (
       <div className="fixed inset-0 bg-black z-50">
         {/* Close Button */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-6 right-6 z-10">
           <button
             onClick={handleClosePlayer}
-            className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            className="text-white hover:text-gray-300 transition-colors"
             aria-label="Close Player"
           >
-            <X className="w-6 h-6" />
+            <X className="w-8 h-8" />
           </button>
         </div>
 
