@@ -171,22 +171,24 @@ const TVDetail: React.FC = () => {
               )}
             </div>
             
-            {/* Player Selection Buttons - Always Visible */}
-            <div className="flex flex-wrap gap-1">
-              {videoSources.map((source, index) => (
-                <button
-                  key={index}
-                  onClick={() => switchPlayer(index)}
-                  className={`px-2 py-1 rounded text-xs transition-colors ${
-                    index === currentPlayerIndex
-                      ? 'bg-pink-600 text-white'
-                      : 'bg-black/50 text-white hover:bg-black/70'
-                  }`}
-                >
-                  {source.name}
-                </button>
-              ))}
-            </div>
+            {/* Player Selection Buttons - Only show when there's an error */}
+            {playerError && (
+              <div className="flex flex-wrap gap-1">
+                {videoSources.map((source, index) => (
+                  <button
+                    key={index}
+                    onClick={() => switchPlayer(index)}
+                    className={`px-2 py-1 rounded text-xs transition-colors ${
+                      index === currentPlayerIndex
+                        ? 'bg-pink-600 text-white'
+                        : 'bg-black/50 text-white hover:bg-black/70'
+                    }`}
+                  >
+                    {source.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           
           <button
@@ -308,7 +310,7 @@ const TVDetail: React.FC = () => {
               {/* Network Info */}
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>Multiple Players Available:</strong> When watching episodes, you can switch between 5 different video sources using the buttons at the top of the player. Perfect for bypassing network restrictions!
+                  <strong>Multiple Players Available:</strong> If episodes don't load or get blocked, alternative players will automatically become available to ensure you can always watch!
                 </p>
               </div>
             </div>

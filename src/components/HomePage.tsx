@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Film, Tv, TrendingUp, MessageCircle, Twitter } from 'lucide-react';
+import { Search, Film, Tv, TrendingUp, MessageCircle, Twitter, Heart } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
@@ -52,6 +52,13 @@ const HomePage: React.FC = () => {
                 LunaStream
               </span>
             </div>
+            <Link
+              to="/donate"
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <Heart className="w-4 h-4" />
+              <span>Donate</span>
+            </Link>
           </div>
         </div>
       </nav>
