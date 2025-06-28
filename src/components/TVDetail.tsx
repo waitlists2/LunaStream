@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Star, Calendar, Tv, ChevronDown, X, Info, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Play, Star, Calendar, Tv, ChevronDown, X, Info } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { TVDetails, Episode } from '../types';
 
@@ -14,37 +14,6 @@ const TVDetail: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null);
   const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({});
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [playerError, setPlayerError] = useState(false);
-
-  // Multiple video sources to bypass blocking
-  const getVideoSources = (showId: string, season: number, episode: number) => [
-    {
-      name: 'Primary Player',
-      url: `https://player.videasy.net/tv/${showId}/${season}/${episode}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Alternative Player 1',
-      url: `https://vidsrc.to/embed/tv/${showId}/${season}/${episode}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Alternative Player 2',
-      url: `https://www.2embed.cc/embedtv/${showId}&s=${season}&e=${episode}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Alternative Player 3',
-      url: `https://multiembed.mov/directstream.php?video_id=${showId}&tmdb=1&s=${season}&e=${episode}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Backup Player',
-      url: `https://embed.su/embed/tv/${showId}/${season}/${episode}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    }
-  ];
 
   useEffect(() => {
     const fetchShow = async () => {
@@ -89,31 +58,11 @@ const TVDetail: React.FC = () => {
   const handleWatchEpisode = (episode: Episode) => {
     setCurrentEpisode(episode);
     setIsPlaying(true);
-    setPlayerError(false);
-    setCurrentPlayerIndex(0);
   };
 
   const handleClosePlayer = () => {
     setIsPlaying(false);
     setCurrentEpisode(null);
-    setPlayerError(false);
-    setCurrentPlayerIndex(0);
-  };
-
-  const handlePlayerError = () => {
-    setPlayerError(true);
-  };
-
-  const switchPlayer = (index: number) => {
-    setCurrentPlayerIndex(index);
-    setPlayerError(false);
-  };
-
-  const nextPlayer = () => {
-    if (currentPlayerIndex < 4) { // 5 sources total (0-4)
-      setCurrentPlayerIndex(currentPlayerIndex + 1);
-      setPlayerError(false);
-    }
   };
 
   const toggleDescription = (episodeId: number) => {
@@ -148,47 +97,14 @@ const TVDetail: React.FC = () => {
   }
 
   if (isPlaying && currentEpisode) {
-    const videoSources = getVideoSources(id!, currentEpisode.season_number, currentEpisode.episode_number);
-    const currentSource = videoSources[currentPlayerIndex];
-    
     return (
       <div className="fixed inset-0 bg-black z-50">
         {/* Player Controls */}
         <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center space-x-2">
-              <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                {currentSource.name}
-              </span>
-              <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                S{currentEpisode.season_number}E{currentEpisode.episode_number}
-              </span>
-              {playerError && (
-                <div className="flex items-center bg-red-600/90 text-white px-3 py-1 rounded-full text-sm">
-                  <AlertTriangle className="w-4 h-4 mr-1" />
-                  Player blocked
-                </div>
-              )}
-            </div>
-            
-            {/* Player Selection Buttons - Only show when there's an error */}
-            {playerError && (
-              <div className="flex flex-wrap gap-1">
-                {videoSources.map((source, index) => (
-                  <button
-                    key={index}
-                    onClick={() => switchPlayer(index)}
-                    className={`px-2 py-1 rounded text-xs transition-colors ${
-                      index === currentPlayerIndex
-                        ? 'bg-pink-600 text-white'
-                        : 'bg-black/50 text-white hover:bg-black/70'
-                    }`}
-                  >
-                    {source.name}
-                  </button>
-                ))}
-              </div>
-            )}
+          <div className="flex items-center space-x-2">
+            <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+              S{currentEpisode.season_number}E{currentEpisode.episode_number}
+            </span>
           </div>
           
           <button
@@ -200,35 +116,13 @@ const TVDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* Error Message */}
-        {playerError && (
-          <div className="absolute bottom-4 left-4 right-4 z-10">
-            <div className="bg-red-600/90 backdrop-blur-sm rounded-lg p-3 text-center">
-              <p className="text-white text-sm">
-                This player is blocked by your network. Try selecting a different player above.
-              </p>
-              {currentPlayerIndex < videoSources.length - 1 && (
-                <button
-                  onClick={nextPlayer}
-                  className="mt-2 bg-white/20 hover:bg-white/30 text-white px-4 py-1 rounded text-sm transition-colors"
-                >
-                  Try Next Player
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Video Player */}
         <iframe
-          key={currentPlayerIndex}
-          src={currentSource.url}
+          src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`}
           className="w-full h-full border-0"
           allowFullScreen
-          sandbox={currentSource.sandbox}
+          sandbox="allow-scripts allow-same-origin allow-forms"
           title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
-          onError={handlePlayerError}
-          onLoad={() => setPlayerError(false)}
           referrerPolicy="no-referrer"
         />
       </div>
@@ -306,13 +200,6 @@ const TVDetail: React.FC = () => {
               </div>
 
               <p className="text-gray-700 leading-relaxed mb-6">{show.overview}</p>
-
-              {/* Network Info */}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>Multiple Players Available:</strong> If episodes don't load or get blocked, alternative players will automatically become available to ensure you can always watch!
-                </p>
-              </div>
             </div>
           </div>
         </div>

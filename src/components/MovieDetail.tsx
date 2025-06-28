@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Star, Calendar, Clock, Film, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Play, Star, Calendar, Clock, Film, X } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { MovieDetails } from '../types';
 
@@ -9,37 +9,6 @@ const MovieDetail: React.FC = () => {
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [playerError, setPlayerError] = useState(false);
-
-  // Multiple video sources to bypass blocking
-  const videoSources = [
-    {
-      name: 'Primary Player',
-      url: `https://player.videasy.net/movie/${id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Alternative Player 1',
-      url: `https://vidsrc.to/embed/movie/${id}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Alternative Player 2',
-      url: `https://www.2embed.cc/embed/${id}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Alternative Player 3',
-      url: `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    },
-    {
-      name: 'Backup Player',
-      url: `https://embed.su/embed/movie/${id}`,
-      sandbox: "allow-scripts allow-same-origin allow-forms"
-    }
-  ];
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -59,29 +28,10 @@ const MovieDetail: React.FC = () => {
 
   const handleWatchMovie = () => {
     setIsPlaying(true);
-    setPlayerError(false);
   };
 
   const handleClosePlayer = () => {
     setIsPlaying(false);
-    setPlayerError(false);
-    setCurrentPlayerIndex(0);
-  };
-
-  const handlePlayerError = () => {
-    setPlayerError(true);
-  };
-
-  const switchPlayer = (index: number) => {
-    setCurrentPlayerIndex(index);
-    setPlayerError(false);
-  };
-
-  const nextPlayer = () => {
-    if (currentPlayerIndex < videoSources.length - 1) {
-      setCurrentPlayerIndex(currentPlayerIndex + 1);
-      setPlayerError(false);
-    }
   };
 
   if (loading) {
@@ -109,45 +59,10 @@ const MovieDetail: React.FC = () => {
   }
 
   if (isPlaying) {
-    const currentSource = videoSources[currentPlayerIndex];
-
     return (
       <div className="fixed inset-0 bg-black z-50">
-        {/* Player Controls */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center space-x-2">
-              <span className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                {currentSource.name}
-              </span>
-              {playerError && (
-                <div className="flex items-center bg-red-600/90 text-white px-3 py-1 rounded-full text-sm">
-                  <AlertTriangle className="w-4 h-4 mr-1" />
-                  Player blocked
-                </div>
-              )}
-            </div>
-            
-            {/* Player Selection Buttons - Only show when there's an error */}
-            {playerError && (
-              <div className="flex flex-wrap gap-1">
-                {videoSources.map((source, index) => (
-                  <button
-                    key={index}
-                    onClick={() => switchPlayer(index)}
-                    className={`px-2 py-1 rounded text-xs transition-colors ${
-                      index === currentPlayerIndex
-                        ? 'bg-pink-600 text-white'
-                        : 'bg-black/50 text-white hover:bg-black/70'
-                    }`}
-                  >
-                    {source.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          
+        {/* Close Button */}
+        <div className="absolute top-4 right-4 z-10">
           <button
             onClick={handleClosePlayer}
             className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
@@ -157,35 +72,13 @@ const MovieDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* Error Message */}
-        {playerError && (
-          <div className="absolute bottom-4 left-4 right-4 z-10">
-            <div className="bg-red-600/90 backdrop-blur-sm rounded-lg p-3 text-center">
-              <p className="text-white text-sm">
-                This player is blocked by your network. Try selecting a different player above.
-              </p>
-              {currentPlayerIndex < videoSources.length - 1 && (
-                <button
-                  onClick={nextPlayer}
-                  className="mt-2 bg-white/20 hover:bg-white/30 text-white px-4 py-1 rounded text-sm transition-colors"
-                >
-                  Try Next Player
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Video Player */}
         <iframe
-          key={currentPlayerIndex}
-          src={currentSource.url}
+          src={`https://player.videasy.net/movie/${id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true`}
           className="w-full h-full border-0"
           allowFullScreen
-          sandbox={currentSource.sandbox}
+          sandbox="allow-scripts allow-same-origin allow-forms"
           title={movie.title}
-          onError={handlePlayerError}
-          onLoad={() => setPlayerError(false)}
           referrerPolicy="no-referrer"
         />
       </div>
@@ -274,13 +167,6 @@ const MovieDetail: React.FC = () => {
                 <Play className="w-6 h-6 mr-2" />
                 Watch Now
               </button>
-
-              {/* Network Info */}
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>Multiple Players Available:</strong> If the video doesn't load or gets blocked, alternative players will automatically become available to ensure you can always watch!
-                </p>
-              </div>
             </div>
           </div>
         </div>
