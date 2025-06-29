@@ -14,6 +14,7 @@ const TVDetail: React.FC = () => {
   const [show, setShow] = useState<TVDetails | null>(null);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [allSeasons, setAllSeasons] = useState<{ [key: number]: Episode[] }>({});
   const [loading, setLoading] = useState(true);
   const [episodesLoading, setEpisodesLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,11 +54,18 @@ const TVDetail: React.FC = () => {
       setEpisodesLoading(true);
       try {
         const seasonData = await tmdb.getTVSeasons(parseInt(id), selectedSeason);
-        setEpisodes(seasonData.episodes || []);
+        const seasonEpisodes = seasonData.episodes || [];
+        setEpisodes(seasonEpisodes);
+        
+        // Cache episodes for this season
+        setAllSeasons(prev => ({
+          ...prev,
+          [selectedSeason]: seasonEpisodes
+        }));
         
         // If URL has episode number, auto-play that episode
-        if (urlEpisode && seasonData.episodes) {
-          const episode = seasonData.episodes.find(ep => ep.episode_number === parseInt(urlEpisode));
+        if (urlEpisode && seasonEpisodes) {
+          const episode = seasonEpisodes.find(ep => ep.episode_number === parseInt(urlEpisode));
           if (episode) {
             setCurrentEpisode(episode);
             setIsPlaying(true);
@@ -77,55 +85,91 @@ const TVDetail: React.FC = () => {
     setCurrentEpisode(episode);
     setIsPlaying(true);
     // Update URL to reflect current episode with hash routing
-    navigate(`/tv/${id}/${episode.season_number}/${episode.episode_number}`, { replace: true });
+    navigate(`/#/tv/${id}/${episode.season_number}/${episode.episode_number}`, { replace: true });
   };
 
   const handleClosePlayer = () => {
     setIsPlaying(false);
     setCurrentEpisode(null);
     // Navigate back to show page without episode
-    navigate(`/tv/${id}`, { replace: true });
+    navigate(`/#/tv/${id}`, { replace: true });
   };
 
   const handleSeasonChange = (newSeason: number) => {
     setSelectedSeason(newSeason);
     // Update URL to reflect season change
-    navigate(`/tv/${id}`, { replace: true });
+    navigate(`/#/tv/${id}`, { replace: true });
   };
 
-  const getNextEpisode = (currentEp: Episode): Episode | null => {
-    if (!episodes || !show) return null;
+  const getNextEpisode = async (currentEp: Episode): Promise<Episode | null> => {
+    if (!show) return null;
     
     // Try to find next episode in current season
-    const nextInSeason = episodes.find(ep => ep.episode_number === currentEp.episode_number + 1);
+    const currentSeasonEpisodes = allSeasons[currentEp.season_number] || episodes;
+    const nextInSeason = currentSeasonEpisodes.find(ep => ep.episode_number === currentEp.episode_number + 1);
     if (nextInSeason) return nextInSeason;
     
     // If no next episode in current season, try first episode of next season
-    const nextSeason = show.seasons.find(s => s.season_number === currentEp.season_number + 1);
+    const nextSeasonNumber = currentEp.season_number + 1;
+    const nextSeason = show.seasons.find(s => s.season_number === nextSeasonNumber);
     if (nextSeason) {
-      // We would need to fetch the next season's episodes, but for now return null
-      // This could be enhanced to automatically load next season
-      return null;
+      // Check if we already have next season episodes cached
+      if (allSeasons[nextSeasonNumber]) {
+        const firstEpisode = allSeasons[nextSeasonNumber][0];
+        return firstEpisode || null;
+      }
+      
+      // Fetch next season episodes
+      try {
+        const seasonData = await tmdb.getTVSeasons(parseInt(id!), nextSeasonNumber);
+        const nextSeasonEpisodes = seasonData.episodes || [];
+        
+        // Cache the episodes
+        setAllSeasons(prev => ({
+          ...prev,
+          [nextSeasonNumber]: nextSeasonEpisodes
+        }));
+        
+        return nextSeasonEpisodes[0] || null;
+      } catch (error) {
+        console.error('Failed to fetch next season:', error);
+        return null;
+      }
     }
     
     return null;
   };
 
-  const handlePlayerMessage = (event: MessageEvent) => {
+  const handlePlayerMessage = async (event: MessageEvent) => {
     // Listen for messages from the video player iframe
-    if (event.origin !== 'https://player.videasy.net') return;
+    if (!event.origin.includes('videasy.net')) return;
     
     try {
-      const data = JSON.parse(event.data);
+      let data;
+      if (typeof event.data === 'string') {
+        data = JSON.parse(event.data);
+      } else {
+        data = event.data;
+      }
       
-      if (data.type === 'nextEpisode' && currentEpisode) {
-        const nextEp = getNextEpisode(currentEpisode);
+      if ((data.type === 'nextEpisode' || data.action === 'nextEpisode') && currentEpisode) {
+        const nextEp = await getNextEpisode(currentEpisode);
         if (nextEp) {
-          handleWatchEpisode(nextEp);
+          // Seamlessly transition to next episode
+          setCurrentEpisode(nextEp);
+          
+          // Update URL to reflect new episode
+          navigate(`/#/tv/${id}/${nextEp.season_number}/${nextEp.episode_number}`, { replace: true });
+          
+          // Update selected season if we moved to a new season
+          if (nextEp.season_number !== selectedSeason) {
+            setSelectedSeason(nextEp.season_number);
+          }
         }
       }
     } catch (error) {
       // Ignore parsing errors
+      console.log('Player message parsing error:', error);
     }
   };
 
@@ -133,7 +177,7 @@ const TVDetail: React.FC = () => {
     // Add event listener for player messages
     window.addEventListener('message', handlePlayerMessage);
     return () => window.removeEventListener('message', handlePlayerMessage);
-  }, [currentEpisode, episodes, show]);
+  }, [currentEpisode, episodes, show, selectedSeason, allSeasons, id, navigate]);
 
   const toggleDescription = (episodeId: number) => {
     setShowDescriptions(prev => ({
@@ -192,7 +236,7 @@ const TVDetail: React.FC = () => {
 
         {/* Enhanced Video Player with better integration */}
         <iframe
-          src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&origin=${encodeURIComponent(window.location.origin)}`}
+          src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&origin=${encodeURIComponent(window.location.origin)}&postMessage=true`}
           className="w-full h-full border-0"
           allowFullScreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
