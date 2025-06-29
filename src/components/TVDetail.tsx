@@ -291,7 +291,6 @@ const TVDetail: React.FC = () => {
                         )}
                         {episode.overview && (
                           <p className="text-gray-700 text-sm leading-relaxed">{episode.overview}</p>
-                        </div>
                         )}
                       </div>
                     )}
