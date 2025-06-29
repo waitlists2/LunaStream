@@ -76,7 +76,7 @@ const TVDetail: React.FC = () => {
   const handleWatchEpisode = (episode: Episode) => {
     setCurrentEpisode(episode);
     setIsPlaying(true);
-    // Update URL to reflect current episode
+    // Update URL to reflect current episode with hash routing
     navigate(`/tv/${id}/${episode.season_number}/${episode.episode_number}`, { replace: true });
   };
 
