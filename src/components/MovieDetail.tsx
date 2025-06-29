@@ -9,6 +9,12 @@ const MovieDetail: React.FC = () => {
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [frogBoops, setFrogBoops] = useState(0);
+  const [showBoopAnimation, setShowBoopAnimation] = useState(false);
+
+  // Easter egg movie IDs
+  const easterEggMovieIds = ['816', '817', '818'];
+  const showEasterEgg = id && easterEggMovieIds.includes(id);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -32,6 +38,12 @@ const MovieDetail: React.FC = () => {
 
   const handleClosePlayer = () => {
     setIsPlaying(false);
+  };
+
+  const handleFrogBoop = () => {
+    setFrogBoops(prev => prev + 1);
+    setShowBoopAnimation(true);
+    setTimeout(() => setShowBoopAnimation(false), 600);
   };
 
   if (loading) {
@@ -91,7 +103,7 @@ const MovieDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 relative">
       {/* Header */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -176,6 +188,41 @@ const MovieDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Easter Egg Frog */}
+      {showEasterEgg && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={handleFrogBoop}
+            className={`group relative bg-green-500 hover:bg-green-600 rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 ${
+              showBoopAnimation ? 'animate-bounce' : ''
+            }`}
+            title={`Boop the frog! (${frogBoops} boops)`}
+            aria-label="Easter egg frog"
+          >
+            {/* Frog Emoji/Icon */}
+            <div className="text-2xl select-none">🐸</div>
+            
+            {/* Boop Counter */}
+            {frogBoops > 0 && (
+              <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                {frogBoops > 99 ? '99+' : frogBoops}
+              </div>
+            )}
+            
+            {/* Boop Animation Effect */}
+            {showBoopAnimation && (
+              <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
+            )}
+            
+            {/* Hover Tooltip */}
+            <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+              Boop me! 🐸
+              <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
