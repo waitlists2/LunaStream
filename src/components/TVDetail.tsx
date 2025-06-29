@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play, Star, Calendar, Tv, ChevronDown, X, Info } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { TVDetails, Episode } from '../types';
 
 const TVDetail: React.FC = () => {
-  const { id, season: urlSeason, episode: urlEpisode } = useParams<{ 
-    id: string; 
-    season?: string; 
-    episode?: string; 
-  }>();
-  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [show, setShow] = useState<TVDetails | null>(null);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [allSeasons, setAllSeasons] = useState<{ [key: number]: Episode[] }>({});
   const [loading, setLoading] = useState(true);
   const [episodesLoading, setEpisodesLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -29,11 +23,7 @@ const TVDetail: React.FC = () => {
       try {
         const showData = await tmdb.getTVDetails(parseInt(id));
         setShow(showData);
-        
-        // Set initial season from URL or first available season
-        if (urlSeason) {
-          setSelectedSeason(parseInt(urlSeason));
-        } else if (showData.seasons && showData.seasons.length > 0) {
+        if (showData.seasons && showData.seasons.length > 0) {
           const firstSeason = showData.seasons.find(s => s.season_number > 0) || showData.seasons[0];
           setSelectedSeason(firstSeason.season_number);
         }
@@ -45,7 +35,7 @@ const TVDetail: React.FC = () => {
     };
 
     fetchShow();
-  }, [id, urlSeason]);
+  }, [id]);
 
   useEffect(() => {
     const fetchEpisodes = async () => {
@@ -54,23 +44,7 @@ const TVDetail: React.FC = () => {
       setEpisodesLoading(true);
       try {
         const seasonData = await tmdb.getTVSeasons(parseInt(id), selectedSeason);
-        const seasonEpisodes = seasonData.episodes || [];
-        setEpisodes(seasonEpisodes);
-        
-        // Cache episodes for this season
-        setAllSeasons(prev => ({
-          ...prev,
-          [selectedSeason]: seasonEpisodes
-        }));
-        
-        // If URL has episode number, auto-play that episode
-        if (urlEpisode && seasonEpisodes) {
-          const episode = seasonEpisodes.find(ep => ep.episode_number === parseInt(urlEpisode));
-          if (episode) {
-            setCurrentEpisode(episode);
-            setIsPlaying(true);
-          }
-        }
+        setEpisodes(seasonData.episodes || []);
       } catch (error) {
         console.error('Failed to fetch episodes:', error);
       } finally {
@@ -79,105 +53,17 @@ const TVDetail: React.FC = () => {
     };
 
     fetchEpisodes();
-  }, [id, selectedSeason, urlEpisode]);
+  }, [id, selectedSeason]);
 
   const handleWatchEpisode = (episode: Episode) => {
     setCurrentEpisode(episode);
     setIsPlaying(true);
-    // Update URL to reflect current episode with hash routing
-    navigate(`/#/tv/${id}/${episode.season_number}/${episode.episode_number}`, { replace: true });
   };
 
   const handleClosePlayer = () => {
     setIsPlaying(false);
     setCurrentEpisode(null);
-    // Navigate back to show page without episode
-    navigate(`/#/tv/${id}`, { replace: true });
   };
-
-  const handleSeasonChange = (newSeason: number) => {
-    setSelectedSeason(newSeason);
-    // Update URL to reflect season change
-    navigate(`/#/tv/${id}`, { replace: true });
-  };
-
-  const getNextEpisode = async (currentEp: Episode): Promise<Episode | null> => {
-    if (!show) return null;
-    
-    // Try to find next episode in current season
-    const currentSeasonEpisodes = allSeasons[currentEp.season_number] || episodes;
-    const nextInSeason = currentSeasonEpisodes.find(ep => ep.episode_number === currentEp.episode_number + 1);
-    if (nextInSeason) return nextInSeason;
-    
-    // If no next episode in current season, try first episode of next season
-    const nextSeasonNumber = currentEp.season_number + 1;
-    const nextSeason = show.seasons.find(s => s.season_number === nextSeasonNumber);
-    if (nextSeason) {
-      // Check if we already have next season episodes cached
-      if (allSeasons[nextSeasonNumber]) {
-        const firstEpisode = allSeasons[nextSeasonNumber][0];
-        return firstEpisode || null;
-      }
-      
-      // Fetch next season episodes
-      try {
-        const seasonData = await tmdb.getTVSeasons(parseInt(id!), nextSeasonNumber);
-        const nextSeasonEpisodes = seasonData.episodes || [];
-        
-        // Cache the episodes
-        setAllSeasons(prev => ({
-          ...prev,
-          [nextSeasonNumber]: nextSeasonEpisodes
-        }));
-        
-        return nextSeasonEpisodes[0] || null;
-      } catch (error) {
-        console.error('Failed to fetch next season:', error);
-        return null;
-      }
-    }
-    
-    return null;
-  };
-
-  const handlePlayerMessage = async (event: MessageEvent) => {
-    // Listen for messages from the video player iframe
-    if (!event.origin.includes('videasy.net')) return;
-    
-    try {
-      let data;
-      if (typeof event.data === 'string') {
-        data = JSON.parse(event.data);
-      } else {
-        data = event.data;
-      }
-      
-      if ((data.type === 'nextEpisode' || data.action === 'nextEpisode') && currentEpisode) {
-        const nextEp = await getNextEpisode(currentEpisode);
-        if (nextEp) {
-          // Seamlessly transition to next episode
-          setCurrentEpisode(nextEp);
-          
-          // Update URL to reflect new episode
-          navigate(`/#/tv/${id}/${nextEp.season_number}/${nextEp.episode_number}`, { replace: true });
-          
-          // Update selected season if we moved to a new season
-          if (nextEp.season_number !== selectedSeason) {
-            setSelectedSeason(nextEp.season_number);
-          }
-        }
-      }
-    } catch (error) {
-      // Ignore parsing errors
-      console.log('Player message parsing error:', error);
-    }
-  };
-
-  useEffect(() => {
-    // Add event listener for player messages
-    window.addEventListener('message', handlePlayerMessage);
-    return () => window.removeEventListener('message', handlePlayerMessage);
-  }, [currentEpisode, episodes, show, selectedSeason, allSeasons, id, navigate]);
 
   const toggleDescription = (episodeId: number) => {
     setShowDescriptions(prev => ({
@@ -234,13 +120,13 @@ const TVDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* Enhanced Video Player with better integration */}
+        {/* Video Player with Enhanced Ad Blocking */}
         <iframe
-          src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&origin=${encodeURIComponent(window.location.origin)}&postMessage=true`}
+          src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false`}
           className="w-full h-full border-0"
           allowFullScreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups-to-escape-sandbox"
+          sandbox="allow-scripts allow-same-origin allow-forms"
           title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
           referrerPolicy="no-referrer"
           style={{
@@ -334,7 +220,7 @@ const TVDetail: React.FC = () => {
             <div className="relative">
               <select
                 value={selectedSeason}
-                onChange={(e) => handleSeasonChange(parseInt(e.target.value))}
+                onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
                 className="appearance-none bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold pr-10 focus:outline-none focus:ring-2 focus:ring-pink-500 cursor-pointer"
               >
                 {show.seasons
@@ -362,25 +248,15 @@ const TVDetail: React.FC = () => {
               {episodes.map((episode) => (
                 <div
                   key={episode.id}
-                  className={`group bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl border overflow-hidden hover:shadow-lg transition-all duration-300 ${
-                    currentEpisode?.id === episode.id ? 'border-pink-400 bg-gradient-to-br from-pink-100 to-purple-100' : 'border-pink-200/50'
-                  }`}
+                  className="group bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl border border-pink-200/50 overflow-hidden hover:shadow-lg transition-all duration-300"
                 >
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          currentEpisode?.id === episode.id 
-                            ? 'bg-gradient-to-r from-pink-600 to-purple-700 text-white' 
-                            : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
-                        }`}>
+                        <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                           {episode.episode_number}
                         </span>
-                        <h3 className={`font-semibold transition-colors ${
-                          currentEpisode?.id === episode.id 
-                            ? 'text-pink-700' 
-                            : 'text-gray-900 group-hover:text-pink-600'
-                        }`}>
+                        <h3 className="font-semibold text-gray-900 group-hover:text-pink-600 transition-colors">
                           {episode.name}
                         </h3>
                       </div>
@@ -396,15 +272,11 @@ const TVDetail: React.FC = () => {
                         )}
                         <button
                           onClick={() => handleWatchEpisode(episode)}
-                          className={`px-3 py-1 rounded-lg font-semibold transition-colors flex items-center space-x-2 ${
-                            currentEpisode?.id === episode.id
-                              ? 'bg-gradient-to-r from-pink-600 to-purple-700 text-white'
-                              : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-pink-600 hover:to-purple-700'
-                          }`}
+                          className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
                           title="Watch episode"
                         >
                           <Play className="w-4 h-4" />
-                          <span>{currentEpisode?.id === episode.id ? 'Playing' : 'Watch'}</span>
+                          <span>Watch</span>
                         </button>
                       </div>
                     </div>
@@ -419,6 +291,7 @@ const TVDetail: React.FC = () => {
                         )}
                         {episode.overview && (
                           <p className="text-gray-700 text-sm leading-relaxed">{episode.overview}</p>
+                        </div>
                         )}
                       </div>
                     )}
