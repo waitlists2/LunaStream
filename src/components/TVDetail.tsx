@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play, Star, Calendar, Tv, ChevronDown, X, Info } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
+import { analytics } from '../services/analytics';
 import { TVDetails, Episode } from '../types';
 import ThemeToggle from './ThemeToggle';
 
@@ -14,6 +15,7 @@ const TVDetail: React.FC = () => {
   const [episodesLoading, setEpisodesLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
@@ -57,14 +59,43 @@ const TVDetail: React.FC = () => {
   }, [id, selectedSeason]);
 
   const handleWatchEpisode = (episode: Episode) => {
-    setCurrentEpisode(episode);
-    setIsPlaying(true);
+    if (show && id) {
+      // Start analytics session
+      const newSessionId = analytics.startSession(
+        'tv', 
+        parseInt(id), 
+        show.name, 
+        episode.season_number, 
+        episode.episode_number
+      );
+      setSessionId(newSessionId);
+      setCurrentEpisode(episode);
+      setIsPlaying(true);
+    }
   };
 
   const handleClosePlayer = () => {
+    if (sessionId) {
+      // End analytics session
+      analytics.endSession(sessionId);
+      setSessionId(null);
+    }
     setIsPlaying(false);
     setCurrentEpisode(null);
   };
+
+  // Update session periodically while playing
+  useEffect(() => {
+    if (isPlaying && sessionId) {
+      const interval = setInterval(() => {
+        // Simulate current time progression (in a real app, you'd get this from the video player)
+        const currentTime = Math.random() * 3600; // Random time for demo
+        analytics.updateSession(sessionId, currentTime);
+      }, 30000); // Update every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying, sessionId]);
 
   const toggleDescription = (episodeId: number) => {
     setShowDescriptions(prev => ({

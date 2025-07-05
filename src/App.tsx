@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import SearchResults from './components/SearchResults';
@@ -7,8 +7,27 @@ import TVDetail from './components/TVDetail';
 import LastUpdated from './components/LastUpdated';
 import DonatePage from './components/DonatePage';
 import VersionPage from './components/VersionPage';
+import AdminLogin from './components/AdminLogin';
+import AdminPanel from './components/AdminPanel';
 
 function App() {
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check if admin is already authenticated
+    const isAuthenticated = localStorage.getItem('lunastream-admin-auth') === 'true';
+    setIsAdminAuthenticated(isAuthenticated);
+  }, []);
+
+  const handleAdminLogin = () => {
+    setIsAdminAuthenticated(true);
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('lunastream-admin-auth');
+    setIsAdminAuthenticated(false);
+  };
+
   return (
     <Router>
       <Routes>
@@ -19,6 +38,16 @@ function App() {
         <Route path="/v" element={<VersionPage />} />
         <Route path="/last-updated" element={<LastUpdated />} />
         <Route path="/donate" element={<DonatePage />} />
+        <Route 
+          path="/admin" 
+          element={
+            isAdminAuthenticated ? (
+              <AdminPanel onLogout={handleAdminLogout} />
+            ) : (
+              <AdminLogin onLogin={handleAdminLogin} />
+            )
+          } 
+        />
       </Routes>
     </Router>
   );

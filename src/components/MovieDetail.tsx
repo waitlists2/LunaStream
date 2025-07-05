@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play, Star, Calendar, Clock, Film, X } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
+import { analytics } from '../services/analytics';
 import { MovieDetails } from '../types';
 import ThemeToggle from './ThemeToggle';
 
@@ -10,6 +11,7 @@ const MovieDetail: React.FC = () => {
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [frogBoops, setFrogBoops] = useState(0);
   const [showBoopAnimation, setShowBoopAnimation] = useState(false);
 
@@ -34,12 +36,35 @@ const MovieDetail: React.FC = () => {
   }, [id]);
 
   const handleWatchMovie = () => {
-    setIsPlaying(true);
+    if (movie && id) {
+      // Start analytics session
+      const newSessionId = analytics.startSession('movie', parseInt(id), movie.title);
+      setSessionId(newSessionId);
+      setIsPlaying(true);
+    }
   };
 
   const handleClosePlayer = () => {
+    if (sessionId) {
+      // End analytics session
+      analytics.endSession(sessionId);
+      setSessionId(null);
+    }
     setIsPlaying(false);
   };
+
+  // Update session periodically while playing
+  useEffect(() => {
+    if (isPlaying && sessionId) {
+      const interval = setInterval(() => {
+        // Simulate current time progression (in a real app, you'd get this from the video player)
+        const currentTime = Math.random() * 7200; // Random time for demo
+        analytics.updateSession(sessionId, currentTime);
+      }, 30000); // Update every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying, sessionId]);
 
   const handleFrogBoop = () => {
     setFrogBoops(prev => prev + 1);
