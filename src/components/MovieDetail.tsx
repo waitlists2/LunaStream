@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Play, Star, Calendar, Clock, Film, X } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { MovieDetails } from '../types';
+import ThemeToggle from './ThemeToggle';
 
 const MovieDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,12 +49,12 @@ const MovieDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
             <Film className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 text-lg">Loading movie details...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Loading movie details...</p>
         </div>
       </div>
     );
@@ -61,10 +62,10 @@ const MovieDetail: React.FC = () => {
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Movie not found</h2>
-          <Link to="/" className="text-pink-600 hover:text-pink-700">Go back home</Link>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">Movie not found</h2>
+          <Link to="/" className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors">Go back home</Link>
         </div>
       </div>
     );
@@ -103,9 +104,9 @@ const MovieDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 relative">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 relative transition-colors duration-300">
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
+      <nav className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-2">
@@ -116,20 +117,23 @@ const MovieDetail: React.FC = () => {
                 LunaStream
               </span>
             </Link>
-            <Link
-              to="/"
-              className="flex items-center text-gray-600 hover:text-pink-600 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Home
-            </Link>
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <Link
+                to="/"
+                className="flex items-center text-gray-600 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Home
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Movie Details */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 overflow-hidden">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 overflow-hidden transition-colors duration-300">
           <div className="md:flex">
             {/* Poster */}
             <div className="md:flex-shrink-0">
@@ -143,14 +147,14 @@ const MovieDetail: React.FC = () => {
             {/* Content */}
             <div className="p-8">
               <div className="flex items-start justify-between mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{movie.title}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">{movie.title}</h1>
                 <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
                   <Star className="w-4 h-4 mr-1" />
                   {movie.vote_average.toFixed(1)}
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
                   {new Date(movie.release_date).getFullYear()}
@@ -174,7 +178,7 @@ const MovieDetail: React.FC = () => {
               </div>
 
               {/* Overview */}
-              <p className="text-gray-700 mb-8 leading-relaxed">{movie.overview}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed transition-colors duration-300">{movie.overview}</p>
 
               {/* Watch Button */}
               <button

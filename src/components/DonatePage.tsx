@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Film, Heart, Copy, Check, Bitcoin, Coins, DollarSign, Shield } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const DonatePage: React.FC = () => {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -61,9 +62,9 @@ const DonatePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300">
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
+      <nav className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-2">
@@ -74,13 +75,16 @@ const DonatePage: React.FC = () => {
                 LunaStream
               </span>
             </Link>
-            <Link
-              to="/"
-              className="flex items-center text-gray-600 hover:text-pink-600 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Home
-            </Link>
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <Link
+                to="/"
+                className="flex items-center text-gray-600 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Home
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -92,19 +96,19 @@ const DonatePage: React.FC = () => {
           <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Heart className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
             <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
               Support LunaStream
             </span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed transition-colors duration-300">
             Help me keep LunaStream free and available for everyone. Your donations directly support my website to provide the best streaming experience.
           </p>
         </div>
 
         {/* What Donations Do */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 p-8 mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 mb-12 transition-colors duration-300">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
             <DollarSign className="w-7 h-7 mr-3 text-green-500" />
             How Your Donations Help
           </h2>
@@ -112,29 +116,29 @@ const DonatePage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Domain Costs:</strong> Domain renewal and alternative domains if possible.</p>
+                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Domain Costs:</strong> Domain renewal and alternative domains if possible.</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Development:</strong> Hiring someone to help out. contact x@fbi.monster</p>
+                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Development:</strong> Hiring someone to help out. contact x@fbi.monster</p>
               </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700"><strong>Accessibility:</strong> Ensuring LunaStream remains free for users worldwide</p>
+                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Accessibility:</strong> Ensuring LunaStream remains free for users worldwide</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Cryptocurrency Addresses */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-colors duration-300">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
             <Bitcoin className="w-7 h-7 mr-3 text-orange-500" />
             Cryptocurrency Donations
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300">
             We accept donations in various cryptocurrencies. Click on any address to copy it to your clipboard.
           </p>
           
@@ -144,7 +148,7 @@ const DonatePage: React.FC = () => {
               return (
                 <div
                   key={crypto.symbol}
-                  className="group bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
@@ -152,14 +156,14 @@ const DonatePage: React.FC = () => {
                         <IconComponent className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{crypto.name}</h3>
-                        <p className="text-sm text-gray-500">{crypto.symbol}</p>
+                        <h3 className="font-semibold text-gray-900 dark:text-white transition-colors duration-300">{crypto.name}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">{crypto.symbol}</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-100 rounded-lg p-3 mb-3">
-                    <p className="text-xs font-mono text-gray-700 break-all leading-relaxed">
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 mb-3 transition-colors duration-300">
+                    <p className="text-xs font-mono text-gray-700 dark:text-gray-300 break-all leading-relaxed transition-colors duration-300">
                       {crypto.address}
                     </p>
                   </div>

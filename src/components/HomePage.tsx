@@ -3,6 +3,7 @@ import { Search, Film, Tv, TrendingUp, MessageCircle, Twitter, Heart } from 'luc
 import { useNavigate, Link } from 'react-router-dom';
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
+import ThemeToggle from './ThemeToggle';
 
 const HomePage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -39,9 +40,9 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300">
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
+      <nav className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -52,13 +53,16 @@ const HomePage: React.FC = () => {
                 LunaStream
               </span>
             </div>
-            <Link
-              to="/donate"
-              className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <Heart className="w-4 h-4" />
-              <span>Donate</span>
-            </Link>
+            <div className="flex items-center space-x-3">
+              <ThemeToggle />
+              <Link
+                to="/donate"
+                className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <Heart className="w-4 h-4" />
+                <span>Donate</span>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -67,28 +71,28 @@ const HomePage: React.FC = () => {
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
           <div className="text-center">
-            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
               <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                 Watch Movies & TV Shows
               </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto transition-colors duration-300">
               Discover and stream your favorite content with our beautiful, easy-to-use platform
             </p>
 
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto">
               <form onSubmit={handleSearch} className="relative">
-                <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 overflow-hidden">
+                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 overflow-hidden transition-colors duration-300">
                   <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <Search className="h-6 w-6 text-pink-400" />
+                    <Search className="h-6 w-6 text-pink-400 dark:text-purple-400 transition-colors duration-300" />
                   </div>
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search for movies or TV shows..."
-                    className="block w-full pl-16 pr-6 py-6 text-lg bg-transparent border-0 placeholder-gray-500 focus:ring-0 focus:outline-none"
+                    className="block w-full pl-16 pr-6 py-6 text-lg bg-transparent border-0 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:ring-0 focus:outline-none transition-colors duration-300"
                   />
                   <button
                     type="submit"
@@ -112,13 +116,13 @@ const HomePage: React.FC = () => {
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg mx-auto">
               <TrendingUp className="w-8 h-8 text-white" />
             </div>
-            <p className="text-gray-600 text-lg">Loading trending content...</p>
+            <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Loading trending content...</p>
           </div>
         ) : (
           <>
             {/* Trending Movies */}
             <div className="mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center transition-colors duration-300">
                 <TrendingUp className="w-8 h-8 mr-3 text-pink-500" />
                 Trending Movies
               </h2>
@@ -127,7 +131,7 @@ const HomePage: React.FC = () => {
                   <Link
                     key={movie.id}
                     to={`/movie/${movie.id}`}
-                    className="group block bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-200/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                    className="group block bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
                   >
                     <div className="aspect-[2/3] overflow-hidden">
                       <img
@@ -137,10 +141,10 @@ const HomePage: React.FC = () => {
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
                         {movie.title}
                       </h3>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>{new Date(movie.release_date).getFullYear()}</span>
                         <div className="flex items-center">
                           <span className="text-yellow-500">★</span>
@@ -155,7 +159,7 @@ const HomePage: React.FC = () => {
 
             {/* Trending TV Shows */}
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center transition-colors duration-300">
                 <TrendingUp className="w-8 h-8 mr-3 text-purple-500" />
                 Trending TV Shows
               </h2>
@@ -164,7 +168,7 @@ const HomePage: React.FC = () => {
                   <Link
                     key={show.id}
                     to={`/tv/${show.id}`}
-                    className="group block bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                    className="group block bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
                   >
                     <div className="aspect-[2/3] overflow-hidden">
                       <img
@@ -174,10 +178,10 @@ const HomePage: React.FC = () => {
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                         {show.name}
                       </h3>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>{new Date(show.first_air_date).getFullYear()}</span>
                         <div className="flex items-center">
                           <span className="text-yellow-500">★</span>
@@ -194,7 +198,7 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* Social Links at Bottom */}
-      <div className="bg-white/60 backdrop-blur-sm border-t border-pink-200/50 py-6">
+      <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-t border-pink-200/50 dark:border-gray-700/50 py-6 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center space-x-4">
             <a

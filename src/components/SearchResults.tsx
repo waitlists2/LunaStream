@@ -4,6 +4,7 @@ import { Search, Film, Tv, Star, Calendar } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import Fuse from 'fuse.js';
 import { Movie, TVShow } from '../types';
+import ThemeToggle from './ThemeToggle';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
@@ -290,12 +291,12 @@ const SearchResults: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
             <Search className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 text-lg">Searching for "{query}"...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Searching for "{query}"...</p>
         </div>
       </div>
     );
@@ -303,19 +304,19 @@ const SearchResults: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100">
-        <div className="text-center max-w-md p-6 bg-white rounded-lg shadow-md">
-          <p className="text-red-600 text-lg font-semibold mb-4">{error}</p>
-          <p className="text-gray-700">Try searching with different keywords or check your connection.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300">
+        <div className="text-center max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
+          <p className="text-red-600 dark:text-red-400 text-lg font-semibold mb-4">{error}</p>
+          <p className="text-gray-700 dark:text-gray-300">Try searching with different keywords or check your connection.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 relative">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 relative transition-colors duration-300">
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-pink-200/50 sticky top-0 z-50">
+      <nav className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-2">
@@ -326,6 +327,7 @@ const SearchResults: React.FC = () => {
                 LunaStream
               </span>
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </nav>
@@ -339,9 +341,9 @@ const SearchResults: React.FC = () => {
           tabIndex={-1}
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center px-6"
         >
-          <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-lg text-center">
-            <h2 className="text-3xl font-bold mb-4 text-pink-600">Haiii!</h2>
-            <p className="mb-6 text-gray-700 text-lg leading-relaxed">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-lg w-full shadow-lg text-center transition-colors duration-300">
+            <h2 className="text-3xl font-bold mb-4 text-pink-600 dark:text-pink-400">Haiii!</h2>
+            <p className="mb-6 text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
               Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe.
             </p>
             <button
@@ -362,10 +364,10 @@ const SearchResults: React.FC = () => {
         aria-hidden={warningVisible}
       >
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
             Search Results for "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
             Found {results.length} result{results.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -376,7 +378,7 @@ const SearchResults: React.FC = () => {
               <Link
                 key={`${item.media_type}-${item.id}`}
                 to={getLink(item)}
-                className="group block bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-200/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                className="group block bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                 aria-label={`View details for ${getTitle(item)}`}
               >
                 <div className="aspect-[2/3] overflow-hidden relative">
@@ -411,13 +413,13 @@ const SearchResults: React.FC = () => {
                 </div>
                 <div className="p-4">
                   <h3
-                    className={`font-semibold text-gray-900 text-sm mb-2 line-clamp-2 transition-colors ${
-                      isMovie(item) ? 'group-hover:text-pink-600' : 'group-hover:text-purple-600'
+                    className={`font-semibold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 transition-colors ${
+                      isMovie(item) ? 'group-hover:text-pink-600 dark:group-hover:text-pink-400' : 'group-hover:text-purple-600 dark:group-hover:text-purple-400'
                     }`}
                   >
                     {getTitle(item)}
                   </h3>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />
                       {getReleaseDate(item) ? new Date(getReleaseDate(item)).getFullYear() : 'N/A'}
@@ -437,8 +439,8 @@ const SearchResults: React.FC = () => {
               <div className="w-24 h-24 bg-gradient-to-r from-pink-300 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 opacity-50">
                 <Search className="w-12 h-12 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-              <p className="text-gray-600">Try searching with different keywords or check spelling</p>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors duration-300">No results found</h3>
+              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">Try searching with different keywords or check spelling</p>
             </div>
           )
         )}
