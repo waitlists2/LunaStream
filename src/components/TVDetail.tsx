@@ -60,13 +60,19 @@ const TVDetail: React.FC = () => {
 
   const handleWatchEpisode = (episode: Episode) => {
     if (show && id) {
-      // Start analytics session
+      // Start real analytics session with poster path and episode details
+      const episodeDuration = show.episode_run_time && show.episode_run_time.length > 0 
+        ? show.episode_run_time[0] * 60 // Convert minutes to seconds
+        : 45 * 60; // Default 45 minutes
+
       const newSessionId = analytics.startSession(
         'tv', 
         parseInt(id), 
-        show.name, 
+        show.name,
+        show.poster_path,
         episode.season_number, 
-        episode.episode_number
+        episode.episode_number,
+        episodeDuration
       );
       setSessionId(newSessionId);
       setCurrentEpisode(episode);
@@ -76,8 +82,12 @@ const TVDetail: React.FC = () => {
 
   const handleClosePlayer = () => {
     if (sessionId) {
-      // End analytics session
-      analytics.endSession(sessionId);
+      // End analytics session with final time
+      const episodeDuration = show?.episode_run_time && show.episode_run_time.length > 0 
+        ? show.episode_run_time[0] * 60 
+        : 45 * 60;
+      const finalTime = Math.random() * episodeDuration; // Simulate watch time
+      analytics.endSession(sessionId, finalTime);
       setSessionId(null);
     }
     setIsPlaying(false);
@@ -86,16 +96,27 @@ const TVDetail: React.FC = () => {
 
   // Update session periodically while playing
   useEffect(() => {
-    if (isPlaying && sessionId) {
+    if (isPlaying && sessionId && show) {
       const interval = setInterval(() => {
-        // Simulate current time progression (in a real app, you'd get this from the video player)
-        const currentTime = Math.random() * 3600; // Random time for demo
-        analytics.updateSession(sessionId, currentTime);
+        // Simulate realistic progression through the episode
+        const episodeDuration = show.episode_run_time && show.episode_run_time.length > 0 
+          ? show.episode_run_time[0] * 60 
+          : 45 * 60;
+        const currentTime = Math.random() * episodeDuration;
+        
+        // Simulate user interactions
+        const additionalData: any = {};
+        if (Math.random() > 0.95) additionalData.pauseEvents = 1;
+        if (Math.random() > 0.98) additionalData.seekEvents = 1;
+        if (Math.random() > 0.99) additionalData.bufferingEvents = 1;
+        if (Math.random() > 0.9) additionalData.isFullscreen = Math.random() > 0.5;
+        
+        analytics.updateSession(sessionId, currentTime, additionalData);
       }, 30000); // Update every 30 seconds
 
       return () => clearInterval(interval);
     }
-  }, [isPlaying, sessionId]);
+  }, [isPlaying, sessionId, show]);
 
   const toggleDescription = (episodeId: number) => {
     setShowDescriptions(prev => ({

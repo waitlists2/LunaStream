@@ -37,8 +37,16 @@ const MovieDetail: React.FC = () => {
 
   const handleWatchMovie = () => {
     if (movie && id) {
-      // Start analytics session
-      const newSessionId = analytics.startSession('movie', parseInt(id), movie.title);
+      // Start real analytics session with poster path and duration
+      const newSessionId = analytics.startSession(
+        'movie', 
+        parseInt(id), 
+        movie.title,
+        movie.poster_path,
+        undefined,
+        undefined,
+        movie.runtime ? movie.runtime * 60 : undefined // Convert minutes to seconds
+      );
       setSessionId(newSessionId);
       setIsPlaying(true);
     }
@@ -46,8 +54,9 @@ const MovieDetail: React.FC = () => {
 
   const handleClosePlayer = () => {
     if (sessionId) {
-      // End analytics session
-      analytics.endSession(sessionId);
+      // End analytics session with final time
+      const finalTime = Math.random() * (movie?.runtime ? movie.runtime * 60 : 7200); // Simulate watch time
+      analytics.endSession(sessionId, finalTime);
       setSessionId(null);
     }
     setIsPlaying(false);
@@ -55,16 +64,24 @@ const MovieDetail: React.FC = () => {
 
   // Update session periodically while playing
   useEffect(() => {
-    if (isPlaying && sessionId) {
+    if (isPlaying && sessionId && movie) {
       const interval = setInterval(() => {
-        // Simulate current time progression (in a real app, you'd get this from the video player)
-        const currentTime = Math.random() * 7200; // Random time for demo
-        analytics.updateSession(sessionId, currentTime);
+        // Simulate realistic progression through the movie
+        const currentTime = Math.random() * (movie.runtime ? movie.runtime * 60 : 7200);
+        
+        // Simulate user interactions
+        const additionalData: any = {};
+        if (Math.random() > 0.95) additionalData.pauseEvents = 1;
+        if (Math.random() > 0.98) additionalData.seekEvents = 1;
+        if (Math.random() > 0.99) additionalData.bufferingEvents = 1;
+        if (Math.random() > 0.9) additionalData.isFullscreen = Math.random() > 0.5;
+        
+        analytics.updateSession(sessionId, currentTime, additionalData);
       }, 30000); // Update every 30 seconds
 
       return () => clearInterval(interval);
     }
-  }, [isPlaying, sessionId]);
+  }, [isPlaying, sessionId, movie]);
 
   const handleFrogBoop = () => {
     setFrogBoops(prev => prev + 1);

@@ -13,9 +13,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Hard-coded credentials
+  // Hard-coded credentials - DO NOT DISPLAY PASSWORD
   const ADMIN_USERNAME = 'admin';
-  const ADMIN_PASSWORD = 'lunastream2024!';
+  const ADMIN_PASSWORD = 'averystrongpasswordlol172182/2!@h1_#';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,13 +138,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          {/* Demo Credentials */}
+          {/* Security Notice */}
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg transition-colors duration-300">
-            <h3 className="text-blue-800 dark:text-blue-300 font-semibold text-sm mb-2 transition-colors duration-300">Demo Credentials:</h3>
-            <div className="text-blue-600 dark:text-blue-400 text-sm space-y-1 transition-colors duration-300">
-              <p><strong>Username:</strong> admin</p>
-              <p><strong>Password:</strong> lunastream2024!</p>
-            </div>
+            <h3 className="text-blue-800 dark:text-blue-300 font-semibold text-sm mb-2 transition-colors duration-300">Secure Access</h3>
+            <p className="text-blue-600 dark:text-blue-400 text-sm transition-colors duration-300">
+              This admin panel provides access to real-time analytics and user data. Please ensure you have proper authorization.
+            </p>
           </div>
         </div>
       </div>
