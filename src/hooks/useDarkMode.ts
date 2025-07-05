@@ -1,60 +1,34 @@
 import { useState, useEffect } from 'react';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark';
 
 export const useDarkMode = () => {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem('lunastream-theme') as Theme;
-    return stored || 'system';
+    if (stored === 'light' || stored === 'dark') {
+      return stored;
+    }
+    // Default to system preference on first visit
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  const [isDark, setIsDark] = useState(false);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const root = window.document.documentElement;
     
-    const updateTheme = () => {
-      let shouldBeDark = false;
-      
-      if (theme === 'system') {
-        shouldBeDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      } else {
-        shouldBeDark = theme === 'dark';
-      }
-      
-      setIsDark(shouldBeDark);
-      
-      if (shouldBeDark) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-    };
-
-    updateTheme();
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      if (theme === 'system') {
-        updateTheme();
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
     
     // Store theme preference
     localStorage.setItem('lunastream-theme', theme);
-
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, [isDark]);
 
   const toggleTheme = () => {
-    setTheme(current => {
-      if (current === 'light') return 'dark';
-      if (current === 'dark') return 'system';
-      return 'light';
-    });
+    setTheme(current => current === 'light' ? 'dark' : 'light');
   };
 
   return { theme, isDark, toggleTheme };
