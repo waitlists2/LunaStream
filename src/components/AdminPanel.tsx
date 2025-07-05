@@ -1,37 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Film, 
-  Users, 
-  Eye, 
-  Clock, 
-  TrendingUp, 
-  Monitor, 
-  BarChart3,
-  Activity,
-  Play,
-  Tv,
-  Calendar,
-  RefreshCw,
-  LogOut,
-  Smartphone,
-  Desktop,
-  Tablet,
-  Globe,
-  Zap,
-  Target,
-  Award,
-  Repeat,
-  PieChart,
-  LineChart,
-  Settings,
-  Download,
-  Share2,
-  AlertTriangle,
-  CheckCircle,
-  Star
-} from 'lucide-react';
+import { ArrowLeft, Film, Users, Eye, Clock, TrendingUp, Monitor, BarChart3, Activity, Play, Tv, Calendar, RefreshCw, LogOut, Smartphone, LampDesk as Desktop, Tablet, Globe, Zap, Target, Award, Repeat, PieChart, LineChart, Settings, Download, Share2, AlertTriangle, CheckCircle, Star } from 'lucide-react';
 import { analytics, ViewingStats, StreamingSession } from '../services/analytics';
 import { tmdb } from '../services/tmdb';
 import ThemeToggle from './ThemeToggle';
