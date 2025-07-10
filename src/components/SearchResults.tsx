@@ -242,26 +242,30 @@ const SearchResults: React.FC = () => {
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-          <div className="flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchInput}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:text-white transition-colors"
-            />
-          </div>
-          <Link to="/" className="flex items-center space-x-2 ml-4">
+        {/* Left side: Logo + Search */}
+        <div className="flex items-center max-w-md w-full space-x-3">
+          {/* Logo only, no text */}
+          <Link to="/" className="flex items-center flex-shrink-0">
             <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
               <Film className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              LunaStream
-            </span>
           </Link>
-          <ThemeToggle />
+
+          {/* Search bar */}
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchInput}
+            onChange={handleInputChange}
+            className="flex-grow px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:text-white transition-colors"
+          />
         </div>
-      </nav>
+
+        {/* Right side: Theme toggle */}
+        <ThemeToggle />
+      </div>
+    </nav>
+
 
       {/* Warning Modal */}
       {warningVisible && (
