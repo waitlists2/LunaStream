@@ -4,4 +4,4 @@
 - [ ] Other language support
 - [ ] Admin panel fix
 - [ ] live search results
-- [ ] Save progress in video with cookies?
+- [ ] Add download video feature (i'll try work on this one)
