@@ -73,7 +73,7 @@ const SearchResults: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [sortBy, setSortBy] = useState<'score' | 'popularity'>(
-    (searchParams.get('sort') === 'popularity' ? 'popularity' : 'score')
+    (searchParams.get('sort') === 'score' ? 'score' : 'popularity')
   );
 
   // Sync sort param from URL when it changes:
@@ -254,8 +254,8 @@ const SearchResults: React.FC = () => {
           }}
           className="rounded border border-gray-300 dark:border-gray-700 px-2 py-1 bg-white dark:bg-gray-700 dark:text-white"
         >
-          <option value="score">Score</option>
           <option value="popularity">Popularity</option>
+          <option value="score">Relevance</option>
         </select>
       </div>
 
