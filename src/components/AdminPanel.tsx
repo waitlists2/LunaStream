@@ -538,7 +538,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 ></div>
                               </div>
                             </div>
-                          </div>
                         ))}
                       </div>
                     ) : (
