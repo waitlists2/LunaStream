@@ -520,10 +520,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <span>{show.views} views</span>
                                 <span>•</span>
                                 <span>{formatDuration(show.totalWatchTime)}</span>
-                                <span>•</span>
-                                <div className="flex items-center">
-                                  <Star className="w-3 h-3 text-yellow-500 mr-1" />
-                                  <span>{show.rating.toFixed(1)}</span>
+                                {/*<span>•</span>*/}
+                                {/*<div className="flex items-center">*/}
+                                  {/*<Star className="w-3 h-3 text-yellow-500 mr-1" />*/}
+                                  {/*<span>{show.rating.toFixed(1)}</span>*/}
                                 </div>
                               </div>
                               {show.topEpisodes.length > 0 && (
