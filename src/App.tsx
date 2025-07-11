@@ -39,7 +39,7 @@ function App() {
         <Route path="/last-updated" element={<LastUpdated />} />
         <Route path="/donate" element={<DonatePage />} />
         <Route 
-          path="/admin" 
+          path="/admin"
           element={
             isAdminAuthenticated ? (
               <AdminPanel onLogout={handleAdminLogout} />

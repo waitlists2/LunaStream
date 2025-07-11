@@ -7,6 +7,7 @@ import ThemeToggle from './ThemeToggle';
 
 const HomePage: React.FC = () => {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<(Movie | TVShow & { media_type: 'movie' | 'tv' })[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [trendingTV, setTrendingTV] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,7 @@ const HomePage: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
           <div className="text-center">
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
@@ -81,16 +82,50 @@ const HomePage: React.FC = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
+            {/* Search Bar with Suggestions */}
+            <div className="max-w-2xl mx-auto relative">
               <form onSubmit={handleSearch} className="relative">
-                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 overflow-hidden transition-colors duration-300">
+                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 transition-colors duration-300">
                   <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <Search className="h-6 w-6 text-pink-400 dark:text-purple-400 transition-colors duration-300" />
                   </div>
                   <input
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      setQuery(value);
+
+                      if (value.trim().length > 1) {
+                        try {
+                          const [movieRes, tvRes] = await Promise.all([
+                            tmdb.searchMovies(value),
+                            tmdb.searchTV(value),
+                          ]);
+
+                          const movieResults = (movieRes.results || []).map((item) => ({
+                            ...item,
+                            media_type: 'movie',
+                          }));
+
+                          const tvResults = (tvRes.results || []).map((item) => ({
+                            ...item,
+                            media_type: 'tv',
+                          }));
+
+                          const combined = [...movieResults, ...tvResults]
+                            .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)) // optional sort
+                            .slice(0, 6);
+
+                          setSuggestions(combined);
+                        } catch (error) {
+                          console.error('Search error:', error);
+                          setSuggestions([]);
+                        }
+                      } else {
+                        setSuggestions([]);
+                      }
+                    }}
                     placeholder="Search for movies or TV shows..."
                     className="block w-full pl-16 pr-6 py-6 text-lg bg-transparent border-0 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:ring-0 focus:outline-none transition-colors duration-300"
                   />
@@ -104,7 +139,28 @@ const HomePage: React.FC = () => {
                   </button>
                 </div>
               </form>
+
+              {/* Suggestions Dropdown */}
+              {suggestions.length > 0 && (
+                <ul className="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                  {suggestions.map((item) => (
+                    <li key={`${item.title || item.name}-${item.id}`}>
+                      <button
+                        onClick={() => navigate(`/${item.media_type}/${item.id}`)}
+                        className="w-full text-left px-4 py-3 hover:bg-pink-50 dark:hover:bg-gray-700 rounded-xl text-gray-800 dark:text-white transition-colors"
+                      >
+                        {item.title || item.name}
+                        <span className="ml-2 text-xs text-gray-500">
+                          ({item.media_type === 'movie' ? 'Movie' : 'TV'})
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+
+
           </div>
         </div>
       </div>
