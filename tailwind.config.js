@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
@@ -16,6 +16,14 @@ export default {
           700: '#b012b5',
           800: '#901494',
           900: '#751677',
+        },
+        dark: {
+          900: '#0d0d0d',
+          800: '#1a1a1a',
+          700: '#2e2e2e',
+        },
+        light: {
+          100: '#f5f5f5',
         },
       },
       animation: {
