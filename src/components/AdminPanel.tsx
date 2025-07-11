@@ -13,7 +13,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [stats, setStats] = useState<ViewingStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'users' | 'technical'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'users'>('overview');
 
   const fetchStats = () => {
     setLoading(true);
@@ -146,7 +146,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                 { id: 'overview', label: 'Overview', icon: BarChart3 },
                 { id: 'content', label: 'Content', icon: Film },
                 { id: 'users', label: 'Users', icon: Users },
-                { id: 'technical', label: 'Technical', icon: Settings }
               ].map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -193,7 +192,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                       <div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors duration-300">Live Viewers</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">{stats.currentlyWatching.length}</p>
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">Peak: {stats.peakConcurrentViewers}</p>
+                        {/* <p className="text-xs text-green-600 dark:text-green-400 mt-1">Peak: {stats.peakConcurrentViewers}</p> */}
                       </div>
                       <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                         <Activity className="w-6 h-6 text-white" />
@@ -332,7 +331,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                               <span>{day.views} views</span>
                               <span>{day.uniqueViewers} viewers</span>
                               <span>{formatDuration(day.watchTime)}</span>
-                              <span className="text-green-600 dark:text-green-400">Peak: {day.peakConcurrent}</span>
+                              {/*<span className="text-green-600 dark:text-green-400">Peak: {day.peakConcurrent}</span>*/}
                             </div>
                           </div>
                           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 transition-colors duration-300">
@@ -461,11 +460,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                                 <span>{movie.views} views</span>
                                 <span>•</span>
                                 <span>{formatDuration(movie.totalWatchTime)}</span>
-                                <span>•</span>
-                                <div className="flex items-center">
-                                  <Star className="w-3 h-3 text-yellow-500 mr-1" />
-                                  <span>{movie.rating.toFixed(1)}</span>
-                                </div>
+                                {/*<span>•</span>*/}
+                                {/*<div className="flex items-center">*/}
+                                  {/*<Star className="w-3 h-3 text-yellow-500 mr-1" />*/}
+                                  {/*<span>{movie.rating.toFixed(1)}</span>*/}
+                                {/*</div>*/}
                               </div>
                               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
                                 <div
@@ -693,192 +692,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
                         </div>
                       ))}
                     </div>
-                  </div>
-                </div>
-
-                {/* Geographic Distribution */}
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-indigo-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                    <Globe className="w-5 h-5 mr-2 text-indigo-500" />
-                    Geographic Distribution
-                  </h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {stats.geographicStats.slice(0, 8).map((country) => (
-                      <div key={country.country} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-700 dark:text-gray-300">{country.country}</span>
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {country.count}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full"
-                            style={{ width: `${country.percentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Technical Tab */}
-            {activeTab === 'technical' && (
-              <>
-                {/* Technical Metrics Overview */}
-                <div className="grid lg:grid-cols-4 gap-6 mb-8">
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-red-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Error Rate</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.technicalMetrics.errorRate.toFixed(2)}%</p>
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">Within target</p>
-                      </div>
-                      <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                        <AlertTriangle className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-blue-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Avg Load Time</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.technicalMetrics.averageLoadTime.toFixed(1)}s</p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Fast loading</p>
-                      </div>
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                        <Zap className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-yellow-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Buffering Events</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.technicalMetrics.averageBufferingEvents.toFixed(1)}</p>
-                        <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Per session</p>
-                      </div>
-                      <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
-                        <Activity className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-green-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Quality Upgrades</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.technicalMetrics.qualityUpgrades}</p>
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">This week</p>
-                      </div>
-                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quality Distribution */}
-                <div className="grid lg:grid-cols-2 gap-8 mb-8">
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <Monitor className="w-5 h-5 mr-2 text-purple-500" />
-                      Video Quality Distribution
-                    </h3>
-                    <div className="space-y-3">
-                      {stats.qualityStats.map((quality) => (
-                        <div key={quality.quality} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-700 dark:text-gray-300">{quality.quality}</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">
-                              {quality.count} ({quality.percentage.toFixed(1)}%)
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div
-                              className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full"
-                              style={{ width: `${quality.percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-teal-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <Settings className="w-5 h-5 mr-2 text-teal-500" />
-                      Performance Metrics
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Quality Upgrades</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div className="bg-green-500 h-2 rounded-full" style={{ width: '75%' }}></div>
-                          </div>
-                          <span className="text-green-600 dark:text-green-400 font-semibold">
-                            {stats.technicalMetrics.qualityUpgrades}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Quality Downgrades</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div className="bg-red-500 h-2 rounded-full" style={{ width: '25%' }}></div>
-                          </div>
-                          <span className="text-red-600 dark:text-red-400 font-semibold">
-                            {stats.technicalMetrics.qualityDowngrades}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Average Load Time</span>
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                          {stats.technicalMetrics.averageLoadTime.toFixed(2)}s
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Error Rate</span>
-                        <span className={`font-semibold ${stats.technicalMetrics.errorRate < 1 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {stats.technicalMetrics.errorRate.toFixed(2)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hourly Activity */}
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-indigo-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                    <Clock className="w-5 h-5 mr-2 text-indigo-500" />
-                    24-Hour Activity Pattern
-                  </h3>
-                  <div className="grid grid-cols-12 gap-2">
-                    {stats.hourlyStats.map((hour) => {
-                      const maxViews = Math.max(...stats.hourlyStats.map(h => h.views));
-                      const height = maxViews > 0 ? (hour.views / maxViews) * 100 : 0;
-                      
-                      return (
-                        <div key={hour.hour} className="text-center">
-                          <div className="h-20 flex items-end justify-center mb-2">
-                            <div
-                              className="w-full bg-gradient-to-t from-indigo-500 to-indigo-600 rounded-t"
-                              style={{ height: `${height}%`, minHeight: height > 0 ? '4px' : '0' }}
-                              title={`${hour.hour}:00 - ${hour.views} views`}
-                            ></div>
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">
-                            {hour.hour.toString().padStart(2, '0')}
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 </div>
               </>
