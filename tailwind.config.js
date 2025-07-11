@@ -1,7 +1,7 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  darkMode: 'class',
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
@@ -16,6 +16,14 @@ export default {
           700: '#b012b5',
           800: '#901494',
           900: '#751677',
+        },
+        dark: {
+          900: '#0d0d0d', // Deep black background
+          800: '#1a1a1a', // Dark gray elements
+          700: '#2e2e2e', // Lighter gray for borders
+        },
+        light: {
+          100: '#f5f5f5', // Light background for light mode
         },
       },
       animation: {
