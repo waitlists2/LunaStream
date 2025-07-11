@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Film, Tv, Star, Calendar } from 'lucide-react';
+import { Search, Film, Star, Calendar } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import Fuse from 'fuse.js';
 import { Movie, TVShow } from '../types';
@@ -8,7 +8,6 @@ import ThemeToggle from './ThemeToggle';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
-// Enhanced fuzzy search options with wildcard support
 const fuseOptions = {
   keys: [
     { name: 'title', weight: 0.9 },
@@ -17,160 +16,108 @@ const fuseOptions = {
     { name: 'original_name', weight: 0.7 },
     { name: 'overview', weight: 0.1 }
   ],
-  threshold: 0.4, // More lenient for wildcard matching
+  threshold: 0.4,
   ignoreLocation: true,
   minMatchCharLength: 1,
   includeScore: true,
   findAllMatches: true,
-  useExtendedSearch: true, // Enable for wildcard patterns
+  useExtendedSearch: true,
   includeMatches: true,
 };
 
-// Updated banned keywords list
 const bannedKeywords = [
-  'gore',
-  'extreme gore',
-  'graphic violence',
-  'real death',
-  'real murder',
-  'snuff',
-  'decapitation',
-  'beheading',
-  'dismemberment',
-  'execution',
-  'liveleak',
-  'necrophilia',
+  'gore', 'extreme gore', 'graphic violence', 'real death', 'real murder', 'snuff', 'decapitation',
+  'beheading', 'dismemberment', 'execution', 'liveleak', 'necrophilia',
 
-  'child abuse',
-  'child torture',
-  'child exploitation',
-  'cp',
-  'infant abuse',
-  'underage',
-  'pedo',
-  'pedophile',
+  'child abuse', 'child torture', 'child exploitation', 'cp', 'infant abuse', 'underage', 'pedo', 'pedophile',
 
-  'rape',
-  'sexual assault',
-  'incest',
-  'bestiality',
-  'zoo',
-  'nonconsensual',
-  'molestation',
-  'forced sex',
-  'snuff porn',
-  'rape porn',
+  'rape', 'sexual assault', 'incest', 'bestiality', 'zoo', 'nonconsensual', 'molestation', 'forced sex', 'snuff porn', 'rape porn',
 
-  'animal abuse',
-  'animal cruelty',
-  'animal torture',
+  'animal abuse', 'animal cruelty', 'animal torture',
 
-  '9/11',
-  'isis execution',
-  'terrorist execution',
-  'war footage',
-  'massacre',
-  'school shooting',
-  'shooting video',
-  'torture video',
+  '9/11', 'isis execution', 'terrorist execution', 'war footage', 'massacre', 'school shooting', 'shooting video', 'torture video',
 
-  'shockumentary',
-  'mondo film',
-  'banned horror',
-  'red room',
-  'deep web video',
-  'dark web',
-  'gore video',
-  'disturbing footage',
+  'shockumentary', 'mondo film', 'banned horror', 'red room', 'deep web video', 'dark web', 'gore video', 'disturbing footage',
 
-  'august underground',
-  'a serbian film',
-  'guinea pig',
-  'tumblr gore',
-  'faces of death',
-  'traces of death',
-  'cannibal holocaust',
-  'human centipede 2',
-  'men behind the sun',
-  'salo 120 days of sodom',
-  'martyrs',
-  'grotesque',
-  'naked blood',
-  'snuff 102',
-  'vase de noces',
+  'august underground', 'a serbian film', 'guinea pig', 'tumblr gore', 'faces of death', 'traces of death', 'cannibal holocaust',
+  'human centipede 2', 'men behind the sun', 'salo 120 days of sodom', 'martyrs', 'grotesque', 'naked blood', 'snuff 102', 'vase de noces',
 
-  'kill yourself',
-  'kys',
-  'suicide',
-  'how to die',
+  'kill yourself', 'kys', 'suicide', 'how to die',
 ];
 
-// Enhanced search preprocessing with wildcard support
-const preprocessQuery = (query: string): string => {
-  return query
-    .toLowerCase()
-    .trim()
-    // Remove special characters but keep spaces and basic punctuation
+const preprocessQuery = (query: string): string =>
+  query.toLowerCase().trim()
     .replace(/[^\w\s\-'.:]/g, ' ')
-    // Normalize multiple spaces
     .replace(/\s+/g, ' ')
-    // Handle common abbreviations
     .replace(/\b&\b/g, 'and');
-};
 
-// Create wildcard patterns for partial matching
 const createWildcardPatterns = (query: string): string[] => {
   const patterns = [query];
-  const words = query.split(' ').filter(word => word.length > 0);
-  
+  const words = query.split(' ').filter(Boolean);
   if (words.length > 1) {
-    // Add patterns for each word individually
     patterns.push(...words);
-    
-    // Add patterns for word combinations
     for (let i = 0; i < words.length - 1; i++) {
       patterns.push(words.slice(i, i + 2).join(' '));
     }
-    
-    // Add fuzzy patterns for partial words (like "family gy" -> "family guy")
-    const fuzzyPatterns = words.map(word => {
-      if (word.length >= 3) {
-        // Create patterns for partial matches
-        return [
-          `${word}*`, // Prefix wildcard
-          `*${word}*`, // Contains wildcard
-          word.slice(0, -1) + '*', // Remove last character + wildcard
-        ];
-      }
-      return [word];
-    }).flat();
-    
+    const fuzzyPatterns = words.flatMap(word =>
+      word.length >= 3 ? [`${word}*`, `*${word}*`, word.slice(0, -1) + '*'] : [word]
+    );
     patterns.push(...fuzzyPatterns);
   } else if (query.length >= 3) {
-    // Single word patterns
-    patterns.push(
-      `${query}*`, // Prefix wildcard
-      `*${query}*`, // Contains wildcard
-    );
+    patterns.push(`${query}*`, `*${query}*`);
   }
-  
-  return [...new Set(patterns)]; // Remove duplicates
+  return [...new Set(patterns)];
 };
 
 const SearchResults: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const query = (searchParams.get('q') || '').trim();
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  const [sortBy, setSortBy] = useState<'score' | 'popularity'>(
+    (searchParams.get('sort') === 'score' ? 'score' : 'popularity')
+  );
+
+  // Sync sort param from URL when it changes:
+  useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam === 'popularity' || sortParam === 'score') {
+      setSortBy(sortParam);
+    }
+  }, [searchParams]);
+
+  const initialQuery = (searchParams.get('q') || '').trim();
+
+  const [searchInput, setSearchInput] = useState(initialQuery);
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warningVisible, setWarningVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Check if query matches any banned keywords (case insensitive)
-  const isQueryBanned = (): boolean => {
-    const lowerQuery = query.toLowerCase();
-    return bannedKeywords.some(keyword => lowerQuery.includes(keyword));
-  };
+  const resultsPerPage = 18;
+  const totalPages = Math.ceil(results.length / resultsPerPage);
+  const startIdx = (currentPage - 1) * resultsPerPage;
+  const paginatedResults = results.slice(startIdx, startIdx + resultsPerPage);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const trimmed = searchInput.trim();
+      if (trimmed !== initialQuery) {
+        const newParams: Record<string, string> = {};
+        if (trimmed) newParams.q = trimmed;
+        if (sortBy) newParams.sort = sortBy;
+        setSearchParams(newParams);
+        setQuery(trimmed);
+      }
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchInput, initialQuery, setSearchParams, sortBy]);
+
+  useEffect(() => {
+    const urlQuery = (searchParams.get('q') || '').trim();
+    if (urlQuery !== searchInput) setSearchInput(urlQuery);
+    if (urlQuery !== query) setQuery(urlQuery);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!query) {
@@ -188,78 +135,52 @@ const SearchResults: React.FC = () => {
 
     const fetchResults = async () => {
       try {
-        // Preprocess the query
-        const processedQuery = preprocessQuery(query);
-        
-        // Perform primary search with original query
-        const [movieResults, tvResults] = await Promise.all([
-          tmdb.searchMovies(processedQuery),
-          tmdb.searchTV(processedQuery),
+        const processed = preprocessQuery(query);
+        const [movies, shows] = await Promise.all([
+          tmdb.searchMovies(processed),
+          tmdb.searchTV(processed),
         ]);
 
         if (!isMounted) return;
 
-        const movieItems: Movie[] = movieResults?.results || [];
-        const tvItems: TVShow[] = tvResults?.results || [];
-
-        const combinedResults: MediaItem[] = [
-          ...movieItems.map(m => ({
-            ...m,
-            media_type: 'movie' as const,
-            popularity: m.popularity || 0,
-          })),
-          ...tvItems.map(t => ({
-            ...t,
-            media_type: 'tv' as const,
-            popularity: t.popularity || 0,
-          })),
+        const combined: MediaItem[] = [
+          ...(movies?.results || []).map(m => ({ ...m, media_type: 'movie', popularity: m.popularity || 0 })),
+          ...(shows?.results || []).map(t => ({ ...t, media_type: 'tv', popularity: t.popularity || 0 })),
         ];
 
-        // Create wildcard patterns for enhanced matching
-        const wildcardPatterns = createWildcardPatterns(processedQuery);
-        const fuse = new Fuse(combinedResults, fuseOptions);
-        
-        // Search with multiple patterns and combine results
-        const allMatches = new Map<number, { item: MediaItem; score: number; pattern: string }>();
-        
-        wildcardPatterns.forEach((pattern, index) => {
-          const patternResults = fuse.search(pattern);
-          patternResults.forEach(result => {
-            const key = `${result.item.media_type}-${result.item.id}`;
-            const score = (result.score || 0) + (index * 0.1); // Prefer exact matches
-            
-            if (!allMatches.has(result.item.id) || allMatches.get(result.item.id)!.score > score) {
-              allMatches.set(result.item.id, {
-                item: result.item,
-                score,
-                pattern
-              });
+        const patterns = createWildcardPatterns(processed);
+        const fuse = new Fuse(combined, fuseOptions);
+        const matches = new Map<string, { item: MediaItem; score: number }>();
+
+        patterns.forEach((p, idx) => {
+          fuse.search(p).forEach(({ item, score }) => {
+            const key = `${item.media_type}-${item.id}`;
+            const adjustedScore = (score ?? 0) + idx * 0.1;
+            if (!matches.has(key) || matches.get(key)!.score > adjustedScore) {
+              matches.set(key, { item, score: adjustedScore });
             }
           });
         });
 
-        // Sort by relevance score and popularity
-        const finalResults = Array.from(allMatches.values())
+        const finalResults = Array.from(matches.values())
           .sort((a, b) => {
-            // Sort by score first (lower is better), then by popularity
-            const scoreDiff = a.score - b.score;
-            if (Math.abs(scoreDiff) > 0.05) {
-              return scoreDiff;
+            if (sortBy === 'popularity') {
+              return b.item.popularity - a.item.popularity || a.score - b.score;
+            } else {
+              return a.score - b.score || b.item.popularity - a.item.popularity;
             }
-            return b.item.popularity - a.item.popularity;
           })
-          .map(r => r.item)
-          .slice(0, 40); // Increased limit for better wildcard results
+          .map(r => r.item);
 
         setResults(finalResults);
+        setCurrentPage(1);
 
-        if (isQueryBanned()) {
+        if (bannedKeywords.some(k => query.toLowerCase().includes(k))) {
           setWarningVisible(true);
         }
       } catch (err) {
-        if (!isMounted) return;
-        console.error('Search failed:', err);
-        setError('Failed to fetch search results. Please try again.');
+        console.error(err);
+        setError('Failed to fetch search results.');
         setResults([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -271,84 +192,84 @@ const SearchResults: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [query]);
+  }, [query, sortBy]);
 
-  const isMovie = (item: MediaItem): item is MediaItem & Movie => {
-    return item.media_type === 'movie';
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
   };
 
-  const getTitle = (item: MediaItem) => {
-    return isMovie(item) ? item.title : (item as TVShow).name;
-  };
-
-  const getReleaseDate = (item: MediaItem) => {
-    return isMovie(item) ? item.release_date : (item as TVShow).first_air_date;
-  };
-
-  const getLink = (item: MediaItem) => {
-    return isMovie(item) ? `/movie/${item.id}` : `/tv/${item.id}`;
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
-            <Search className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Searching for "{query}"...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300">
-        <div className="text-center max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
-          <p className="text-red-600 dark:text-red-400 text-lg font-semibold mb-4">{error}</p>
-          <p className="text-gray-700 dark:text-gray-300">Try searching with different keywords or check your connection.</p>
-        </div>
-      </div>
-    );
-  }
+  const isMovie = (item: MediaItem): item is Movie & { media_type: 'movie' } => item.media_type === 'movie';
+  const getTitle = (item: MediaItem) => isMovie(item) ? item.title : (item as TVShow).name;
+  const getDate = (item: MediaItem) => isMovie(item) ? item.release_date : (item as TVShow).first_air_date;
+  const getLink = (item: MediaItem) => isMovie(item) ? `/movie/${item.id}` : `/tv/${item.id}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 relative transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300">
       {/* Header */}
-      <nav className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center space-x-2">
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+          {/* Left side: Logo + Search */}
+          <div className="flex items-center max-w-md w-full space-x-3">
+            {/* Logo only, no text */}
+            <Link to="/" className="flex items-center flex-shrink-0">
               <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
                 <Film className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                LunaStream
-              </span>
             </Link>
-            <ThemeToggle />
+
+            {/* Search bar */}
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchInput}
+              onChange={handleInputChange}
+              className="flex-grow px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:text-white transition-colors"
+            />
           </div>
+
+          {/* Right side: Theme toggle */}
+          <ThemeToggle />
         </div>
       </nav>
 
-      {/* WARNING MODAL */}
-      {warningVisible && (
-        <div
-          aria-live="assertive"
-          role="alertdialog"
-          aria-modal="true"
-          tabIndex={-1}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center px-6"
+      {/* Sort control */}
+      <div className="mb-4 flex items-center justify-center space-x-2 mt-4">
+        <label htmlFor="sort" className="text-gray-700 dark:text-gray-300 font-semibold">
+          Sort by:
+        </label>
+        <select
+          id="sort"
+          value={sortBy}
+          onChange={(e) => {
+            const newSort = e.target.value === 'popularity' ? 'popularity' : 'score';
+            setSortBy(newSort);
+            const newParams: Record<string, string> = {};
+            if (query) newParams.q = query;
+            newParams.sort = newSort;
+            setSearchParams(newParams);
+          }}
+          className="rounded border border-gray-300 dark:border-gray-700 px-2 py-1 bg-white dark:bg-gray-700 dark:text-white"
         >
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-lg w-full shadow-lg text-center transition-colors duration-300">
+          <option value="popularity">Popularity</option>
+          <option value="score">Relevance</option>
+        </select>
+      </div>
+
+      {/* Warning Modal */}
+      {warningVisible && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center px-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-lg w-full text-center">
             <h2 className="text-3xl font-bold mb-4 text-pink-600 dark:text-pink-400">Haiii!</h2>
-            <p className="mb-6 text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-              Based on your search term, you might find a TV show or movie that could be highly disturbing! Please stay safe.
+            <p className="mb-6 text-gray-700 dark:text-gray-300">
+              Based on your search term, you might find disturbing content. Please stay safe.
             </p>
             <button
               onClick={() => setWarningVisible(false)}
-              className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-colors focus:outline-none focus:ring-4 focus:ring-pink-400"
+              className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg focus:ring-4 focus:ring-pink-400"
             >
               Continue anyway
             </button>
@@ -356,93 +277,110 @@ const SearchResults: React.FC = () => {
         </div>
       )}
 
-      {/* CONTENT BELOW - blur and disable interaction if warning visible */}
-      <main
-        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-filter duration-300 ${
-          warningVisible ? 'blur-sm pointer-events-none select-none' : ''
-        }`}
-        aria-hidden={warningVisible}
-      >
+      {/* Main Content */}
+      <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${warningVisible ? 'blur-sm pointer-events-none' : ''}`}>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Search Results for "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
-            Found {results.length} result{results.length !== 1 ? 's' : ''}
+          <p className="text-gray-600 dark:text-gray-300">
+            Showing {paginatedResults.length} of {results.length} result{results.length !== 1 ? 's' : ''}
           </p>
         </div>
 
-        {results.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {results.map(item => (
-              <Link
-                key={`${item.media_type}-${item.id}`}
-                to={getLink(item)}
-                className="group block bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-pink-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-                aria-label={`View details for ${getTitle(item)}`}
-              >
-                <div className="aspect-[2/3] overflow-hidden relative">
-                  <img
-                    src={tmdb.getImageUrl(item.poster_path)}
-                    alt={getTitle(item)}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                  {/* Media Type Badge */}
-                  <div className="absolute top-2 left-2">
-                    <div
-                      className={`flex items-center px-2 py-1 rounded-full text-xs font-semibold text-white shadow-lg ${
-                        isMovie(item)
-                          ? 'bg-gradient-to-r from-pink-500 to-pink-600'
-                          : 'bg-gradient-to-r from-purple-500 to-purple-600'
-                      }`}
-                    >
-                      {isMovie(item) ? (
-                        <>
-                          <Film className="w-3 h-3 mr-1" />
-                          Movie
-                        </>
-                      ) : (
-                        <>
-                          <Tv className="w-3 h-3 mr-1" />
-                          TV
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3
-                    className={`font-semibold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 transition-colors ${
-                      isMovie(item) ? 'group-hover:text-pink-600 dark:group-hover:text-pink-400' : 'group-hover:text-purple-600 dark:group-hover:text-purple-400'
-                    }`}
-                  >
-                    {getTitle(item)}
-                  </h3>
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <div className="flex items-center">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {getReleaseDate(item) ? new Date(getReleaseDate(item)).getFullYear() : 'N/A'}
-                    </div>
-                    <div className="flex items-center">
-                      <Star className="w-3 h-3 mr-1 text-yellow-500" />
-                      {(item.vote_average ?? 0).toFixed(1)}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          !loading && (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 bg-gradient-to-r from-pink-300 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 opacity-50">
-                <Search className="w-12 h-12 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors duration-300">No results found</h3>
-              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">Try searching with different keywords or check spelling</p>
+        {loading && (
+          <div className="flex items-center justify-center py-10">
+            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center shadow-lg">
+              <Search className="w-6 h-6 text-white" />
             </div>
-          )
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center text-red-600 dark:text-red-400 font-semibold py-10">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && paginatedResults.length === 0 && (
+          <div className="text-center text-gray-700 dark:text-gray-300 py-10">
+            No results found for &quot;{query}&quot;.
+          </div>
+        )}
+
+        {!loading && !error && paginatedResults.length > 0 && (
+          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {paginatedResults.map(item => (
+              <li key={`${item.media_type}-${item.id}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <Link to={getLink(item)} className="block focus:outline-none focus:ring-2 focus:ring-pink-500">
+                  {item.poster_path ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w342${item.poster_path}`}
+                      alt={getTitle(item)}
+                      className="w-full h-auto object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
+                      No Image
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={getTitle(item)}>
+                      {getTitle(item)}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center space-x-1 mt-1">
+                      <Calendar className="w-3 h-3" />
+                      <span>{getDate(item) || 'N/A'}</span>
+                    </p>
+                    <p className="text-xs text-yellow-500 flex items-center space-x-1 mt-1">
+                      <Star className="w-3 h-3" />
+                      <span>{item.vote_average?.toFixed(1) || '–'}</span>
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <nav aria-label="Pagination" className="flex justify-center mt-8 space-x-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded-md bg-pink-600 text-white disabled:bg-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            >
+              Previous
+            </button>
+
+            {[...Array(totalPages)].map((_, idx) => {
+              const page = idx + 1;
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  aria-current={currentPage === page ? 'page' : undefined}
+                  className={`px-3 py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                    currentPage === page
+                      ? 'bg-pink-700 text-white'
+                      : 'bg-pink-300 dark:bg-pink-500 text-pink-900 dark:text-pink-100 hover:bg-pink-400'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded-md bg-pink-600 text-white disabled:bg-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            >
+              Next
+            </button>
+          </nav>
         )}
       </main>
     </div>

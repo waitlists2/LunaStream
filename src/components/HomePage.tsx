@@ -7,6 +7,7 @@ import ThemeToggle from './ThemeToggle';
 
 const HomePage: React.FC = () => {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<(Movie | TVShow & { media_type: 'movie' | 'tv' })[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [trendingTV, setTrendingTV] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,7 @@ const HomePage: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
           <div className="text-center">
             <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
@@ -81,16 +82,50 @@ const HomePage: React.FC = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
+            {/* Search Bar with Suggestions */}
+            <div className="max-w-2xl mx-auto relative">
               <form onSubmit={handleSearch} className="relative">
-                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 overflow-hidden transition-colors duration-300">
+                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 transition-colors duration-300">
                   <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
                     <Search className="h-6 w-6 text-pink-400 dark:text-purple-400 transition-colors duration-300" />
                   </div>
                   <input
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      setQuery(value);
+
+                      if (value.trim().length > 1) {
+                        try {
+                          const [movieRes, tvRes] = await Promise.all([
+                            tmdb.searchMovies(value),
+                            tmdb.searchTV(value),
+                          ]);
+
+                          const movieResults = (movieRes.results || []).map((item) => ({
+                            ...item,
+                            media_type: 'movie',
+                          }));
+
+                          const tvResults = (tvRes.results || []).map((item) => ({
+                            ...item,
+                            media_type: 'tv',
+                          }));
+
+                          const combined = [...movieResults, ...tvResults]
+                            .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)) // optional sort
+                            .slice(0, 6);
+
+                          setSuggestions(combined);
+                        } catch (error) {
+                          console.error('Search error:', error);
+                          setSuggestions([]);
+                        }
+                      } else {
+                        setSuggestions([]);
+                      }
+                    }}
                     placeholder="Search for movies or TV shows..."
                     className="block w-full pl-16 pr-6 py-6 text-lg bg-transparent border-0 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:ring-0 focus:outline-none transition-colors duration-300"
                   />
@@ -104,7 +139,28 @@ const HomePage: React.FC = () => {
                   </button>
                 </div>
               </form>
+
+              {/* Suggestions Dropdown */}
+              {suggestions.length > 0 && (
+                <ul className="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                  {suggestions.map((item) => (
+                    <li key={`${item.title || item.name}-${item.id}`}>
+                      <button
+                        onClick={() => navigate(`/${item.media_type}/${item.id}`)}
+                        className="w-full text-left px-4 py-3 hover:bg-pink-50 dark:hover:bg-gray-700 rounded-xl text-gray-800 dark:text-white transition-colors"
+                      >
+                        {item.title || item.name}
+                        <span className="ml-2 text-xs text-gray-500">
+                          ({item.media_type === 'movie' ? 'Movie' : 'TV'})
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+
+
           </div>
         </div>
       </div>
@@ -208,7 +264,16 @@ const HomePage: React.FC = () => {
               className="bg-[#5865F2] hover:bg-[#4752C4] text-white p-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group"
               title="Join our Discord"
             >
-              <MessageCircle className="w-4 h-4" />
+            <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-discord"
+            viewBox="0 0 16 16"
+            >
+              <path d="M13.545 2.907a13.2 13.2 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.2 12.2 0 0 0-3.658 0 8 8 0 0 0-.412-.833.05.05 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.04.04 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032q.003.022.021.037a13.3 13.3 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019q.463-.63.818-1.329a.05.05 0 0 0-.01-.059l-.018-.011a9 9 0 0 1-1.248-.595.05.05 0 0 1-.02-.066l.015-.019q.127-.095.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.05.05 0 0 1 .053.007q.121.1.248.195a.05.05 0 0 1-.004.085 8 8 0 0 1-1.249.594.05.05 0 0 0-.03.03.05.05 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.2 13.2 0 0 0 4.001-2.02.05.05 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.03.03 0 0 0-.02-.019m-8.198 7.307c-.789 0-1.438-.724-1.438-1.612s.637-1.613 1.438-1.613c.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612m5.316 0c-.788 0-1.438-.724-1.438-1.612s.637-1.613 1.438-1.613c.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612"/>
+            </svg>
             </a>
             <a
               href="https://x.com/Lunastreamwatch"
@@ -217,7 +282,16 @@ const HomePage: React.FC = () => {
               className="bg-[#1DA1F2] hover:bg-[#1A91DA] text-white p-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group"
               title="Follow us on Twitter"
             >
-              <Twitter className="w-4 h-4" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-twitter"
+              viewBox="0 0 16 16"
+            >
+              <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334q.002-.211-.006-.422A6.7 6.7 0 0 0 16 3.542a6.7 6.7 0 0 1-1.889.518 3.3 3.3 0 0 0 1.447-1.817 6.5 6.5 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.32 9.32 0 0 1-6.767-3.429 3.29 3.29 0 0 0 1.018 4.382A3.3 3.3 0 0 1 .64 6.575v.045a3.29 3.29 0 0 0 2.632 3.218 3.2 3.2 0 0 1-.865.115 3 3 0 0 1-.614-.057 3.28 3.28 0 0 0 3.067 2.277A6.6 6.6 0 0 1 .78 13.58a6 6 0 0 1-.78-.045A9.34 9.34 0 0 0 5.026 15" />
+            </svg>
             </a>
           </div>
         </div>
