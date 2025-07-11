@@ -2,22 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Smooth transition between light and dark mode */
 body {
   @apply transition-colors duration-500 ease-in-out;
 }
 
-/* Light mode */
-body.light {
-  @apply bg-white text-black;
-}
-
-/* Dark mode */
 body.dark {
   @apply bg-dark-900 text-white;
 }
 
-/* Scrollbar styles (consistent in both modes) */
+body.light {
+  @apply bg-white text-black;
+}
+
 ::-webkit-scrollbar {
   width: 5px;
 }
