@@ -15,6 +15,7 @@
   background: linear-gradient(to bottom, rgb(219 39 119), rgb(147 51 234));
 }
 
+/*
 * {
   cursor: none !important;
 }
@@ -27,7 +28,7 @@
   height: 32px;
   pointer-events: none;
   border-radius: 12px;
-  background: rgba(147, 51, 234, 0.6); /* More opaque */
+  background: rgba(147, 51, 234, 0.6);
   z-index: 9999;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 16px 8px rgba(147, 51, 234, 0.3);
@@ -39,14 +40,12 @@
     box-shadow 0.2s ease;
 }
 
-/* Optional: handle dark mode with Tailwind or your own class logic */
 @media (prefers-color-scheme: dark) {
   .custom-cursor {
-    background: rgba(147, 51, 234, 0.3); /* Slightly less opaque in dark mode */
+    background: rgba(147, 51, 234, 0.3);
   }
 }
 
-/* Gradient border */
 .custom-cursor::before {
   content: "";
   position: absolute;
@@ -71,6 +70,7 @@
   background: rgba(219, 39, 119, 0.5);
   box-shadow: 0 0 16px 8px rgba(219, 39, 119, 0.3);
 }
+*/
 
 ::selection {
   background: rgb(219, 39, 119);
