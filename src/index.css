@@ -2,18 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply transition-colors duration-500 ease-in-out;
-}
-
-body.dark {
-  @apply bg-dark-900 text-white;
-}
-
-body.light {
-  @apply bg-white text-black;
-}
-
 ::-webkit-scrollbar {
   width: 5px;
 }
@@ -25,4 +13,89 @@ body.light {
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, rgb(219 39 119), rgb(147 51 234));
+}
+
+* {
+  cursor: none !important;
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  border-radius: 12px; /* default rounded corners */
+  background: rgba(147, 51, 234, 0.3);
+  mix-blend-mode: lighten;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px 8px rgba(147, 51, 234, 0.3);
+  transition:
+    width 0.2s ease,
+    height 0.2s ease,
+    border-radius 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+  position: fixed;
+}
+
+/* Gradient border */
+.custom-cursor::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: inherit; /* match cursor's border radius */
+  padding: 2px;
+  background: linear-gradient(135deg, rgb(219, 39, 119), rgb(147, 51, 234));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+  transition: border-radius 0.2s ease;
+}
+
+.custom-cursor.clickable {
+  background: rgba(219, 39, 119, 0.3);
+  box-shadow: 0 0 16px 8px rgba(219, 39, 119, 0.3);
+  border-radius: inherit; /* keep element's border radius */
+}
+
+
+
+
+::selection {
+  background: rgb(219, 39, 119);
+  color: white;
+}
+  
+
+/* Autofill input styling */
+input:-webkit-autofill {
+  background-color: #101010 !important;
+  color: #fff !important;
+}
+
+/* Placeholder text */
+::placeholder {
+  color: #a3a3a3;
+  opacity: 1;
+}
+
+/* Resize handle for textarea */
+textarea {
+  resize: vertical;
+}
+
+/* Custom focus outline */
+:focus {
+  outline: 2px solid rgb(147 51 234);
+  outline-offset: 2px;
 }
