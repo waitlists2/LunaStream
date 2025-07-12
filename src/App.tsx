@@ -9,6 +9,8 @@ import DonatePage from './components/DonatePage';
 import VersionPage from './components/VersionPage';
 import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
+import CustomCursor from './components/CustomCursor';
+import NotFoundPage from './components/NotFoundPage';
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -30,6 +32,7 @@ function App() {
 
   return (
     <Router>
+      {/*<CustomCursor />*/}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchResults />} />
@@ -48,6 +51,7 @@ function App() {
             )
           } 
         />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
