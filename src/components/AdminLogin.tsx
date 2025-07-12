@@ -16,9 +16,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const ADMIN_USERNAME = process.env.REACT_APP_ADMIN_USERNAME || '';
   const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || '';
 
-  console.log('Admin Username:', ADMIN_USERNAME);
-  console.log('Admin Password:', ADMIN_PASSWORD);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
