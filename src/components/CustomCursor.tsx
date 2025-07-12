@@ -6,7 +6,7 @@ const CustomCursor: React.FC = () => {
     cursor.className = "custom-cursor";
     document.body.appendChild(cursor);
 
-    const MAX_WIDTH = 150;  // max width threshold to morph
+    const MAX_WIDTH = 300;  // max width threshold to morph
     const MAX_HEIGHT = 80;  // max height threshold to morph
 
     const moveCursor = (e: MouseEvent) => {
@@ -32,8 +32,16 @@ const CustomCursor: React.FC = () => {
           isInteractive = true;
           width = rect.width;
           height = rect.height;
+
           const style = window.getComputedStyle(interactiveEl);
-          borderRadius = style.borderRadius || "0px";
+          const computedBorderRadius = style.borderRadius;
+
+          // Use the computed borderRadius if valid, else fallback
+          if (computedBorderRadius && computedBorderRadius !== "0px") {
+            borderRadius = computedBorderRadius;
+          } else {
+            borderRadius = "12px";
+          }
         }
       }
 
@@ -43,12 +51,15 @@ const CustomCursor: React.FC = () => {
 
       if (isInteractive) {
         cursor.classList.add("clickable");
+        cursor.style.background = "rgba(219, 39, 119, 0.3)";
+        cursor.style.boxShadow = "0 0 16px 8px rgba(219, 39, 119, 0.3)";
       } else {
         cursor.classList.remove("clickable");
-        // Keep default size and rounded corners
         cursor.style.width = "32px";
         cursor.style.height = "32px";
         cursor.style.borderRadius = "12px";
+        cursor.style.background = "rgba(147, 51, 234, 0.3)";
+        cursor.style.boxShadow = "0 0 16px 8px rgba(147, 51, 234, 0.3)";
       }
     };
 

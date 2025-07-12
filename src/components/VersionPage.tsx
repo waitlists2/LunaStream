@@ -1,50 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Film, Clock, GitBranch, Calendar, Code, RefreshCw, ExternalLink, User, AlertCircle, Info } from 'lucide-react';
+import {
+  ArrowLeft,
+  Film,
+  Clock,
+  GitBranch,
+  Calendar,
+  Code,
+  RefreshCw,
+  ExternalLink,
+  User,
+  AlertCircle,
+  Info,
+} from 'lucide-react';
 import { github, GitHubCommit, GitHubRepo } from '../services/github';
 import ThemeToggle from './ThemeToggle';
 
 const VersionPage: React.FC = () => {
   const [commitInfo, setCommitInfo] = useState<GitHubCommit | null>(null);
+  const [commitInfoList, setCommitInfoList] = useState<GitHubCommit[]>([]);
   const [repoInfo, setRepoInfo] = useState<GitHubRepo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  // Configure your GitHub repository here
   const GITHUB_OWNER = 'Waitlists'; // Replace with your GitHub username
   const GITHUB_REPO = 'lunastream'; // Replace with your repository name
-  const GITHUB_BRANCH = 'main'; // Replace with your default branch if different
+  const GITHUB_BRANCH = 'main'; // Replace if different
 
-  // Check if GitHub integration is properly configured
-  const isGitHubConfigured = GITHUB_OWNER !== 'your-username' && GITHUB_OWNER.trim() !== '';
+  const isGitHubConfigured =
+    GITHUB_OWNER !== 'your-username' && GITHUB_OWNER.trim() !== '';
 
   const currentTime = new Date();
   const lastModified = new Date(document.lastModified);
-  
+
   const versionInfo = {
     version: '2.1.0',
     buildDate: lastModified,
-    environment: 'production'
+    environment: 'production',
   };
 
   const fetchGitHubData = async () => {
     if (!isGitHubConfigured) {
-      setError('GitHub integration not configured. Please update GITHUB_OWNER in the code.');
+      setError(
+        'GitHub integration not configured. Please update GITHUB_OWNER in the code.'
+      );
       return;
     }
 
     setLoading(true);
     setError(null);
-    
+
     try {
-      const [commit, repo] = await Promise.all([
-        github.getLatestCommit(GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH),
-        github.getRepoInfo(GITHUB_OWNER, GITHUB_REPO)
+      const fetchWithRetry = async (fn: () => Promise<any>, retries = 3) => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            return await fn();
+          } catch {
+            if (i === retries - 1) throw {};
+          }
+        }
+      };
+
+      const [commit, repo, commits] = await Promise.all([
+        fetchWithRetry(() =>
+          github.getLatestCommit(GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH)
+        ),
+        fetchWithRetry(() =>
+          github.getRepoInfo(GITHUB_OWNER, GITHUB_REPO)
+        ),
+        fetchWithRetry(() =>
+          github.getCommits(GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH, 6)
+        ),
       ]);
-      
+
       setCommitInfo(commit);
       setRepoInfo(repo);
+      setCommitInfoList(commits);
       setLastRefresh(new Date());
     } catch (err) {
       console.error('Failed to fetch GitHub data:', err);
@@ -68,7 +100,7 @@ const VersionPage: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      timeZoneName: 'short'
+      timeZoneName: 'short',
     });
   };
 
@@ -136,9 +168,12 @@ const VersionPage: React.FC = () => {
             <div className="flex items-start space-x-3">
               <Info className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="text-blue-800 dark:text-blue-300 font-semibold transition-colors duration-300">GitHub Integration Available</h3>
+                <h3 className="text-blue-800 dark:text-blue-300 font-semibold transition-colors duration-300">
+                  GitHub Integration Available
+                </h3>
                 <p className="text-blue-600 dark:text-blue-400 text-sm mt-1 transition-colors duration-300">
-                  To enable real-time repository and commit information, update the <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">GITHUB_OWNER</code> constant 
+                  To enable real-time repository and commit information, update the{' '}
+                  <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">GITHUB_OWNER</code> constant{' '}
                   in the VersionPage component with your actual GitHub username.
                 </p>
                 <p className="text-blue-500 dark:text-blue-400 text-xs mt-2 transition-colors duration-300">
@@ -155,215 +190,141 @@ const VersionPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
               <div>
-                <h3 className="text-red-800 dark:text-red-300 font-semibold transition-colors duration-300">Failed to fetch GitHub data</h3>
-                <p className="text-red-600 dark:text-red-400 text-sm mt-1 transition-colors duration-300">{error}</p>
-                <p className="text-red-500 dark:text-red-400 text-xs mt-2 transition-colors duration-300">
-                  Make sure the repository exists and is publicly accessible.
+                <h3 className="text-red-800 dark:text-red-300 font-semibold transition-colors duration-300">
+                  Failed to fetch GitHub data
+                </h3>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-1 transition-colors duration-300">
+                  {error}
                 </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Version Info Card */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 mb-8 transition-colors duration-300">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
-            <Clock className="w-7 h-7 mr-3 text-pink-500" />
-            Build Information
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Version:</strong> {versionInfo.version}</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Environment:</strong> {versionInfo.environment}</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Last Updated:</strong></p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">{formatDate(lastModified)}</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Current Time:</strong></p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">{formatDate(currentTime)}</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Build Date:</strong></p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">{formatDate(versionInfo.buildDate)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Repository Info */}
-        {repoInfo && (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 mb-8 transition-colors duration-300">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
-              <GitBranch className="w-7 h-7 mr-3 text-indigo-500" />
-              Repository Information
-            </h2>
-            
-            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 p-6 transition-colors duration-300">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg transition-colors duration-300">{repoInfo.full_name}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mt-1 transition-colors duration-300">{repoInfo.description || 'No description available'}</p>
-                </div>
-                <a
-                  href={`https://github.com/${repoInfo.full_name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                <button
+                  onClick={fetchGitHubData}
+                  disabled={loading}
+                  className="mt-3 inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ExternalLink className="w-4 h-4" />
-                  <span className="text-sm">View on GitHub</span>
-                </a>
-              </div>
-              
-              <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                <div>
-                  <strong>Default Branch:</strong> {repoInfo.default_branch}
-                </div>
-                <div>
-                  <strong>Last Push:</strong> {github.getRelativeTime(repoInfo.pushed_at)}
-                </div>
+                  Retry
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Latest Commit Info */}
-        {loading ? (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-colors duration-300">
-            <div className="text-center py-8">
-              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mx-auto mb-4">
-                <GitBranch className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">Fetching latest commit from GitHub...</p>
-            </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center my-12">
+            <RefreshCw className="w-10 h-10 text-pink-600 animate-spin" />
           </div>
-        ) : commitInfo ? (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-colors duration-300">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
-              <GitBranch className="w-7 h-7 mr-3 text-purple-500" />
-              Latest Commit
-            </h2>
-            
-            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 p-6 transition-colors duration-300">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-                    <GitBranch className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white transition-colors duration-300">#{github.formatCommitHash(commitInfo.sha)}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">{GITHUB_BRANCH} branch</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-1 transition-colors duration-300">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {github.formatCommitDate(commitInfo.commit.author.date)}
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                    {github.getRelativeTime(commitInfo.commit.author.date)}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mb-4 transition-colors duration-300">
-                <p className="text-gray-800 dark:text-gray-200 font-medium transition-colors duration-300">{commitInfo.commit.message}</p>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4" />
-                  <span>
-                    <strong>{commitInfo.commit.author.name}</strong>
-                    {commitInfo.author && (
-                      <span className="text-gray-500 dark:text-gray-400"> (@{commitInfo.author.login})</span>
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs font-semibold transition-colors duration-300">
-                    Latest
-                  </span>
+        )}
+
+        {/* Repository & Commit Info */}
+        {!loading && commitInfo && repoInfo && (
+          <div className="space-y-12">
+            {/* Repo Info */}
+            <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Repository Information
+              </h2>
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <GitBranch className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                  <span>Default Branch: <strong>{repoInfo.default_branch}</strong></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <span>Owner: <strong>{repoInfo.owner.login}</strong></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <span>Created At: <strong>{formatDate(new Date(repoInfo.created_at))}</strong></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                  <span>Last Updated: <strong>{formatDate(new Date(repoInfo.updated_at))}</strong></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <ExternalLink className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <a
+                    href={repoInfo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    View on GitHub
+                  </a>
+                </li>
+              </ul>
+            </section>
+
+            {/* Latest Commit Info */}
+            <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Latest Commit
+              </h2>
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <Code className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                  <span>SHA: <code>{commitInfo.sha}</code></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <span>Author: <strong>{commitInfo.commit.author.name}</strong></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  <span>Date: <strong>{formatDate(new Date(commitInfo.commit.author.date))}</strong></span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Info className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                  <span>Message: {commitInfo.commit.message}</span>
+                </li>
+                <li>
                   <a
                     href={commitInfo.html_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                    className="inline-block mt-3 text-pink-600 dark:text-pink-400 hover:underline"
                   >
-                    <ExternalLink className="w-3 h-3" />
-                    <span className="text-xs">View</span>
+                    View Commit on GitHub
                   </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : isGitHubConfigured ? (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-colors duration-300">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
-              <GitBranch className="w-7 h-7 mr-3 text-purple-500" />
-              Latest Commit
-            </h2>
-            <div className="text-center py-8">
-              <GitBranch className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4 transition-colors duration-300" />
-              <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">No commit information available</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 transition-colors duration-300">Check your repository configuration and try refreshing</p>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-colors duration-300">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
-              <GitBranch className="w-7 h-7 mr-3 text-purple-500" />
-              Repository Integration
-            </h2>
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
-                <GitBranch className="w-8 h-8 text-purple-500" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-2 transition-colors duration-300">Connect to GitHub for live repository data</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
-                Update the GitHub configuration to see commit history, repository stats, and more
-              </p>
-            </div>
+                </li>
+              </ul>
+            </section>
+
+            {/* Recent Commits List */}
+            <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Recent Commits
+              </h2>
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                {commitInfoList.map((commit) => (
+                  <li key={commit.sha} className="py-3">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-4">
+                      <code className="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-2 rounded">
+                        {commit.sha.substring(0, 7)}
+                      </code>
+                      <div className="flex-1 text-gray-700 dark:text-gray-300 text-sm truncate">
+                        {commit.commit.message}
+                      </div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {new Date(commit.commit.author.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
         )}
 
-        {/* Footer Note */}
-        <div className="text-center mt-12">
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl p-6 text-white">
-            <p className="text-lg opacity-90 mb-2">
-              This page shows real-time deployment status and version information for LunaStream.
-            </p>
-            <p className="text-sm opacity-75">
-              {isGitHubConfigured 
-                ? "Data is fetched directly from GitHub API and updates automatically."
-                : "Configure GitHub integration to see live repository data."
-              }
-            </p>
-          </div>
-        </div>
+        {/* Static Version Info */}
+        <section className="mt-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center transition-colors duration-300">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Application Version: <span className="font-mono">{versionInfo.version}</span>
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Built on: {formatDate(versionInfo.buildDate)}
+          </p>
+          <p className="text-gray-600 dark:text-gray-400">Environment: {versionInfo.environment}</p>
+        </section>
       </div>
     </div>
   );
