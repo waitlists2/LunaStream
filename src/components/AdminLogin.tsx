@@ -13,9 +13,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Hard-coded credentials - DO NOT DISPLAY PASSWORD
-  const ADMIN_USERNAME = 'admin';
-  const ADMIN_PASSWORD = 'averystrongpasswordlol172182/2!@h1_#';
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || '';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
