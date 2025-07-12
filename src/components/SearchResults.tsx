@@ -8,7 +8,7 @@ import ThemeToggle from './ThemeToggle';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
-const fuseOptions = {
+const fuseOptions: Fuse.IFuseOptions<MediaItem> = {
   keys: [
     { name: 'title', weight: 0.9 },
     { name: 'name', weight: 0.9 },
@@ -28,20 +28,13 @@ const fuseOptions = {
 const bannedKeywords = [
   'gore', 'extreme gore', 'graphic violence', 'real death', 'real murder', 'snuff', 'decapitation',
   'beheading', 'dismemberment', 'execution', 'liveleak', 'necrophilia',
-
   'child abuse', 'child torture', 'child exploitation', 'cp', 'infant abuse', 'underage', 'pedo', 'pedophile',
-
   'rape', 'sexual assault', 'incest', 'bestiality', 'zoo', 'nonconsensual', 'molestation', 'forced sex', 'snuff porn', 'rape porn',
-
   'animal abuse', 'animal cruelty', 'animal torture',
-
   '9/11', 'isis execution', 'terrorist execution', 'war footage', 'massacre', 'school shooting', 'shooting video', 'torture video',
-
   'shockumentary', 'mondo film', 'banned horror', 'red room', 'deep web video', 'dark web', 'gore video', 'disturbing footage',
-
   'august underground', 'a serbian film', 'guinea pig', 'tumblr gore', 'faces of death', 'traces of death', 'cannibal holocaust',
   'human centipede 2', 'men behind the sun', 'salo 120 days of sodom', 'martyrs', 'grotesque', 'naked blood', 'snuff 102', 'vase de noces',
-
   'kill yourself', 'kys', 'suicide', 'how to die',
 ];
 
@@ -71,21 +64,10 @@ const createWildcardPatterns = (query: string): string[] => {
 
 const SearchResults: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const [sortBy, setSortBy] = useState<'score' | 'popularity'>(
-    (searchParams.get('sort') === 'score' ? 'score' : 'popularity')
+    searchParams.get('sort') === 'score' ? 'score' : 'popularity'
   );
-
-  // Sync sort param from URL when it changes:
-  useEffect(() => {
-    const sortParam = searchParams.get('sort');
-    if (sortParam === 'popularity' || sortParam === 'score') {
-      setSortBy(sortParam);
-    }
-  }, [searchParams]);
-
   const initialQuery = (searchParams.get('q') || '').trim();
-
   const [searchInput, setSearchInput] = useState(initialQuery);
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<MediaItem[]>([]);
@@ -98,6 +80,13 @@ const SearchResults: React.FC = () => {
   const totalPages = Math.ceil(results.length / resultsPerPage);
   const startIdx = (currentPage - 1) * resultsPerPage;
   const paginatedResults = results.slice(startIdx, startIdx + resultsPerPage);
+
+  useEffect(() => {
+    const sortParam = searchParams.get('sort');
+    if (sortParam === 'popularity' || sortParam === 'score') {
+      setSortBy(sortParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -212,16 +201,12 @@ const SearchResults: React.FC = () => {
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-          {/* Left side: Logo + Search */}
-          <div className="flex items-center max-w-md w-full space-x-3">
-            {/* Logo only, no text */}
+          <div className="flex items-center w-full max-w-3xl space-x-3">
             <Link to="/" className="flex items-center flex-shrink-0">
               <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
                 <Film className="w-5 h-5 text-white" />
               </div>
             </Link>
-
-            {/* Search bar */}
             <input
               type="text"
               placeholder="Search..."
@@ -229,37 +214,27 @@ const SearchResults: React.FC = () => {
               onChange={handleInputChange}
               className="flex-grow px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:text-white transition-colors"
             />
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                const newSort = e.target.value === 'popularity' ? 'popularity' : 'score';
+                setSortBy(newSort);
+                const newParams: Record<string, string> = {};
+                if (query) newParams.q = query;
+                newParams.sort = newSort;
+                setSearchParams(newParams);
+              }}
+              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-white focus:ring-2 focus:ring-pink-400 transition-colors"
+            >
+              <option value="popularity">Popularity</option>
+              <option value="score">Relevance</option>
+            </select>
           </div>
-
-          {/* Right side: Theme toggle */}
           <ThemeToggle />
         </div>
       </nav>
 
-      {/* Sort control */}
-      <div className="mb-4 flex items-center justify-center space-x-2 mt-4">
-        <label htmlFor="sort" className="text-gray-700 dark:text-gray-300 font-semibold">
-          Sort by:
-        </label>
-        <select
-          id="sort"
-          value={sortBy}
-          onChange={(e) => {
-            const newSort = e.target.value === 'popularity' ? 'popularity' : 'score';
-            setSortBy(newSort);
-            const newParams: Record<string, string> = {};
-            if (query) newParams.q = query;
-            newParams.sort = newSort;
-            setSearchParams(newParams);
-          }}
-          className="rounded border border-gray-300 dark:border-gray-700 px-2 py-1 bg-white dark:bg-gray-700 dark:text-white"
-        >
-          <option value="popularity">Popularity</option>
-          <option value="score">Relevance</option>
-        </select>
-      </div>
-
-      {/* Warning Modal */}
+      {/* Warning modal */}
       {warningVisible && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center px-6">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-lg w-full text-center">
@@ -277,7 +252,7 @@ const SearchResults: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content */}
+      {/* Main content */}
       <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${warningVisible ? 'blur-sm pointer-events-none' : ''}`}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
