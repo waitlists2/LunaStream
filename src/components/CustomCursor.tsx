@@ -7,7 +7,7 @@ const CustomCursor: React.FC = () => {
     document.body.appendChild(cursor);
 
     const MAX_WIDTH = 300;  // max width threshold to morph
-    const MAX_HEIGHT = 80;  // max height threshold to morph
+    const MAX_HEIGHT = 400;  // max height threshold to morph
 
     const moveCursor = (e: MouseEvent) => {
       cursor.style.top = `${e.clientY}px`;

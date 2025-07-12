@@ -298,7 +298,7 @@ const VersionPage: React.FC = () => {
                 {commitInfoList.map((commit) => (
                   <li key={commit.sha} className="py-3">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-4">
-                      <code className="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-2 rounded">
+                      <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 rounded">
                         {commit.sha.substring(0, 7)}
                       </code>
                       <div className="flex-1 text-gray-700 dark:text-gray-300 text-sm truncate">
