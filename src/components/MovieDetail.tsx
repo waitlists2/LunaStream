@@ -265,7 +265,7 @@ const MovieDetail: React.FC = () => {
         <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">Recently Viewed</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {recentlyViewedMovies.map((item) => (
+            {recentlyViewedMovies.slice(0, 5).map((item) => (
               <Link
                 key={item.id}
                 to={`/movie/${item.id}`}
