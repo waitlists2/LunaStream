@@ -17,6 +17,14 @@ const TVDetail: React.FC = () => {
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({});
+  const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([]);
+
+  useEffect(() => {
+    const items = JSON.parse(localStorage.getItem('recentlyViewedTV') || '[]');
+    setRecentlyViewedTV(items);
+  }, [id]);
+
+      
 
   useEffect(() => {
     const fetchShow = async () => {
@@ -57,6 +65,27 @@ const TVDetail: React.FC = () => {
 
     fetchEpisodes();
   }, [id, selectedSeason]);
+
+  useEffect(() => {
+    if (show) {
+      const existing = JSON.parse(localStorage.getItem('recentlyViewedTV') || '[]');
+
+      // Remove duplicates by filtering out this show if already in the list
+      const filtered = existing.filter((item: any) => item.id !== show.id);
+
+      // Add current show to the start
+      const updated = [{ 
+        id: show.id,
+        name: show.name,
+        poster_path: show.poster_path,
+        first_air_date: show.first_air_date
+      }, ...filtered];
+
+      // Limit to 10 items max
+      localStorage.setItem('recentlyViewedTV', JSON.stringify(updated.slice(0, 10)));
+    }
+  }, [show]);
+
 
   const handleWatchEpisode = (episode: Episode) => {
     if (show && id) {
@@ -353,6 +382,32 @@ const TVDetail: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Add Recently Viewed Block here */}
+          {recentlyViewedTV.length > 0 && (
+            <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">Recently Viewed</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {recentlyViewedTV.map((item) => (
+                  <Link
+                    key={item.id}
+                    to={`/tv/${item.id}`}
+                    className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                  >
+                    <img
+                      src={tmdb.getImageUrl(item.poster_path, 'w300')}
+                      alt={item.name}
+                      className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
+                      <p className="font-semibold truncate">{item.name}</p>
+                      <p className="text-xs">{item.first_air_date?.split('-')[0]}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
         </div>

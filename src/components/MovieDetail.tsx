@@ -14,10 +14,37 @@ const MovieDetail: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [frogBoops, setFrogBoops] = useState(0);
   const [showBoopAnimation, setShowBoopAnimation] = useState(false);
+  const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
 
   // Easter egg movie IDs
   const easterEggMovieIds = ['816', '817', '818'];
   const showEasterEgg = id && easterEggMovieIds.includes(id);
+
+  useEffect(() => {
+      const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
+      setRecentlyViewedMovies(items);
+    }, [id]);
+
+  useEffect(() => {
+    if (movie) {
+      const existing = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
+
+      // Remove duplicates by filtering out this movie if already in the list
+      const filtered = existing.filter((item: any) => item.id !== movie.id);
+
+      // Add current movie to the start
+      const updated = [{
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        release_date: movie.release_date
+      }, ...filtered];
+
+      // Limit to 10 items max
+      localStorage.setItem('recentlyViewedMovies', JSON.stringify(updated.slice(0, 10)));
+    }
+}, [movie]);
+
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -233,6 +260,31 @@ const MovieDetail: React.FC = () => {
             </div>
           </div>
         </div>
+
+      {recentlyViewedMovies.length > 0 && (
+        <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">Recently Viewed</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {recentlyViewedMovies.map((item) => (
+              <Link
+                key={item.id}
+                to={`/movie/${item.id}`}
+                className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+              >
+                <img
+                  src={tmdb.getImageUrl(item.poster_path, 'w300')}
+                  alt={item.title}
+                  className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
+                  <p className="font-semibold truncate">{item.title}</p>
+                  <p className="text-xs">{item.release_date?.split('-')[0]}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Easter Egg Frog */}

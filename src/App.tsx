@@ -11,6 +11,7 @@ import AdminLogin from './components/AdminLogin';
 import AdminPanel from './components/AdminPanel';
 import CustomCursor from './components/CustomCursor';
 import NotFoundPage from './components/NotFoundPage';
+import ScrollToTopButton from './components/ScrollToTop';
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -33,6 +34,8 @@ function App() {
   return (
     <Router>
       {/*<CustomCursor />*/}
+      <ScrollToTopButton />
+      {/* Define routes for the application */}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchResults />} />

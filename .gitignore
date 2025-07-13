@@ -25,3 +25,4 @@ dist-ssr
 .env
 electron_app/
 bank/
+app/
