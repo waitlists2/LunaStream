@@ -20,6 +20,12 @@ const MovieDetail: React.FC = () => {
   const easterEggMovieIds = ['816', '817', '818'];
   const showEasterEgg = id && easterEggMovieIds.includes(id);
 
+  const clearRecentlyViewed = () => {
+    localStorage.removeItem('recentlyViewedMovies');
+    setRecentlyViewedMovies([]);
+  };
+
+
   useEffect(() => {
       const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
       setRecentlyViewedMovies(items);
@@ -254,7 +260,7 @@ const MovieDetail: React.FC = () => {
                 onClick={handleWatchMovie}
                 className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
               >
-                <Play className="w-6 h-6 mr-2" />
+                 <Play className="w-6 h-6 mr-2" />
                 Watch Now
               </button>
             </div>
@@ -263,7 +269,19 @@ const MovieDetail: React.FC = () => {
 
       {recentlyViewedMovies.length > 0 && (
         <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">Recently Viewed</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
+              Recently Viewed
+            </h2>
+    
+            <button
+              onClick={clearRecentlyViewed}
+              className="text-sm bg-pink-500 hover:bg-pink-600 text-white px-3 py-1 rounded-lg shadow transition-all duration-200"
+            >
+              Clear
+            </button>
+          </div>
+            
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {recentlyViewedMovies.slice(0, 5).map((item) => (
               <Link
@@ -285,7 +303,7 @@ const MovieDetail: React.FC = () => {
           </div>
         </div>
       )}
-      </div>
+    </div>
 
       {/* Easter Egg Frog */}
       {showEasterEgg && (

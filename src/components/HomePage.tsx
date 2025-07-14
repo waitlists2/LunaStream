@@ -1,17 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Film, Tv, TrendingUp, MessageCircle, Twitter, Heart } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
 import ThemeToggle from './ThemeToggle';
 
 const HomePage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<(Movie | TVShow & { media_type: 'movie' | 'tv' })[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [trendingTV, setTrendingTV] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
+  const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([]);
+  const [showRecentlyViewed, setShowRecentlyViewed] = useState(true);
+
+  const clearRecentlyViewed = () => {
+    localStorage.removeItem('recentlyViewedMovies');
+    localStorage.removeItem('recentlyViewedTV');
+    setRecentlyViewedMovies([]);
+    setRecentlyViewedTV([]);
+    setShowRecentlyViewed(false); // Hide the entire section after clearing
+  };
+  
+  useEffect(() => {
+    const items = JSON.parse(localStorage.getItem('recentlyViewedTV') || '[]');
+    setRecentlyViewedTV(items);
+  }, [id]);
+
+  useEffect(() => {
+      const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
+      setRecentlyViewedMovies(items);
+    }, [id]);
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -159,11 +182,88 @@ const HomePage: React.FC = () => {
                 </ul>
               )}
             </div>
-
-
           </div>
         </div>
       </div>
+      
+      {/* Recently Viewed Section Wrapper */}
+      {showRecentlyViewed && (recentlyViewedMovies.length > 0 || recentlyViewedTV.length > 0) && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300 relative">
+
+            {/* Heading + Clear Button Wrapper */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
+                Recently Viewed
+              </h2>
+              <button
+                onClick={clearRecentlyViewed}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                aria-label="Clear all recently viewed content"
+              >
+                Clear All
+              </button>
+            </div>
+
+            {/* Recently Viewed Movies */}
+            {recentlyViewedMovies.length > 0 && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Movies</h3>
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide mb-8 max-w-fit">
+                  {recentlyViewedMovies.slice(0, 10).map((item) => (
+                    <Link
+                      key={`movie-${item.id}`}
+                      to={`/movie/${item.id}`}
+                      className="group relative flex-shrink min-w-[80px] max-w-[120px] rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                    >
+                      <img
+                        src={tmdb.getImageUrl(item.poster_path, 'w300')}
+                        alt={item.title}
+                        className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
+                        <p className="font-semibold truncate">{item.title}</p>
+                        <p className="text-xs">{item.release_date?.split('-')[0]}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Recently Viewed TV Shows */}
+            {recentlyViewedTV.length > 0 && (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">TV Shows</h3>
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide max-w-full">
+                  {recentlyViewedTV.slice(0, 10).map((item) => (
+                    <Link
+                      key={`tv-${item.id}`}
+                      to={`/tv/${item.id}`}
+                      className="group relative flex-shrink min-w-[80px] max-w-[120px] rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                    >
+                      <img
+                        src={tmdb.getImageUrl(item.poster_path, 'w300')}
+                        alt={item.name}
+                        className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
+                        <p className="font-semibold truncate">{item.name}</p>
+                        <p className="text-xs">{item.first_air_date?.split('-')[0]}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+      
+      <br/>
+      <br/>
+
 
       {/* Trending Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
