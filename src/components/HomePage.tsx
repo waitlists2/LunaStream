@@ -17,25 +17,27 @@ const HomePage: React.FC = () => {
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
   const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([]);
   const [showRecentlyViewed, setShowRecentlyViewed] = useState(true);
+  const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
 
   const clearRecentlyViewed = () => {
     localStorage.removeItem('recentlyViewedMovies');
-    localStorage.removeItem('recentlyViewedTV');
+    localStorage.removeItem('recentlyViewedTVEpisodes');
     setRecentlyViewedMovies([]);
     setRecentlyViewedTV([]);
     setShowRecentlyViewed(false); // Hide the entire section after clearing
   };
-  
-  useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('recentlyViewedTV') || '[]');
-    setRecentlyViewedTV(items);
-  }, [id]);
 
   useEffect(() => {
       const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
       setRecentlyViewedMovies(items);
     }, [id]);
 
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem('recentlyViewedTVEpisodes') || '{}');
+    setRecentlyViewedTVEpisodes(data);
+  }, []);
+  
+  
   useEffect(() => {
     const fetchTrending = async () => {
       try {
@@ -232,27 +234,93 @@ const HomePage: React.FC = () => {
             )}
 
             {/* Recently Viewed TV Shows */}
-            {recentlyViewedTV.length > 0 && (
+            {Object.keys(recentlyViewedTVEpisodes).length > 0 && (
               <>
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">TV Shows</h3>
-                <div className="flex gap-4 overflow-x-auto scrollbar-hide max-w-full">
-                  {recentlyViewedTV.slice(0, 10).map((item) => (
-                    <Link
-                      key={`tv-${item.id}`}
-                      to={`/tv/${item.id}`}
-                      className="group relative flex-shrink min-w-[80px] max-w-[120px] rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <img
-                        src={tmdb.getImageUrl(item.poster_path, 'w300')}
-                        alt={item.name}
-                        className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
-                        <p className="font-semibold truncate">{item.name}</p>
-                        <p className="text-xs">{item.first_air_date?.split('-')[0]}</p>
-                      </div>
-                    </Link>
-                  ))}
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                  TV
+                </h3>
+                <div className="mt-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
+                  <div className="flex gap-6">
+                    {/* Left: Latest viewed show with big image and episodes */}
+                    {(() => {
+                      const firstShow = Object.values(recentlyViewedTVEpisodes)[0];
+                      if (!firstShow) return null;
+                      return (
+                        <div className="md:w-1/2 flex space-x-6">
+                          <Link to={`/tv/${firstShow.show.id}`} className="flex-shrink-0">
+                            <img
+                              src={tmdb.getImageUrl(firstShow.show.poster_path, 'w300')}
+                              alt={firstShow.show.name}
+                              className="rounded-lg object-cover w-48 h-72"
+                            />
+                          </Link>
+                          <div className="flex flex-col">
+                            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                              {firstShow.show.name}
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                              {firstShow.show.first_air_date?.slice(0, 4)}
+                            </p>
+                            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 max-h-[360px] overflow-auto pr-2">
+                              {firstShow.episodes.slice(0, 5).map((ep: any) => (
+                                <li key={ep.id}>
+                                  <Link
+                                    to={`/tv/${firstShow.show.id}`}
+                                    className="hover:text-pink-600 dark:hover:text-pink-400"
+                                  >
+                                    S{ep.season_number}E{ep.episode_number} – {ep.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Right: Next 4 shows in 2x2 grid matching left side height */}
+                    <div className="md:w-1/2 grid grid-cols-2 grid-rows-2 gap-4 h-[288px]">
+                      {Object.values(recentlyViewedTVEpisodes)
+                        .slice(1, 5)
+                        .map((group: any) => (
+                          <div
+                            key={group.show.id}
+                            className="bg-white dark:bg-gray-900 rounded-lg shadow p-3 flex flex-col"
+                          >
+                            <Link
+                              to={`/tv/${group.show.id}`}
+                              className="flex items-center space-x-3 mb-2 hover:underline"
+                            >
+                              <img
+                                src={tmdb.getImageUrl(group.show.poster_path, 'w92')}
+                                alt={group.show.name}
+                                className="w-12 h-18 rounded-md object-cover flex-shrink-0"
+                              />
+                              <div>
+                                <h4 className="text-md font-semibold text-gray-900 dark:text-white">
+                                  {group.show.name}
+                                </h4>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {group.show.first_air_date?.slice(0, 4)}
+                                </p>
+                              </div>
+                            </Link>
+                            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 text-xs overflow-auto flex-grow pr-2">
+                              {group.episodes.slice(0, 5).map((ep: any) => (
+                                <li key={ep.id}>
+                                  <Link
+                                    to={`/tv/${group.show.id}`}
+                                    className="hover:text-pink-600 dark:hover:text-pink-400"
+                                  >
+                                    S{ep.season_number}E{ep.episode_number} - {ep.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
                 </div>
               </>
             )}

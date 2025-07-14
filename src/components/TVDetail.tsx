@@ -18,18 +18,19 @@
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({});
     const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([]);
+    const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
 
     useEffect(() => {
-      const items = JSON.parse(localStorage.getItem('recentlyViewedTV') || '[]');
-      setRecentlyViewedTV(items);
-    }, [id]);
+      const data = JSON.parse(localStorage.getItem('recentlyViewedTVEpisodes') || '{}');
+      setRecentlyViewedTVEpisodes(data);
+    }, []);
+
 
     const clearRecentlyViewed = () => {
-      localStorage.removeItem('recentlyViewedTV');
-      setRecentlyViewedTV([]);
+      localStorage.removeItem('recentlyViewedTVEpisodes');
+      setRecentlyViewedTVEpisodes({});
     };
-
-
+    
     useEffect(() => {
       const fetchShow = async () => {
         if (!id) return;
@@ -85,14 +86,51 @@
           first_air_date: show.first_air_date
         }, ...filtered];
 
-        // Limit to 10 items max
-        localStorage.setItem('recentlyViewedTV', JSON.stringify(updated.slice(0, 10)));
+        // Limit to 5 items max
+        localStorage.setItem('recentlyViewedTV', JSON.stringify(updated.slice(0, 5)));
+        setRecentlyViewedTV(updated.slice(0, 5));
       }
     }, [show]);
 
-
     const handleWatchEpisode = (episode: Episode) => {
       if (show && id) {
+        const existing = JSON.parse(localStorage.getItem('recentlyViewedTVEpisodes') || '{}');
+
+        const currentShowGroup = existing[show.id] || {
+          show: {
+            id: show.id,
+            name: show.name,
+            poster_path: show.poster_path,
+            first_air_date: show.first_air_date
+          },
+          episodes: []
+        };
+
+        // Prevent duplicates
+        currentShowGroup.episodes = currentShowGroup.episodes.filter((ep: any) =>
+          !(ep.season_number === episode.season_number && ep.episode_number === episode.episode_number)
+        );
+
+        // Add the new episode at the start
+        currentShowGroup.episodes.unshift({
+          id: episode.id,
+          name: episode.name,
+          season_number: episode.season_number,
+          episode_number: episode.episode_number,
+          air_date: episode.air_date
+        });
+
+        // Limit to last 5 episodes per show
+        currentShowGroup.episodes = currentShowGroup.episodes.slice(0, 5);
+
+        // Update storage
+        const updated = {
+          ...existing,
+          [show.id]: currentShowGroup
+        };
+
+        localStorage.setItem('recentlyViewedTVEpisodes', JSON.stringify(updated));
+        setRecentlyViewedTVEpisodes(updated);
         // Start real analytics session with poster path and episode details
         const episodeDuration = show.episode_run_time && show.episode_run_time.length > 0 
           ? show.episode_run_time[0] * 60 // Convert minutes to seconds
@@ -389,12 +427,11 @@
               </div>
             )}
 
-            {/* Add Recently Viewed Block here */}
-            {recentlyViewedTV.length > 0 && (
+            {Object.keys(recentlyViewedTVEpisodes).length > 0 && (
               <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-                    Recently Viewed
+                    Recently Viewed Episodes
                   </h2>
                   <button
                     onClick={clearRecentlyViewed}
@@ -404,23 +441,33 @@
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {recentlyViewedTV.slice(0, 5).map((item) => (
-                    <Link
-                      key={item.id}
-                      to={`/tv/${item.id}`}
-                      className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <img
-                        src={tmdb.getImageUrl(item.poster_path, 'w300')}
-                        alt={item.name}
-                        className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
-                        <p className="font-semibold truncate">{item.name}</p>
-                        <p className="text-xs">{item.first_air_date?.split('-')[0]}</p>
-                      </div>
-                    </Link>
+                <div className="space-y-6">
+                  {Object.values(recentlyViewedTVEpisodes).slice(0,5).map((group: any) => (
+                    <div key={group.show.id}>
+                      <Link to={`/tv/${group.show.id}`} className="flex items-center mb-2 space-x-3 hover:underline">
+                        <img
+                          src={tmdb.getImageUrl(group.show.poster_path, 'w92')}
+                          alt={group.show.name}
+                          className="w-12 h-18 object-cover rounded-lg"
+                        />
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{group.show.name}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{group.show.first_air_date?.slice(0, 4)}</p>
+                        </div>
+                      </Link>
+                      <ul className="ml-16 list-disc text-sm text-gray-700 dark:text-gray-300">
+                        {group.episodes.map((ep: any) => (
+                          <li key={ep.id}>
+                            <Link
+                              to={`/tv/${group.show.id}`}
+                              className="hover:text-pink-600 dark:hover:text-pink-400"
+                            >
+                              S{ep.season_number}E{ep.episode_number} – {ep.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
                 </div>
               </div>
