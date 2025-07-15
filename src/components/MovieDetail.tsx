@@ -32,27 +32,6 @@ const MovieDetail: React.FC = () => {
     }, [id]);
 
   useEffect(() => {
-    if (movie) {
-      const existing = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
-
-      // Remove duplicates by filtering out this movie if already in the list
-      const filtered = existing.filter((item: any) => item.id !== movie.id);
-
-      // Add current movie to the start
-      const updated = [{
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        release_date: movie.release_date
-      }, ...filtered];
-
-      // Limit to 10 items max
-      localStorage.setItem('recentlyViewedMovies', JSON.stringify(updated.slice(0, 10)));
-    }
-}, [movie]);
-
-
-  useEffect(() => {
     const fetchMovie = async () => {
       if (!id) return;
       setLoading(true);
@@ -70,7 +49,7 @@ const MovieDetail: React.FC = () => {
 
   const handleWatchMovie = () => {
     if (movie && id) {
-      // Start real analytics session with poster path and duration
+      // Start analytics session
       const newSessionId = analytics.startSession(
         'movie', 
         parseInt(id), 
@@ -78,12 +57,27 @@ const MovieDetail: React.FC = () => {
         movie.poster_path,
         undefined,
         undefined,
-        movie.runtime ? movie.runtime * 60 : undefined // Convert minutes to seconds
+        movie.runtime ? movie.runtime * 60 : undefined
       );
       setSessionId(newSessionId);
       setIsPlaying(true);
+
+      // Update recently viewed list here
+      const existing = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
+      const filtered = existing.filter((item: any) => item.id !== movie.id);
+      
+      const updated = [{
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        release_date: movie.release_date
+      }, ...filtered];
+
+      localStorage.setItem('recentlyViewedMovies', JSON.stringify(updated.slice(0, 10)));
+      setRecentlyViewedMovies(updated.slice(0, 10));
     }
   };
+
 
   const handleClosePlayer = () => {
     if (sessionId) {
