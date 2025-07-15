@@ -190,135 +190,86 @@ const HomePage: React.FC = () => {
 
             {/* Heading + Clear Button */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-                Recently Viewed
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Continue watching</h2>
               <button
                 onClick={clearRecentlyViewed}
                 className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                aria-label="Clear all recently viewed content"
               >
                 Clear All
               </button>
             </div>
 
-            {/* Recently Viewed Movies */}
-            {recentlyViewedMovies.length > 0 ? (
-              <>
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Movies</h3>
-                <div className="flex gap-4 overflow-x-auto mb-8 max-w-fit scrollbar-hide">
-                  {recentlyViewedMovies.slice(0, 10).map((item) => (
-                    <Link
-                      key={`movie-${item.id}`}
-                      to={`/movie/${item.id}`}
-                      className="group relative flex-shrink min-w-[80px] max-w-[120px] rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <img
-                        src={tmdb.getImageUrl(item.poster_path, 'w300')}
-                        alt={item.title}
-                        className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
-                        <p className="font-semibold truncate">{item.title}</p>
-                        <p className="text-xs">{item.release_date?.split('-')[0]}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="text-center text-gray-500">No recently viewed movies.</p>
-            )}
+            {/* Unified Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {(() => {
+                const tvItems = Object.values(recentlyViewedTVEpisodes).flatMap((group: any) =>
+                  group.episodes.map((ep: any) => ({
+                    type: 'tv-episode',
+                    lastWatchedAt: ep.lastWatchedAt,
+                    show: group.show,
+                    episode: ep,
+                  }))
+                );
 
-            {/* Recently Viewed TV */}
-            {Object.keys(recentlyViewedTVEpisodes).length > 0 ? (
-              <>
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">TV</h3>
-                <div className="mt-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-                  <div className="flex gap-6">
-                    {(() => {
-                      const shows = Object.values(recentlyViewedTVEpisodes).slice().reverse();
-                      if (shows.length === 0) return null;
+                const movieItems = recentlyViewedMovies.map((movie: any) => ({
+                  type: 'movie',
+                  lastWatchedAt: movie.lastWatchedAt,
+                  movie,
+                }));
 
-                      const firstShow = shows[0];
+                const combined = [...tvItems, ...movieItems].sort(
+                  (a, b) => b.lastWatchedAt - a.lastWatchedAt
+                );
 
-                      return (
-                        <>
-                          {/* Big card for most recent show */}
-                          <div className="md:w-1/2 flex space-x-6">
-                            <Link to={`/tv/${firstShow.show.id}`} className="flex-shrink-0">
-                              <img
-                                src={tmdb.getImageUrl(firstShow.show.poster_path, 'w300')}
-                                alt={firstShow.show.name}
-                                className="rounded-lg object-cover w-48 h-72"
-                              />
-                            </Link>
-                            <div className="flex flex-col">
-                              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                                {firstShow.show.name}
-                              </h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                {firstShow.show.first_air_date?.slice(0, 4)}
-                              </p>
-                              <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 max-h-[360px] overflow-auto pr-2 scroll-smooth">
-                                {firstShow.episodes.slice(0, 10).map((ep: any) => (
-                                  <li key={ep.id}>
-                                    <Link
-                                      to={`/tv/${firstShow.show.id}`}
-                                      className="hover:text-pink-600 dark:hover:text-pink-400"
-                                    >
-                                      S{ep.season_number}E{ep.episode_number} – {ep.name}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
+                return combined.slice(0, 6).map((item, idx) => {
+                  if (item.type === 'movie') {
+                    return (
+                      <Link
+                        key={`movie-${item.movie.id}-${idx}`}
+                        to={`/movie/${item.movie.id}`}
+                        className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                      >
+                        <img
+                          src={tmdb.getImageUrl(item.movie.poster_path, 'w300')}
+                          alt={item.movie.title}
+                          className="w-full h-full object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
+                          <p className="font-semibold truncate">{item.movie.title}</p>
+                          <p className="text-xs">{item.movie.release_date?.split('-')[0]}</p>
+                        </div>
+                      </Link>
+                    );
+                  }
 
-                          {/* Grid of next 4 most recent shows */}
-                          <div className="md:w-1/2 grid grid-cols-2 grid-rows-2 gap-4 h-[288px]">
-                            {shows.slice(1, 5).map((group: any) => (
-                              <div key={group.show.id} className="bg-white dark:bg-gray-900 rounded-lg shadow p-3 flex flex-col">
-                                <Link to={`/tv/${group.show.id}`} className="flex items-center space-x-3 mb-2 hover:underline">
-                                  <img
-                                    src={tmdb.getImageUrl(group.show.poster_path, 'w92')}
-                                    alt={group.show.name}
-                                    className="w-12 h-18 object-cover rounded-md flex-shrink-0"
-                                  />
-                                  <div>
-                                    <h4 className="text-md font-semibold text-gray-900 dark:text-white">{group.show.name}</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                      {group.show.first_air_date?.slice(0, 4)}
-                                    </p>
-                                  </div>
-                                </Link>
-                                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 max-h-[360px] overflow-auto pr-2 scroll-smooth">
-                                  {group.episodes.slice(0, 5).map((ep: any) => (
-                                    <li key={ep.id}>
-                                      <Link
-                                        to={`/tv/${group.show.id}`}
-                                        className="hover:text-pink-600 dark:hover:text-pink-400"
-                                      >
-                                        S{ep.season_number}E{ep.episode_number} – {ep.name}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-center text-gray-500">No recently viewed TV episodes.</p>
-            )}
+                  if (item.type === 'tv-episode') {
+                    return (
+                      <Link
+                        key={`tv-${item.show.id}-ep-${item.episode.id}-${idx}`}
+                        to={`/tv/${item.show.id}`}
+                        className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                      >
+                        <img
+                          src={tmdb.getImageUrl(item.show.poster_path, 'w300')}
+                          alt={item.show.name}
+                          className="w-full h-full object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs leading-tight">
+                          <p className="font-semibold truncate">{item.show.name}</p>
+                          <p className="truncate">S{item.episode.season_number}E{item.episode.episode_number} - {item.episode.name}</p>
+                        </div>
+                      </Link>
+                    );
+                  }
+                  return null;
+                });
+              })()}
+            </div>
+
           </div>
         </div>
       )}
+
 
 
       {Object.keys(recentlyViewedTVEpisodes).length > 0 ? (
