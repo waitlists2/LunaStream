@@ -5,9 +5,9 @@ import { analytics, ViewingStats, StreamingSession } from '../services/analytics
 import { tmdb } from '../services/tmdb';
 import ThemeToggle from './ThemeToggle';
 
-interface AdminPanelProps {
+/*interface AdminPanelProps {
   onLogout: () => void;
-}
+}*/
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [stats, setStats] = useState<ViewingStats | null>(null);

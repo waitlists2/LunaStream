@@ -13,8 +13,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const ADMIN_USERNAME = process.env.REACT_APP_ADMIN_USERNAME || '';
-  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || '';
+  const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_PASSWORD || '';
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

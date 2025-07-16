@@ -183,33 +183,38 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Show "Recently Viewed" only if there's data */}
       {(recentlyViewedMovies.length > 0 || Object.keys(recentlyViewedTVEpisodes).length > 0) && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300 relative">
+          <div className="mt-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-all duration-500 relative">
 
             {/* Heading + Clear Button */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Continue watching</h2>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Continue Watching
+              </h2>
               <button
                 onClick={clearRecentlyViewed}
-                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Clear All
               </button>
             </div>
 
             {/* Unified Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {(() => {
-                const tvItems = Object.values(recentlyViewedTVEpisodes).flatMap((group: any) =>
-                  group.episodes.map((ep: any) => ({
-                    type: 'tv-episode',
-                    lastWatchedAt: ep.lastWatchedAt,
+                const tvItems = Object.values(recentlyViewedTVEpisodes).map((group: any) => {
+                  const seasons = group.episodes.reduce((acc: any, ep: any) => {
+                    if (!acc[ep.season_number]) acc[ep.season_number] = [];
+                    acc[ep.season_number].push(ep);
+                    return acc;
+                  }, {});
+                  return {
                     show: group.show,
-                    episode: ep,
-                  }))
-                );
+                    seasons,
+                    lastWatchedAt: Math.max(...group.episodes.map((ep: any) => ep.lastWatchedAt)),
+                  };
+                });
 
                 const movieItems = recentlyViewedMovies.map((movie: any) => ({
                   type: 'movie',
@@ -217,9 +222,10 @@ const HomePage: React.FC = () => {
                   movie,
                 }));
 
-                const combined = [...tvItems, ...movieItems].sort(
-                  (a, b) => b.lastWatchedAt - a.lastWatchedAt
-                );
+                const combined = [
+                  ...tvItems.map((item) => ({ type: 'tv', ...item })),
+                  ...movieItems,
+                ].sort((a, b) => b.lastWatchedAt - a.lastWatchedAt);
 
                 return combined.slice(0, 6).map((item, idx) => {
                   if (item.type === 'movie') {
@@ -227,49 +233,84 @@ const HomePage: React.FC = () => {
                       <Link
                         key={`movie-${item.movie.id}-${idx}`}
                         to={`/movie/${item.movie.id}`}
-                        className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                        className="group relative rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-pink-200/50 dark:border-gray-700/50"
                       >
                         <img
                           src={tmdb.getImageUrl(item.movie.poster_path, 'w300')}
                           alt={item.movie.title}
-                          className="w-full h-full object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                          className="w-full h-full object-cover rounded-2xl group-hover:opacity-80 transition-opacity"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white text-sm">
                           <p className="font-semibold truncate">{item.movie.title}</p>
-                          <p className="text-xs">{item.movie.release_date?.split('-')[0]}</p>
+                          <p className="text-xs opacity-80">{item.movie.release_date?.split('-')[0]}</p>
                         </div>
                       </Link>
                     );
                   }
 
-                  if (item.type === 'tv-episode') {
+                  if (item.type === 'tv') {
                     return (
                       <Link
-                        key={`tv-${item.show.id}-ep-${item.episode.id}-${idx}`}
+                        key={`tv-${item.show.id}-${idx}`}
                         to={`/tv/${item.show.id}`}
-                        className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+                        className="group relative rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-pink-200/50 dark:border-gray-700/50"
                       >
                         <img
                           src={tmdb.getImageUrl(item.show.poster_path, 'w300')}
                           alt={item.show.name}
-                          className="w-full h-full object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                          className="w-full h-full object-cover rounded-2xl group-hover:opacity-80 transition-opacity"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs leading-tight">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white text-xs">
                           <p className="font-semibold truncate">{item.show.name}</p>
-                          <p className="truncate">S{item.episode.season_number}E{item.episode.episode_number} - {item.episode.name}</p>
+                          <p className="opacity-80 truncate">Multiple Episodes</p>
+                        </div>
+
+                        {/* Hover Details */}
+                        <div className="absolute inset-0 bg-black/75 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col p-4 rounded-2xl transform scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto">
+                          <div className="flex-shrink-0">
+                            <p className="text-lg font-bold text-center text-white">{item.show.name}</p>
+                          </div>
+
+                          <div className="mt-4 overflow-y-auto text-white text-sm space-y-3 flex-1 flex justify-center">
+                            <div className="w-full max-w-xs text-left">
+                              {Object.entries(item.seasons)
+                                .sort(([a], [b]) => Number(a) - Number(b))
+                                .map(([seasonNum, episodes]) => (
+                                  <div key={seasonNum}>
+                                    <p className="font-semibold text-pink-400 mb-1">Season {seasonNum}</p>
+                                    <ul className="space-y-1">
+                                      {episodes
+                                        .sort((a: any, b: any) => a.episode_number - b.episode_number)
+                                        .map((ep: any) => (
+                                          <li key={ep.id}>
+                                            <Link
+                                              to={`/tv/${item.show.id}#S${ep.season_number}E${ep.episode_number}`}
+                                              className="block hover:text-pink-300 transition-colors"
+                                            >
+                                              <span className="opacity-80">
+                                                S{ep.season_number}E{ep.episode_number}
+                                              </span>{' '}
+                                              - {ep.name}
+                                            </Link>
+                                          </li>
+                                        ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
                         </div>
                       </Link>
                     );
                   }
+
                   return null;
                 });
               })()}
             </div>
-
           </div>
         </div>
       )}
-
 
 
       {Object.keys(recentlyViewedTVEpisodes).length > 0 ? (
