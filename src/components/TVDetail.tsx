@@ -23,33 +23,35 @@
 
     useEffect(() => {
       if (!show) return;
-      // Check if show is in favorites
+      // Check if show is in favorites (array of objects)
       const favorites = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
-      setIsFavorited(favorites.includes(show.id));
+      const isFav = favorites.some((fav) => fav.id === show.id);
+      setIsFavorited(isFav);
     }, [show]);
 
+
     const toggleFavorite = () => {
-    if (!show) return;
+      if (!show) return;
 
-    // Load current favorites as full objects (or empty array)
-    let favorites = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
+      // Load current favorites as full objects (or empty array)
+      let favorites = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
 
-    // Check if current show is already favorited by ID
-    const index = favorites.findIndex((fav: any) => fav.id === show.id);
+      // Check if current show is already favorited by ID
+      const index = favorites.findIndex((fav: any) => fav.id === show.id);
 
-    if (index !== -1) {
-      // If found, remove it from favorites
-      favorites.splice(index, 1);
-      setIsFavorited(false);
-    } else {
-      // Otherwise, add full show object to favorites
-      favorites.unshift(show);
-      setIsFavorited(true);
-    }
+      if (index !== -1) {
+        // If found, remove it from favorites
+        favorites.splice(index, 1);
+        setIsFavorited(false);
+      } else {
+        // Otherwise, add full show object to favorites
+        favorites.unshift(show);
+        setIsFavorited(true);
+      }
 
-    // Save updated favorites list
-    localStorage.setItem('favoriteShows', JSON.stringify(favorites));
-  };
+      // Save updated favorites list
+      localStorage.setItem('favoriteShows', JSON.stringify(favorites));
+    };
 
 
     useEffect(() => {

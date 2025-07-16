@@ -20,7 +20,7 @@ const MovieDetail: React.FC = () => {
   useEffect(() => {
     if (movie) {
       const favorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
-      setIsFavorited(favorites.some((fav: any) => fav.id === movie.id));
+      setIsFavorited(favorites.some((fav) => fav.id === movie.id));
     }
   }, [movie]);
 
@@ -28,12 +28,12 @@ const MovieDetail: React.FC = () => {
     if (!movie) return;
 
     const favorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
-    const exists = favorites.some((fav: any) => fav.id === movie.id);
+    const exists = favorites.some((fav) => fav.id === movie.id);
 
     let updatedFavorites;
 
     if (exists) {
-      updatedFavorites = favorites.filter((fav: any) => fav.id !== movie.id);
+      updatedFavorites = favorites.filter((fav) => fav.id !== movie.id);
       setIsFavorited(false);
     } else {
       updatedFavorites = [
@@ -43,13 +43,14 @@ const MovieDetail: React.FC = () => {
           title: movie.title,
           poster_path: movie.poster_path,
           release_date: movie.release_date,
-        }
+        },
       ];
       setIsFavorited(true);
     }
 
     localStorage.setItem('favoriteMovies', JSON.stringify(updatedFavorites));
   };
+
 
   // Easter egg movie IDs
   const easterEggMovieIds = ['816', '817', '818'];
