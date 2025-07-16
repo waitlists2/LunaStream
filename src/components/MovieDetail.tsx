@@ -15,6 +15,7 @@ const MovieDetail: React.FC = () => {
   const [frogBoops, setFrogBoops] = useState(0);
   const [showBoopAnimation, setShowBoopAnimation] = useState(false);
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
+  const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
   const [isFavorited, setIsFavorited] = useState(false);
 
   useEffect(() => {
@@ -23,6 +24,13 @@ const MovieDetail: React.FC = () => {
       setIsFavorited(favorites.some((fav) => fav.id === movie.id));
     }
   }, [movie]);
+
+  const clearRecentlyViewed = () => {
+    localStorage.removeItem('recentlyViewedMovies');
+    localStorage.removeItem('recentlyViewedTVEpisodes');
+    setRecentlyViewedMovies([]);
+    setRecentlyViewedTVEpisodes({});
+  };
 
   const toggleFavorite = () => {
     if (!movie) return;
@@ -49,16 +57,6 @@ const MovieDetail: React.FC = () => {
     }
 
     localStorage.setItem('favoriteMovies', JSON.stringify(updatedFavorites));
-  };
-
-
-  // Easter egg movie IDs
-  const easterEggMovieIds = ['816', '817', '818'];
-  const showEasterEgg = id && easterEggMovieIds.includes(id);
-
-  const clearRecentlyViewed = () => {
-    localStorage.removeItem('recentlyViewedMovies');
-    setRecentlyViewedMovies([]);
   };
 
   useEffect(() => {
@@ -291,62 +289,155 @@ const MovieDetail: React.FC = () => {
         </div>
 
         {/* Recently Viewed and Easter Egg Section */}
-        <div className="mt-10">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300">Recently Viewed</h2>
-            <button
-              onClick={clearRecentlyViewed}
-              className="text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 transition-colors text-sm"
-            >
-              Clear All
-            </button>
-          </div>
-          {recentlyViewedMovies.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400">No recently viewed movies.</p>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-              {recentlyViewedMovies.map((movie: any) => (
-                <Link
-                  key={movie.id}
-                  to={`/movie/${movie.id}`}
-                  className="hover:scale-105 transform transition-transform duration-200 rounded-lg overflow-hidden shadow-md"
-                >
-                  <img
-                    src={tmdb.getImageUrl(movie.poster_path, 'w200')}
-                    alt={movie.title}
-                    className="w-full h-40 object-cover"
-                    loading="lazy"
-                  />
-                  <div className="text-center text-sm text-gray-700 dark:text-gray-300 mt-1">{movie.title}</div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+        {(recentlyViewedMovies.length > 0 || Object.keys(recentlyViewedTVEpisodes).length > 0) && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mt-12 p-8 relative rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 bg-gradient-to-br from-white/30 to-white/10 dark:from-gray-800/30 dark:to-gray-800/10 backdrop-blur-lg transition-all duration-500 overflow-hidden">
+              <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-400/10 via-purple-400/10 to-indigo-400/10 opacity-30 rounded-2xl"></div>
+              </div>
+              <div className="relative z-10">
+                {/* Heading + Clear Button */}
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    Continue Watching
+                  </h2>
+                  <button
+                    onClick={clearRecentlyViewed}
+                    className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    Clear All
+                  </button>
+                </div>
 
-        {/* Easter Egg */}
-        {showEasterEgg && (
-          <div className="mt-12 p-6 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 rounded-xl shadow-lg text-center text-white font-bold animate-pulse">
-            🐸 Ribbit! You've found the secret frog easter egg! 🐸
+                {/* Unified Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                  {(() => {
+                    const tvItems = Object.values(recentlyViewedTVEpisodes).map((group: any) => {
+                      const seasons = group.episodes.reduce((acc: any, ep: any) => {
+                        if (!acc[ep.season_number]) acc[ep.season_number] = [];
+                        acc[ep.season_number].push(ep);
+                        return acc;
+                      }, {});
+                      return {
+                        show: group.show,
+                        seasons,
+                        lastWatchedAt: Math.max(...group.episodes.map((ep: any) => ep.lastWatchedAt)),
+                      };
+                    });
+
+                    const movieItems = recentlyViewedMovies.map((movie: any) => ({
+                      type: 'movie',
+                      lastWatchedAt: movie.lastWatchedAt,
+                      movie,
+                    }));
+
+                    const combined = [
+                      ...tvItems.map((item) => ({ type: 'tv', ...item })),
+                      ...movieItems,
+                    ].sort((a, b) => b.lastWatchedAt - a.lastWatchedAt);
+
+                    return combined.slice(0, 12).map((item, idx) => {
+                      if (item.type === 'movie') {
+                        return (
+                          <Link
+                            key={`movie-${item.movie.id}-${idx}`}
+                            to={`/movie/${item.movie.id}`}
+                            className="group relative rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-white/20 dark:border-gray-700/50 bg-white/10 dark:bg-gray-700/10 backdrop-blur-sm"
+                          >
+                            <img
+                              src={tmdb.getImageUrl(item.movie.poster_path, 'w300')}
+                              alt={item.movie.title}
+                              className="w-full h-full object-cover rounded-2xl group-hover:opacity-80 transition-opacity"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white text-sm">
+                              <p className="font-semibold truncate">{item.movie.title}</p>
+                              <p className="text-xs opacity-80">{item.movie.release_date?.split('-')[0]}</p>
+                            </div>
+                          </Link>
+                        );
+                      }
+
+                      if (item.type === 'tv') {
+                        return (
+                          <Link
+                            key={`tv-${item.show.id}-${idx}`}
+                            to={`/tv/${item.show.id}`}
+                            className="group relative rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-white/20 dark:border-gray-700/50 bg-white/10 dark:bg-gray-700/10 backdrop-blur-sm"
+                          >
+                            <img
+                              src={tmdb.getImageUrl(item.show.poster_path, 'w300')}
+                              alt={item.show.name}
+                              className="w-full h-full object-cover rounded-2xl group-hover:opacity-80 transition-opacity"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white text-xs">
+                              <p className="font-semibold truncate">{item.show.name}</p>
+                              <p className="opacity-80 truncate">Multiple Episodes</p>
+                            </div>
+
+                            {/* Hover Details */}
+                            <div className="absolute inset-0 bg-black/75 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col p-4 rounded-2xl transform scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto">
+                              <div className="flex-shrink-0">
+                                <p className="text-lg font-bold text-center">{item.show.name}</p>
+                              </div>
+                              <div className="mt-4 overflow-y-auto text-white text-sm space-y-3 flex-1 flex justify-center">
+                                <div className="w-full max-w-xs text-left">
+                                  {Object.entries(item.seasons)
+                                    .sort(([a], [b]) => Number(a) - Number(b))
+                                    .map(([seasonNum, episodes]) => (
+                                      <div key={seasonNum}>
+                                        <p className="font-semibold text-pink-400 mb-1">Season {seasonNum}</p>
+                                        <ul className="space-y-1">
+                                          {episodes
+                                            .sort((a: any, b: any) => a.episode_number - b.episode_number)
+                                            .map((ep: any) => (
+                                              <li key={ep.id}>
+                                                <Link
+                                                  to={`/tv/${item.show.id}#S${ep.season_number}E${ep.episode_number}`}
+                                                  className="block hover:text-pink-300 transition-colors"
+                                                >
+                                                  <span className="opacity-80">
+                                                    S{ep.season_number}E{ep.episode_number}
+                                                  </span>{' '}
+                                                  - {ep.name}
+                                                </Link>
+                                              </li>
+                                            ))}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      }
+                      return null;
+                    });
+                  })()}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Frog Boop Counter */}
-        <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3 bg-pink-600/90 dark:bg-pink-700/90 rounded-full px-4 py-2 shadow-lg cursor-pointer select-none"
-          onClick={handleFrogBoop}
-          role="button"
-          tabIndex={0}
-          aria-label="Boop the frog"
-          onKeyDown={(e) => { if (e.key === 'Enter') handleFrogBoop(); }}
-        >
-          <img
-            src="/frog-icon.png"
-            alt="Frog icon"
-            className={`w-10 h-10 rounded-full transition-transform duration-150 ${showBoopAnimation ? 'scale-125' : 'scale-100'}`}
-            draggable={false}
-          />
-          <span className="text-white font-semibold text-lg select-none">{frogBoops} Boops</span>
-        </div>
+        {/* Easter Egg */}
+        {movie && [816, 817, 818].includes(movie.id) && (
+          <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3 bg-pink-600/90 dark:bg-pink-700/90 rounded-full px-4 py-2 shadow-lg cursor-pointer select-none"
+            onClick={handleFrogBoop}
+            role="button"
+            tabIndex={0}
+            aria-label="Boop the frog"
+            onKeyDown={(e) => { if (e.key === 'Enter') handleFrogBoop(); }}
+          >
+            <img
+              src="/frog.svg"
+              alt="Frog icon"
+              className={`w-10 h-10 rounded-full transition-transform duration-150 ${showBoopAnimation ? 'scale-125' : 'scale-100'}`}
+              draggable={false}
+            />
+            <span className="text-white font-semibold text-lg select-none">{frogBoops} Boops</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -285,7 +285,7 @@ const HomePage: React.FC = () => {
                     ...movieItems,
                   ].sort((a, b) => b.lastWatchedAt - a.lastWatchedAt);
 
-                  return combined.slice(0, 6).map((item, idx) => {
+                  return combined.slice(0, 12).map((item, idx) => {
                     if (item.type === 'movie') {
                       return (
                         <Link
