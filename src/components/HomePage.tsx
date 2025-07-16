@@ -324,7 +324,7 @@ const HomePage: React.FC = () => {
                           </div>
 
                           {/* Hover Details */}
-                          <div className="absolute inset-0 bg-black/75 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col p-4 rounded-2xl transform scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto">
+                          <div className="absolute inset-0 bg-black/75 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col p-4 rounded-2xl transform scale-95 group-hover:scale-100 pointer-events-none group-hover:pointer-events-auto">
                             <div className="flex-shrink-0">
                               <p className="text-lg font-bold text-center">{item.show.name}</p>
                             </div>

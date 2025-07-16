@@ -55,7 +55,7 @@ function App() {
             )
           } 
         />
-        <Route path="watchlist" element={<Watchlist />} />
+        {/*<Route path="watchlist" element={<Watchlist />} />*/}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
