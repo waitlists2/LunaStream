@@ -12,6 +12,7 @@ import AdminPanel from './components/AdminPanel';
 import CustomCursor from './components/CustomCursor';
 import NotFoundPage from './components/NotFoundPage';
 import ScrollToTopButton from './components/ScrollToTop';
+import Watchlist from './components/Watchlist';
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -54,6 +55,7 @@ function App() {
             )
           } 
         />
+        <Route path="watchlist" element={<Watchlist />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
