@@ -1,6 +1,6 @@
   import React, { useState, useEffect } from 'react';
   import { useParams, Link } from 'react-router-dom';
-  import { ArrowLeft, Play, Star, Calendar, Tv, ChevronDown, X, Info } from 'lucide-react';
+  import { ArrowLeft, Play, Star, Calendar, Tv, ChevronDown, X, Info, Heart, Heart as HeartFill } from 'lucide-react';
   import { tmdb } from '../services/tmdb';
   import { analytics } from '../services/analytics';
   import { TVDetails, Episode } from '../types';
@@ -19,6 +19,38 @@
     const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({});
     const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([]);
     const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
+    const [isFavorited, setIsFavorited] = useState(false);
+
+    useEffect(() => {
+      if (!show) return;
+      // Check if show is in favorites
+      const favorites = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
+      setIsFavorited(favorites.includes(show.id));
+    }, [show]);
+
+    const toggleFavorite = () => {
+    if (!show) return;
+
+    // Load current favorites as full objects (or empty array)
+    let favorites = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
+
+    // Check if current show is already favorited by ID
+    const index = favorites.findIndex((fav: any) => fav.id === show.id);
+
+    if (index !== -1) {
+      // If found, remove it from favorites
+      favorites.splice(index, 1);
+      setIsFavorited(false);
+    } else {
+      // Otherwise, add full show object to favorites
+      favorites.unshift(show);
+      setIsFavorited(true);
+    }
+
+    // Save updated favorites list
+    localStorage.setItem('favoriteShows', JSON.stringify(favorites));
+  };
+
 
     useEffect(() => {
       const data = JSON.parse(localStorage.getItem('recentlyViewedTVEpisodes') || '{}');
@@ -305,9 +337,20 @@
               <div className="p-8">
                 <div className="flex items-start justify-between mb-4">
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">{show.name}</h1>
-                  <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
-                    <Star className="w-4 h-4 mr-1" />
-                    {show.vote_average.toFixed(1)}
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
+                      <Star className="w-4 h-4 mr-1" />
+                      {show.vote_average.toFixed(1)}
+                    </div>
+                    <button
+                      onClick={toggleFavorite}
+                      aria-label="Toggle Favorite"
+                      className={`transition-colors duration-200 ${
+                        isFavorited ? 'text-pink-500 hover:text-pink-600' : 'text-gray-400 hover:text-gray-500'
+                      }`}
+                    >
+                      <Heart className="w-7 h-7" fill={isFavorited ? 'currentColor' : 'none'} />
+                    </button>
                   </div>
                 </div>
 

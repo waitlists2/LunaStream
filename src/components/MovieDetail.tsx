@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Star, Calendar, Clock, Film, X } from 'lucide-react';
+import { ArrowLeft, Play, Star, Calendar, Clock, Film, X, Heart } from 'lucide-react'; // Added Heart import
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { MovieDetails } from '../types';
@@ -15,6 +15,41 @@ const MovieDetail: React.FC = () => {
   const [frogBoops, setFrogBoops] = useState(0);
   const [showBoopAnimation, setShowBoopAnimation] = useState(false);
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  useEffect(() => {
+    if (movie) {
+      const favorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
+      setIsFavorited(favorites.some((fav: any) => fav.id === movie.id));
+    }
+  }, [movie]);
+
+  const toggleFavorite = () => {
+    if (!movie) return;
+
+    const favorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
+    const exists = favorites.some((fav: any) => fav.id === movie.id);
+
+    let updatedFavorites;
+
+    if (exists) {
+      updatedFavorites = favorites.filter((fav: any) => fav.id !== movie.id);
+      setIsFavorited(false);
+    } else {
+      updatedFavorites = [
+        ...favorites,
+        {
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          release_date: movie.release_date,
+        }
+      ];
+      setIsFavorited(true);
+    }
+
+    localStorage.setItem('favoriteMovies', JSON.stringify(updatedFavorites));
+  };
 
   // Easter egg movie IDs
   const easterEggMovieIds = ['816', '817', '818'];
@@ -25,11 +60,10 @@ const MovieDetail: React.FC = () => {
     setRecentlyViewedMovies([]);
   };
 
-
   useEffect(() => {
-      const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
-      setRecentlyViewedMovies(items);
-    }, [id]);
+    const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
+    setRecentlyViewedMovies(items);
+  }, [id]);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -51,8 +85,8 @@ const MovieDetail: React.FC = () => {
     if (movie && id) {
       // Start analytics session
       const newSessionId = analytics.startSession(
-        'movie', 
-        parseInt(id), 
+        'movie',
+        parseInt(id),
         movie.title,
         movie.poster_path,
         undefined,
@@ -65,7 +99,7 @@ const MovieDetail: React.FC = () => {
       // Update recently viewed list here
       const existing = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
       const filtered = existing.filter((item: any) => item.id !== movie.id);
-      
+
       const updated = [{
         id: movie.id,
         title: movie.title,
@@ -77,7 +111,6 @@ const MovieDetail: React.FC = () => {
       setRecentlyViewedMovies(updated.slice(0, 10));
     }
   };
-
 
   const handleClosePlayer = () => {
     if (sessionId) {
@@ -95,14 +128,14 @@ const MovieDetail: React.FC = () => {
       const interval = setInterval(() => {
         // Simulate realistic progression through the movie
         const currentTime = Math.random() * (movie.runtime ? movie.runtime * 60 : 7200);
-        
+
         // Simulate user interactions
         const additionalData: any = {};
         if (Math.random() > 0.95) additionalData.pauseEvents = 1;
         if (Math.random() > 0.98) additionalData.seekEvents = 1;
         if (Math.random() > 0.99) additionalData.bufferingEvents = 1;
         if (Math.random() > 0.9) additionalData.isFullscreen = Math.random() > 0.5;
-        
+
         analytics.updateSession(sessionId, currentTime, additionalData);
       }, 30000); // Update every 30 seconds
 
@@ -215,124 +248,105 @@ const MovieDetail: React.FC = () => {
 
             {/* Content */}
             <div className="p-8">
-              <div className="flex items-start justify-between mb-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">{movie.title}</h1>
-                <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
-                  <Star className="w-4 h-4 mr-1" />
-                  {movie.vote_average.toFixed(1)}
+              <div className="flex items-start justify-between mb-4 w-full">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">{movie.title}</h1>
+                  <div className="flex items-center mt-2 text-sm text-gray-600 dark:text-gray-300">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {new Date(movie.release_date).getFullYear()}
+                    <Clock className="w-4 h-4 ml-4 mr-1" />
+                    {movie.runtime} minutes
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(movie.release_date).getFullYear()}
-                </div>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {movie.runtime} minutes
-                </div>
-              </div>
-
-              {/* Genres */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm"
+                <div className="flex items-center space-x-4 ml-4">
+                  <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full px-3 py-1">
+                    <Star className="w-4 h-4 mr-1" />
+                    {movie.vote_average.toFixed(1)}
+                  </div>
+                  <button
+                    onClick={toggleFavorite}
+                    aria-label="Toggle Favorite"
+                    className={`transition-colors duration-200 ${
+                      isFavorited ? 'text-pink-500 hover:text-pink-600' : 'text-gray-400 hover:text-gray-500'
+                    }`}
                   >
-                    {genre.name}
-                  </span>
-                ))}
+                    <Heart className="w-7 h-7" fill={isFavorited ? 'currentColor' : 'none'} />
+                  </button>
+                </div>
               </div>
 
-              {/* Overview */}
-              <p className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed transition-colors duration-300">{movie.overview}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-6 transition-colors duration-300">{movie.overview}</p>
 
-              {/* Watch Button */}
               <button
                 onClick={handleWatchMovie}
-                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
+                className="flex items-center space-x-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-full font-semibold transition-colors duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-300 dark:focus:ring-pink-600"
               >
-                 <Play className="w-6 h-6 mr-2" />
-                Watch Now
+                <Play className="w-5 h-5" />
+                <span>Watch Movie</span>
               </button>
             </div>
           </div>
         </div>
 
-      {recentlyViewedMovies.length > 0 && (
-        <div className="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-              Recently Viewed
-            </h2>
-    
+        {/* Recently Viewed and Easter Egg Section */}
+        <div className="mt-10">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300">Recently Viewed</h2>
             <button
               onClick={clearRecentlyViewed}
-              className="text-sm bg-pink-500 hover:bg-pink-600 text-white px-3 py-1 rounded-lg shadow transition-all duration-200"
+              className="text-pink-600 dark:text-pink-400 hover:text-pink-800 dark:hover:text-pink-300 transition-colors text-sm"
             >
-              Clear
+              Clear All
             </button>
           </div>
-            
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {recentlyViewedMovies.slice(0, 5).map((item) => (
-              <Link
-                key={item.id}
-                to={`/movie/${item.id}`}
-                className="group relative rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
-              >
-                <img
-                  src={tmdb.getImageUrl(item.poster_path, 'w300')}
-                  alt={item.title}
-                  className="w-full h-48 object-cover rounded-lg group-hover:opacity-80 transition-opacity"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-sm">
-                  <p className="font-semibold truncate">{item.title}</p>
-                  <p className="text-xs">{item.release_date?.split('-')[0]}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-
-      {/* Easter Egg Frog */}
-      {showEasterEgg && (
-        <div className="fixed bottom-6 right-6 z-40">
-          <button
-            onClick={handleFrogBoop}
-            className={`group relative bg-green-500 hover:bg-green-600 rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 ${
-              showBoopAnimation ? 'animate-bounce' : ''
-            }`}
-            title={`Boop the frog! (${frogBoops} boops)`}
-            aria-label="Easter egg frog"
-          >
-            {/* Frog Emoji/Icon */}
-            <div className="text-2xl select-none">🐸</div>
-            
-            {/* Boop Counter */}
-            {frogBoops > 0 && (
-              <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-md">
-                {frogBoops > 99 ? '99+' : frogBoops}
-              </div>
-            )}
-            
-            {/* Boop Animation Effect */}
-            {showBoopAnimation && (
-              <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
-            )}
-            
-            {/* Hover Tooltip */}
-            <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-              Boop me! 🐸
-              <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+          {recentlyViewedMovies.length === 0 ? (
+            <p className="text-gray-600 dark:text-gray-400">No recently viewed movies.</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+              {recentlyViewedMovies.map((movie: any) => (
+                <Link
+                  key={movie.id}
+                  to={`/movie/${movie.id}`}
+                  className="hover:scale-105 transform transition-transform duration-200 rounded-lg overflow-hidden shadow-md"
+                >
+                  <img
+                    src={tmdb.getImageUrl(movie.poster_path, 'w200')}
+                    alt={movie.title}
+                    className="w-full h-40 object-cover"
+                    loading="lazy"
+                  />
+                  <div className="text-center text-sm text-gray-700 dark:text-gray-300 mt-1">{movie.title}</div>
+                </Link>
+              ))}
             </div>
-          </button>
+          )}
         </div>
-      )}
+
+        {/* Easter Egg */}
+        {showEasterEgg && (
+          <div className="mt-12 p-6 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 rounded-xl shadow-lg text-center text-white font-bold animate-pulse">
+            🐸 Ribbit! You've found the secret frog easter egg! 🐸
+          </div>
+        )}
+
+        {/* Frog Boop Counter */}
+        <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3 bg-pink-600/90 dark:bg-pink-700/90 rounded-full px-4 py-2 shadow-lg cursor-pointer select-none"
+          onClick={handleFrogBoop}
+          role="button"
+          tabIndex={0}
+          aria-label="Boop the frog"
+          onKeyDown={(e) => { if (e.key === 'Enter') handleFrogBoop(); }}
+        >
+          <img
+            src="/frog-icon.png"
+            alt="Frog icon"
+            className={`w-10 h-10 rounded-full transition-transform duration-150 ${showBoopAnimation ? 'scale-125' : 'scale-100'}`}
+            draggable={false}
+          />
+          <span className="text-white font-semibold text-lg select-none">{frogBoops} Boops</span>
+        </div>
+      </div>
     </div>
   );
 };

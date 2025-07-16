@@ -14,9 +14,64 @@ const HomePage: React.FC = () => {
   const [trendingTV, setTrendingTV] = useState<TVShow[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [showAllFaves, setShowAllFaves] = React.useState(false);
+
 
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
   const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
+
+  // State
+  const [favoriteShows, setFavoriteShows] = useState(() => {
+    const stored = localStorage.getItem('favoriteShows');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const [favoriteMovies, setFavoriteMovies] = useState(() => {
+    const stored = localStorage.getItem('favoriteMovies');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const storedShows = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
+    const storedMovies = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
+    setFavoriteShows(storedShows);
+    setFavoriteMovies(storedMovies);
+  }, []);
+
+  const toggleFavorite = (item: any) => {
+    if (item.type === 'tv') {
+      let updatedShows = [...favoriteShows];
+      if (favoriteShows.includes(item.show.id)) {
+        updatedShows = updatedShows.filter((id) => id !== item.show.id);
+      } else {
+        updatedShows.unshift(item.show.id);
+      }
+      setFavoriteShows(updatedShows);
+      localStorage.setItem('favoriteShows', JSON.stringify(updatedShows));
+    }
+
+    if (item.type === 'movie') {
+      let updatedMovies = [...favoriteMovies];
+      if (favoriteMovies.includes(item.movie.id)) {
+        updatedMovies = updatedMovies.filter((id) => id !== item.movie.id);
+      } else {
+        updatedMovies.unshift(item.movie.id);
+      }
+      setFavoriteMovies(updatedMovies);
+      localStorage.setItem('favoriteMovies', JSON.stringify(updatedMovies));
+    }
+  };
+
+  const isFavorited = (item: any) => {
+    if (item.type === 'tv') {
+      return favoriteShows.includes(item.show.id);
+    }
+    if (item.type === 'movie') {
+      return favoriteMovies.includes(item.movie.id);
+    }
+    return false;
+  };
 
   const clearRecentlyViewed = () => {
     localStorage.removeItem('recentlyViewedMovies');
@@ -308,6 +363,124 @@ const HomePage: React.FC = () => {
                     return null;
                   });
                 })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <br/>
+
+      {/* Favourites Section */}
+      {(favoriteMovies.length > 0 || favoriteShows.length > 0) && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mt-12 p-8 relative rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/50 bg-gradient-to-br from-white/30 to-white/10 dark:from-gray-800/30 dark:to-gray-800/10 backdrop-blur-lg transition-all duration-500 overflow-hidden">
+            <div className="absolute inset-0 z-0 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-400/10 via-purple-400/10 to-indigo-400/10 opacity-30 rounded-2xl"></div>
+            </div>
+            <div className="relative z-10">
+              {/* Heading with Unlimit button */}
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Favorites</h2>
+                {[...favoriteMovies, ...favoriteShows].length > 12 && (
+                  <button
+                    onClick={() => setShowAllFaves(!showAllFaves)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
+                  >
+                    {showAllFaves ? 'Close' : 'Show All'}
+                  </button>
+                )}
+              </div>
+
+              {/* Unified Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                {[...favoriteMovies.map(movie => ({ type: 'movie', data: movie })), ...favoriteShows.map(show => ({ type: 'tv', data: show }))]
+                  .slice(0, showAllFaves ? undefined : 12)
+                  .map(({ type, data }) => {
+                    const isMovie = type === 'movie';
+                    const id = data.id;
+                    const title = isMovie ? data.title : data.name;
+
+                    // Calculate subtitle
+                    let subtitle = '';
+                    if (isMovie) {
+                      subtitle = data.release_date?.split('-')[0] ?? '';
+                    } else {
+                      const firstYear = data.first_air_date?.split('-')[0];
+                      const lastAirDate = data.last_air_date || data.last_episode_to_air?.air_date;
+                      const lastYear = lastAirDate?.split('-')[0];
+                      if (firstYear && lastYear) {
+                        subtitle = firstYear === lastYear ? firstYear : `${firstYear} - ${lastYear}`;
+                      } else if (firstYear) {
+                        subtitle = firstYear;
+                      } else {
+                        subtitle = 'TV Show';
+                      }
+                    }
+
+                    const imageUrl = tmdb.getImageUrl(data.poster_path, 'w300');
+
+                    const isFavorited = isMovie
+                      ? favoriteMovies.some(fav => fav.id === id)
+                      : favoriteShows.some(fav => fav.id === id);
+
+                    const toggleFavorite = () => {
+                      if (isMovie) {
+                        let favs = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
+                        if (favs.some(fav => fav.id === id)) {
+                          favs = favs.filter(fav => fav.id !== id);
+                        } else {
+                          favs.unshift(data);
+                        }
+                        localStorage.setItem('favoriteMovies', JSON.stringify(favs));
+                        setFavoriteMovies(favs);
+                      } else {
+                        let favs = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
+                        if (favs.some(fav => fav.id === id)) {
+                          favs = favs.filter(fav => fav.id !== id);
+                        } else {
+                          favs.unshift(data);
+                        }
+                        localStorage.setItem('favoriteShows', JSON.stringify(favs));
+                        setFavoriteShows(favs);
+                      }
+                    };
+
+                    return (
+                      <Link
+                        key={`${type}-${id}`}
+                        to={`/${isMovie ? 'movie' : 'tv'}/${id}`}
+                        className="group relative rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-white/20 dark:border-gray-700/50 bg-white/10 dark:bg-gray-700/10 backdrop-blur-sm block"
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={title}
+                          className="w-full h-full object-cover rounded-2xl group-hover:opacity-80 transition-opacity"
+                        />
+
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault(); // Prevent link navigation on button click
+                            toggleFavorite();
+                          }}
+                          aria-label="Toggle Favorite"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-pink-500 p-1 transition-opacity duration-300"
+                        >
+                          <Heart
+                            className="w-7 h-7"
+                            fill={isFavorited ? 'currentColor' : 'none'}
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                          />
+                        </button>
+
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white text-sm">
+                          <p className="font-semibold truncate">{title}</p>
+                          {subtitle && <p className="text-xs opacity-80">{subtitle}</p>}
+                        </div>
+                      </Link>
+                    );
+                  })}
               </div>
             </div>
           </div>
