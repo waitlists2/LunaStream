@@ -156,6 +156,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                 </div>
             </div>
         </div>
+        </div>
       </div>
     </div>
   );
