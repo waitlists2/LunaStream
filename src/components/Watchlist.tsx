@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Film } from 'lucide-react';
+import { Film, ArrowLeft } from 'lucide-react';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 type Movie = {
   id: number;
@@ -8,6 +9,7 @@ type Movie = {
   poster_path: string;
   release_date?: string;
   lastWatchedAt: number;
+  vote_average?: number;
 };
 
 type Episode = {
@@ -23,6 +25,7 @@ type TVGroup = {
     id: number;
     name: string;
     poster_path: string;
+    vote_average?: number;
   };
   episodes: Episode[];
 };
@@ -205,18 +208,6 @@ const Watchlist: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
-  );
-};
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </main>
     </div>
   );
 };
