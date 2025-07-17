@@ -153,21 +153,21 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
           {/* Heading */}
           <div className="text-center">
-            <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 transition-colors duration-300 px-4">
               <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                 Watch Movies & TV Shows
               </span>
             </h1>
             {/* Subtitle */}
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto transition-colors duration-300">
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto transition-colors duration-300 px-4">
               Discover and stream your favorite content with our beautiful, easy-to-use platform
             </p>
             {/* Search with Suggestions */}
-            <div className="max-w-2xl mx-auto relative">
+            <div className="max-w-2xl mx-auto relative px-4">
               <form onSubmit={handleSearch} className="relative">
                 <div className="relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 transition-colors duration-300">
                   <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <Search className="h-6 w-6 text-pink-400 dark:text-purple-400 transition-colors duration-300" />
+                    <Search className="h-5 w-5 sm:h-6 sm:w-6 text-pink-400 dark:text-purple-400 transition-colors duration-300" />
                   </div>
                   <input
                     type="text"
@@ -202,28 +202,29 @@ const HomePage: React.FC = () => {
                       }
                     }}
                     placeholder="Search for movies or TV shows..."
-                    className="block w-full pl-16 pr-6 py-6 text-lg bg-transparent border-0 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:ring-0 focus:outline-none transition-colors duration-300"
+                    className="block w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6 text-base sm:text-lg bg-transparent border-0 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:ring-0 focus:outline-none transition-colors duration-300"
                   />
                   <button
                     type="submit"
-                    className="absolute inset-y-0 right-0 flex items-center pr-6"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-6"
                   >
-                    <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                      Search
+                    <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                      <span className="hidden sm:inline">Search</span>
+                      <Search className="w-4 h-4 sm:hidden" />
                     </div>
                   </button>
                 </div>
                 {/* Suggestions Dropdown */}
                 {suggestions.length > 0 && (
-                  <ul className="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 max-h-64 overflow-auto">
+                  <ul className="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 max-h-48 sm:max-h-64 overflow-auto">
                     {suggestions.map((item) => (
                       <li key={`${item.title || item.name}-${item.id}`}>
                         <button
                           onClick={() => navigate(`/${item.media_type}/${item.id}`)}
-                          className="w-full text-left px-4 py-3 hover:bg-pink-50 dark:hover:bg-gray-700 rounded-xl text-gray-800 dark:text-white transition-colors"
+                          className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-pink-50 dark:hover:bg-gray-700 rounded-xl text-gray-800 dark:text-white transition-colors text-sm sm:text-base"
                         >
                           {item.title || item.name}
-                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                          <span className="ml-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                             ({item.media_type === 'movie' ? 'Movie' : 'TV'})
                           </span>
                         </button>
