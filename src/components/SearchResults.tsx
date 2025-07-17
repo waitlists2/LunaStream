@@ -197,9 +197,9 @@ const SearchResults: React.FC = () => {
   const getLink = (item: MediaItem) => isMovie(item) ? `/movie/${item.id}` : `/tv/${item.id}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black transition-colors duration-300">
       {/* Header */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50">
+      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
           <div className="flex items-center w-full max-w-3xl space-x-3">
             <Link to="/" className="flex items-center flex-shrink-0">

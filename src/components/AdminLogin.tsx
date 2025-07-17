@@ -38,13 +38,14 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
 
   return (
     // Main background consistent with HomePage
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black flex items-center justify-center transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black transition-colors duration-300">
       {/* Theme Toggle - same position */}
       <div className="absolute top-6 right-6">
         <ThemeToggle />
       </div>
 
-      <div className="max-w-md w-full mx-4">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="max-w-md w-full mx-4">
         {/* Logo and Title - styled to match HomePage */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
