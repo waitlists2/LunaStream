@@ -211,7 +211,7 @@ const SearchResults: React.FC = () => {
                 placeholder="Search for movies or TV shows..."
                 value={searchInput}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 h-12 bg-white/95 dark:bg-gray-700/95 backdrop-blur-md rounded-l-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
+                className="w-full pl-10 pr-4 h-12 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-l-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
               />
             </div>
             <select
@@ -224,7 +224,7 @@ const SearchResults: React.FC = () => {
                 newParams.sort = newSort;
                 setSearchParams(newParams);
               }}
-              className="h-12 px-6 rounded-r-xl border border-l-0 border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-700/95 text-gray-900 dark:text-gray-100 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
+              className="h-12 px-6 rounded-r-xl border border-l-0 border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-800/95 text-gray-900 dark:text-gray-100 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
               style={{ paddingRight: '1.5rem' }} // extra right padding so text doesn't get too close to edge
             >
               <option value="popularity">Popularity</option>
