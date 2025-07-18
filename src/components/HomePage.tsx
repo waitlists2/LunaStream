@@ -469,17 +469,27 @@ const HomePage: React.FC = () => {
               href="https://tiktok.com/@lunastream.watch"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gradient-to-r from-[#FF0050] via-[#FF0050] to-[#00F2EA] hover:from-[#E6004A] hover:to-[#00D9D1] text-white p-3 rounded-lg shadow-md transition-all duration-200 transform hover:-translate-y-0.5 group"
+              className="bg-black hover:bg-gray-900 text-white p-3 rounded-lg shadow-md transition-all duration-200 transform hover:-translate-y-0.5 group"
               title="Follow us on TikTok"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
-                fill="currentColor"
+                fill="none"
                 viewBox="0 0 24 24"
               >
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                <defs>
+                  <linearGradient id="tiktok-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF0050" />
+                    <stop offset="50%" stopColor="#FF0050" />
+                    <stop offset="100%" stopColor="#00F2EA" />
+                  </linearGradient>
+                </defs>
+                <path 
+                  fill="url(#tiktok-gradient)"
+                  d="M19.321 5.562a5.124 5.124 0 0 1-.443-.258 6.228 6.228 0 0 1-1.137-.966c-.849-.849-1.204-1.864-1.204-2.338h-3.861v14.447c0 .706-.287 1.347-.751 1.81a2.57 2.57 0 0 1-1.81.751c-1.421 0-2.571-1.15-2.571-2.571 0-.706.287-1.347.751-1.81a2.57 2.57 0 0 1 1.81-.751c.283 0 .555.046.81.131V10.14a6.571 6.571 0 0 0-.81-.051c-3.632 0-6.571 2.939-6.571 6.571s2.939 6.571 6.571 6.571 6.571-2.939 6.571-6.571V9.282a9.642 9.642 0 0 0 5.645 1.806V7.227a5.86 5.86 0 0 1-2.001-.665z"
+                />
               </svg>
             </a>
             
