@@ -20,8 +20,23 @@ function App() {
 
   useEffect(() => {
     // Check if admin is already authenticated
-    const isAuthenticated = localStorage.getItem('lunastream-admin-auth') === 'true';
-    setIsAdminAuthenticated(isAuthenticated);
+    const checkAuth = async () => {
+      const isLocalAuth = localStorage.getItem('lunastream-admin-auth') === 'true';
+      if (isLocalAuth) {
+        // Verify with server
+        const { authService } = await import('./services/auth');
+        const verification = await authService.verifyToken();
+        setIsAdminAuthenticated(verification.success);
+        if (!verification.success) {
+          // Clear invalid auth
+          localStorage.removeItem('lunastream-admin-auth');
+        }
+      } else {
+        setIsAdminAuthenticated(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const handleAdminLogin = () => {
@@ -29,7 +44,6 @@ function App() {
   };
 
   const handleAdminLogout = () => {
-    localStorage.removeItem('lunastream-admin-auth');
     setIsAdminAuthenticated(false);
   };
 

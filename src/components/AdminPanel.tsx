@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Film, Users, Eye, Clock, TrendingUp, Monitor, BarChart3, Activity, Play, Tv, Calendar, RefreshCw, LogOut, Smartphone, LampDesk as Desktop, Tablet, Globe, Zap, Target, Award, Repeat, PieChart, LineChart, Settings, Download, Share2, AlertTriangle, CheckCircle, Star } from 'lucide-react';
 import { analytics, ViewingStats, StreamingSession } from '../services/analytics';
+import { authService } from '../services/auth';
 import { tmdb } from '../services/tmdb';
 import GlobalNavbar from './GlobalNavbar';
 
@@ -14,6 +15,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'users'>('overview');
+  const [serverData, setServerData] = useState<any>(null);
 
   const fetchStats = () => {
     setLoading(true);
@@ -26,6 +28,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
     } finally {
       setLoading(false);
     }
+    
+    // Also fetch server data
+    try {
+      const data = await authService.getAdminData();
+      setServerData(data.data);
+    } catch (error) {
+      console.error('Failed to fetch server data:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
+    onLogout();
   };
 
   useEffect(() => {

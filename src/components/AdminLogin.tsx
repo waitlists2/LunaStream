@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Film, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { authService } from '../services/auth';
 import GlobalNavbar from './GlobalNavbar';
 
 interface AdminLoginProps {
@@ -13,24 +14,21 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // In a real application, these should be handled more securely (e.g., environment variables
-  // not directly exposed to the client-side, or proper authentication backend).
-  const ADMIN_USERNAME = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'password';
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Simulate a brief loading delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      localStorage.setItem('lunastream-admin-auth', 'true');
-      onLogin();
-    } else {
-      setError('Invalid username or password');
+    try {
+      const result = await authService.login({ username, password });
+      
+      if (result.success) {
+        onLogin();
+      } else {
+        setError(result.message || 'Invalid username or password');
+      }
+    } catch (error) {
+      setError('Network error. Please try again.');
     }
 
     setLoading(false);
