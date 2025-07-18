@@ -13,6 +13,7 @@ import CustomCursor from './components/CustomCursor';
 import NotFoundPage from './components/NotFoundPage';
 import ScrollToTopButton from './components/ScrollToTop';
 import Watchlist from './components/Watchlist';
+import Vault from './components/Vault'
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -55,7 +56,8 @@ function App() {
             )
           } 
         />
-        {/*<Route path="watchlist" element={<Watchlist />} />*/}
+        <Route path="/vault" element={<Vault />} />
+        <Route path="/watchlist" element={<Watchlist />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
