@@ -40,7 +40,7 @@ async function registerPlugins() {
 
   await fastify.register(fastifyStatic, {
     root: path.join(__dirname, 'dist'),
-    prefix: '/',
+    prefix: '',
   });
 
   await fastify.register(cookie);
