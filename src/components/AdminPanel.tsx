@@ -17,7 +17,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'users'>('overview');
   const [serverData, setServerData] = useState<any>(null);
 
-  const fetchStats = () => {
+  const fetchStats = async () => {
     setLoading(true);
     try {
       const viewingStats = analytics.getViewingStats();
