@@ -394,12 +394,12 @@ import React, { useState, useEffect } from 'react';
                   ))}
                 </div>
 
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 transition-colors duration-300">{show.overview}</p>
+                <p className="text-gray-700 flex flex-wrap dark:text-gray-300 leading-relaxed mb-6 transition-colors duration-300">{show.overview}</p>
 
                 {/* Cast Overview */}
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">Cast Overview</h2>
-                    <div className="flex overflow-x-auto space-x-6 px-8 pb-8">
+                    <div className="flex flex-wrap gap-6 px-8 pb-8">
                       {loading ? (
                         <p className="text-gray-700 dark:text-gray-300">Loading cast...</p>
                       ) : cast.length === 0 ? (

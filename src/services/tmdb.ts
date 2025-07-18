@@ -58,6 +58,14 @@ export const tmdb = {
     return response.json();
   },
 
+  getMovieCredits: async (id: number) => {
+    const response = await fetch(
+      `${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}`
+    );
+    return response.json();
+  },
+
+
   getImageUrl: (path: string | null, size: string = 'w500') => {
     if (!path)
       return 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=500&h=750&fit=crop';

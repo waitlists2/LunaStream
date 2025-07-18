@@ -18,6 +18,7 @@ const MovieDetail: React.FC = () => {
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
   const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
   const [isFavorited, setIsFavorited] = useState(false);
+  const [cast, setCast] = React.useState([]);
 
   useEffect(() => {
     if (movie) {
@@ -25,6 +26,19 @@ const MovieDetail: React.FC = () => {
       setIsFavorited(favorites.some((fav) => fav.id === movie.id));
     }
   }, [movie]);
+
+  useEffect(() => {
+    async function fetchCredits() {
+      setLoading(true);
+      const credits = await tmdb.getMovieCredits(movie.id);
+      setCast(credits.cast || []);
+      setLoading(false);
+    }
+
+    if (movie?.id) {
+      fetchCredits();
+    }
+  }, [movie?.id]);
 
   const clearRecentlyViewed = () => {
     localStorage.removeItem('recentlyViewedMovies');
@@ -260,7 +274,7 @@ const MovieDetail: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-gray-700 dark:text-gray-300 mb-6 transition-colors duration-300">{movie.overview}</p>
+              <p className="text-gray-700 flex flex-wrap dark:text-gray-300 mb-6 transition-colors duration-300">{movie.overview}</p>
 
               <button
                 onClick={handleWatchMovie}
@@ -269,6 +283,29 @@ const MovieDetail: React.FC = () => {
                 <Play className="w-5 h-5" />
                 <span>Watch Movie</span>
               </button>
+              <br/>
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">Cast Overview</h2>
+                  <div className="flex flex-wrap gap-6 px-8 pb-8">
+                    {loading ? (
+                      <p className="text-gray-700 dark:text-gray-300">Loading cast...</p>
+                    ) : cast.length === 0 ? (
+                      <p className="text-gray-700 dark:text-gray-300">No cast information available.</p>
+                    ) : (
+                      cast.slice(0, 12).map((actor) => (
+                        <div key={actor.id} className="flex-shrink-0 w-28 text-center">
+                          <img
+                            src={actor.profile_path ? tmdb.getImageUrl(actor.profile_path, 'w185') : '/placeholder-avatar.png'}
+                            alt={actor.name}
+                            className="w-28 h-28 object-cover rounded-full shadow-md mb-2 border border-gray-300 dark:border-gray-600"
+                          />
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{actor.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{actor.character}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
