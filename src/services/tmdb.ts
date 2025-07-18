@@ -1,4 +1,7 @@
-const API_KEY = '762f9abeaf5a0a96795dee0bb3989df9';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const API_KEY = process.env.TMDB_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 
 export const tmdb = {

@@ -1,6 +1,20 @@
-import fastify from 'fastify';
+import Fastify from 'fastify';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
+import fastifyStatic from '@fastify/static';
+import cookie from '@fastify/cookie';
+
+import dotenv from 'dotenv';
+
+// Setup __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config();
 
 // Environment variables with defaults
 const PORT = process.env.PORT || 3000;
@@ -9,27 +23,27 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
+const fastify = Fastify({
+  logger: true,
+});
+
 // Register plugins
 async function registerPlugins() {
-  // CORS support
-  await fastify.register(require('@fastify/cors'), {
+  await fastify.register(cors, {
     origin: true,
     credentials: true
   });
 
-  // JWT support
-  await fastify.register(require('@fastify/jwt'), {
+  await fastify.register(jwt, {
     secret: JWT_SECRET
   });
 
-  // Static file serving
-  await fastify.register(require('@fastify/static'), {
+  await fastify.register(fastifyStatic, {
     root: path.join(__dirname, 'dist'),
     prefix: '/',
   });
 
-  // Cookie support
-  await fastify.register(require('@fastify/cookie'));
+  await fastify.register(cookie);
 }
 
 // Authentication decorator
@@ -43,39 +57,34 @@ fastify.decorate('authenticate', async function(request, reply) {
 
 // API Routes
 async function registerRoutes() {
-  // Health check
-  fastify.get('/api/health', async (request, reply) => {
+  fastify.get('/api/health', async () => {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
-  // Admin login endpoint
   fastify.post('/api/admin/login', async (request, reply) => {
     const { username, password } = request.body;
 
-    // Validate credentials
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      // Generate JWT token
       const token = fastify.jwt.sign(
         { 
-          username: username,
+          username,
           role: 'admin',
           loginTime: new Date().toISOString()
         },
         { expiresIn: '24h' }
       );
 
-      // Set secure cookie
       reply.setCookie('admin_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000
       });
 
       return { 
         success: true, 
         message: 'Login successful',
-        token: token,
+        token,
         expiresIn: '24h'
       };
     } else {
@@ -87,14 +96,12 @@ async function registerRoutes() {
     }
   });
 
-  // Admin logout endpoint
   fastify.post('/api/admin/logout', async (request, reply) => {
     reply.clearCookie('admin_token');
     return { success: true, message: 'Logged out successfully' };
   });
 
-  // Verify admin token endpoint
-  fastify.get('/api/admin/verify', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+  fastify.get('/api/admin/verify', { preHandler: [fastify.authenticate] }, async (request) => {
     return { 
       success: true, 
       user: {
@@ -105,9 +112,7 @@ async function registerRoutes() {
     };
   });
 
-  // Protected admin data endpoint
-  fastify.get('/api/admin/data', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    // This could return analytics data, user stats, etc.
+  fastify.get('/api/admin/data', { preHandler: [fastify.authenticate] }, async () => {
     return {
       success: true,
       data: {
@@ -119,10 +124,10 @@ async function registerRoutes() {
     };
   });
 
-  // Catch-all route for SPA (Single Page Application)
-  fastify.get('*', async (request, reply) => {
+  // SPA catch-all handler
+  fastify.setNotFoundHandler(async (request, reply) => {
     const indexPath = path.join(__dirname, 'dist', 'index.html');
-    
+
     try {
       if (fs.existsSync(indexPath)) {
         const html = fs.readFileSync(indexPath, 'utf8');
@@ -140,7 +145,7 @@ async function registerRoutes() {
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
-  
+
   if (error.validation) {
     reply.code(400).send({
       error: 'Validation Error',
@@ -177,12 +182,12 @@ const start = async () => {
   try {
     await registerPlugins();
     await registerRoutes();
-    
+
     await fastify.listen({ 
       port: PORT, 
       host: HOST 
     });
-    
+
     fastify.log.info(`🚀 LunaStream server running on http://${HOST}:${PORT}`);
     fastify.log.info(`📊 Admin panel available at http://${HOST}:${PORT}/admin`);
     fastify.log.info(`🔐 Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
