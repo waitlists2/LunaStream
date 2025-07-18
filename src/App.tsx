@@ -57,7 +57,7 @@ function App() {
           } 
         />
         <Route path="/vault" element={<Vault />} />
-        <Route path="/watchlist" element={<Watchlist />} />
+        <Route path="/watchlist" element={<Watchlist />} /> {/* Redirects to /vault */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

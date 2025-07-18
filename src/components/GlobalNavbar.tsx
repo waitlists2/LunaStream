@@ -15,7 +15,6 @@ const GlobalNavbar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/search', label: 'Search', icon: Search },
-    { path: '/watchlist', label: 'Watchlist', icon: Heart },
     { path: '/vault', label: 'Vault', icon: Archive },
   ];
 
