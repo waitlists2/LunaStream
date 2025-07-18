@@ -201,17 +201,17 @@ const SearchResults: React.FC = () => {
       <GlobalNavbar />
       
       {/* Search Header */}
-      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-pink-200/50 dark:border-gray-600/30 sticky top-16 z-40 transition-colors duration-300">
+      <div className="backdrop-blur-md sticky top-16 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-0">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
               <input
                 type="text"
                 placeholder="Search for movies or TV shows..."
                 value={searchInput}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 bg-white/95 dark:bg-gray-700/95 backdrop-blur-md rounded-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
+                className="w-full pl-10 pr-4 h-12 bg-white/95 dark:bg-gray-700/95 backdrop-blur-md rounded-l-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
               />
             </div>
             <select
@@ -224,12 +224,14 @@ const SearchResults: React.FC = () => {
                 newParams.sort = newSort;
                 setSearchParams(newParams);
               }}
-              className="px-4 py-3 rounded-xl border border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-700/95 backdrop-blur-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
+              className="h-12 px-6 rounded-r-xl border border-l-0 border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-700/95 text-gray-900 dark:text-gray-100 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
+              style={{ paddingRight: '1.5rem' }} // extra right padding so text doesn't get too close to edge
             >
               <option value="popularity">Popularity</option>
               <option value="score">Relevance</option>
             </select>
           </div>
+
         </div>
       </div>
 
