@@ -319,11 +319,11 @@ import React, { useState, useEffect } from 'react';
 
           {/* Video Player with Enhanced Ad Blocking */}
           <iframe
-            src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=false&popup=false&mobile=true`}
+            src={`https://player.videasy.net/tv/${id}/${currentEpisode.season_number}/${currentEpisode.episode_number}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&mobile=true`}
             className="w-full h-full border-0"
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+            sandbox="allow-scripts allow-same-origin allow-forms"
             title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
             referrerPolicy="no-referrer"
             style={{
