@@ -1,6 +1,6 @@
-const fastify = require('fastify')({ logger: true });
-const path = require('path');
-const fs = require('fs');
+import fastify from 'fastify';
+import path from 'path';
+import fs from 'fs';
 
 // Environment variables with defaults
 const PORT = process.env.PORT || 3000;
