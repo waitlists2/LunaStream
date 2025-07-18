@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Film, Lock, User, Eye, EyeOff } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
+import GlobalNavbar from './GlobalNavbar';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -38,11 +38,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
 
   return (
     // Main background consistent with HomePage
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black transition-colors duration-300">
-      {/* Theme Toggle - same position */}
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
+      <GlobalNavbar />
 
       <div className="flex items-center justify-center min-h-screen">
         <div className="max-w-md w-full mx-4">

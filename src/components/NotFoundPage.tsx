@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import GlobalNavbar from './GlobalNavbar';
 
 function NotFoundPage() {
   const canvasRef = useRef(null);
@@ -61,13 +62,16 @@ function NotFoundPage() {
   const gradient = `linear-gradient(90deg, ${gradientColors.join(', ')})`;
 
   return (
-    <div style={{
-      position: 'relative',
-      height: '100vh',
-      backgroundColor: '#000',
-      overflow: 'hidden',
-      fontFamily: 'monospace, monospace',
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
+      <GlobalNavbar />
+      
+      <div style={{
+        position: 'relative',
+        height: 'calc(100vh - 4rem)',
+        backgroundColor: 'transparent',
+        overflow: 'hidden',
+        fontFamily: 'monospace, monospace',
+      }}>
       {/* Canvas for falling characters */}
       <canvas
         ref={canvasRef}
@@ -79,6 +83,7 @@ function NotFoundPage() {
           height: '100%',
           display: 'block',
           zIndex: 0,
+          opacity: 0.3,
         }}
       />
 
@@ -112,6 +117,13 @@ function NotFoundPage() {
           }}>
             404
           </h1>
+          <p style={{
+            fontSize: '1.5em',
+            color: '#fff',
+            marginBottom: '2rem',
+          }}>
+            Page Not Found
+          </p>
           <a
             href="/"
             style={{
@@ -129,6 +141,7 @@ function NotFoundPage() {
             Go Home
           </a>
         </div>
+      </div>
       </div>
     </div>
   );

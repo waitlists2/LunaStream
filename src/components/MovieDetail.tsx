@@ -4,7 +4,8 @@ import { ArrowLeft, Play, Star, Calendar, Clock, Film, X, Heart } from 'lucide-r
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { MovieDetails } from '../types';
-import ThemeToggle from './ThemeToggle';
+import { watchlistService } from '../services/watchlist';
+import GlobalNavbar from './GlobalNavbar';
 
 const MovieDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -82,6 +83,15 @@ const MovieDetail: React.FC = () => {
 
   const handleWatchMovie = () => {
     if (movie && id) {
+      // Add to watchlist
+      watchlistService.addMovieToWatchlist({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        release_date: movie.release_date,
+        vote_average: movie.vote_average
+      });
+
       // Start analytics session
       const newSessionId = analytics.startSession(
         'movie',
@@ -204,32 +214,8 @@ const MovieDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black relative transition-colors duration-300">
-      {/* Header */}
-      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
-                <Film className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                LunaStream
-              </span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <ThemeToggle />
-              <Link
-                to="/"
-                className="flex items-center text-gray-600 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Home
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative transition-colors duration-300">
+      <GlobalNavbar />
 
       {/* Movie Details */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

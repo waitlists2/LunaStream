@@ -4,7 +4,7 @@ import { Search, Film, Star, Calendar } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import Fuse from 'fuse.js';
 import { Movie, TVShow } from '../types';
-import ThemeToggle from './ThemeToggle';
+import GlobalNavbar from './GlobalNavbar';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
@@ -197,24 +197,23 @@ const SearchResults: React.FC = () => {
   const getLink = (item: MediaItem) => isMovie(item) ? `/movie/${item.id}` : `/tv/${item.id}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black transition-colors duration-300">
-      {/* Header */}
-      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center py-4 sm:h-16 space-y-3 sm:space-y-0">
-            <div className="flex items-center w-full sm:max-w-3xl space-x-3">
-            <Link to="/" className="flex items-center flex-shrink-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
-                <Film className="w-5 h-5 text-white" />
-              </div>
-            </Link>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchInput}
-              onChange={handleInputChange}
-              className="flex-grow px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-pink-400 dark:bg-gray-700 dark:text-white transition-colors"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
+      <GlobalNavbar />
+      
+      {/* Search Header */}
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-pink-200/50 dark:border-gray-600/30 sticky top-16 z-40 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search for movies or TV shows..."
+                value={searchInput}
+                onChange={handleInputChange}
+                className="w-full pl-10 pr-4 py-3 bg-white/95 dark:bg-gray-700/95 backdrop-blur-md rounded-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
+              />
+            </div>
             <select
               value={sortBy}
               onChange={(e) => {
@@ -225,18 +224,14 @@ const SearchResults: React.FC = () => {
                 newParams.sort = newSort;
                 setSearchParams(newParams);
               }}
-              className="px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-700 dark:text-white focus:ring-2 focus:ring-pink-400 transition-colors"
+              className="px-4 py-3 rounded-xl border border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-700/95 backdrop-blur-md text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
             >
               <option value="popularity">Popularity</option>
               <option value="score">Relevance</option>
             </select>
           </div>
-          <div className="flex-shrink-0">
-            <ThemeToggle />
-          </div>
         </div>
-        </div>
-      </nav>
+      </div>
 
       {/* Warning modal */}
       {warningVisible && (

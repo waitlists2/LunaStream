@@ -4,7 +4,8 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
-import ThemeToggle from './ThemeToggle';
+import { watchlistService } from '../services/watchlist';
+import GlobalNavbar from './GlobalNavbar';
 
 const HomePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -118,35 +119,8 @@ const HomePage: React.FC = () => {
   const showRecentlyViewed = recentlyViewedMovies.length > 0 || Object.keys(recentlyViewedTVEpisodes).length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-black dark:via-gray-950 dark:to-black transition-colors duration-300">
-
-      {/* Header */}
-      <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-pink-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo & Title */}
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-lg">
-                <Film className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                LunaStream
-              </span>
-            </div>
-            {/* Buttons */}
-            <div className="flex items-center space-x-3">
-              <ThemeToggle />
-              <Link
-                to="/donate"
-                className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                <Heart className="w-4 h-4" />
-                <span>Donate</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
+      <GlobalNavbar />
 
       {/* Hero & Search */}
       <div className="relative">
