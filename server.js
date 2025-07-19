@@ -8,6 +8,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
 import cookie from '@fastify/cookie';
+import rateLimit from '@fastify/rate-limit'; // NEW: Rate limit import
 
 import dotenv from 'dotenv';
 
@@ -44,6 +45,21 @@ async function registerPlugins() {
   });
 
   await fastify.register(cookie);
+
+  // NEW: Register rate limit
+  await fastify.register(rateLimit, {
+    max: 100, // 100 requests per IP
+    timeWindow: '1 minute',
+    ban: 3, // Ban after 3 breaches
+    allowList: (req, key) => {
+      return req.ip === '127.0.0.1' || req.ip === '::1'; // Allowlist local IPs
+    },
+    addHeaders: {
+      'x-ratelimit-limit': true,
+      'x-ratelimit-remaining': true,
+      'x-ratelimit-reset': true
+    }
+  });
 }
 
 // Authentication decorator
@@ -61,7 +77,14 @@ async function registerRoutes() {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
-  fastify.post('/api/admin/login', async (request, reply) => {
+  fastify.post('/api/admin/login', {
+    config: {
+      rateLimit: {
+        max: 5, // NEW: Stricter login limit
+        timeWindow: '1 minute'
+      }
+    }
+  }, async (request, reply) => {
     const { username, password } = request.body;
 
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
