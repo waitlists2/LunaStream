@@ -9,6 +9,8 @@ import jwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
 import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
+import pino from 'pino';
+import { v4 as uuidv4 } from 'uuid';
 
 import dotenv from 'dotenv';
 
@@ -24,13 +26,27 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
-const fastify = Fastify({
-  logger: true,
-  bodyLimit: 10 * 1024, // 10KB limit to prevent large payload attacks
-  maxParamLength: 100, // Prevent long URL abuse
-  keepAliveTimeout: 5, // Protect against slow-loris
-  requestTimeout: 5000  // Drop slow requests after 5 seconds
+// Create your own pino logger
+const logger = pino({
+  level: 'info',
+  transport: {
+    target: 'pino-pretty',
+    options: { colorize: true }
+  }
 });
+
+const fastify = Fastify({
+  logger: false, // Disable default Fastify logger
+  trustProxy: true,
+  bodyLimit: 10 * 1024,
+  maxParamLength: 100,
+  // Removed keepAliveTimeout to avoid lingering sockets on shutdown
+  // keepAliveTimeout: 5,
+  requestTimeout: 5000
+});
+
+// Decorate request to hold requestId
+fastify.decorateRequest('id', null);
 
 // Register plugins
 async function registerPlugins() {
@@ -62,6 +78,37 @@ async function registerPlugins() {
     }
   });
 }
+
+// Assign unique ID and log request start
+fastify.addHook('onRequest', async (request, reply) => {
+  const requestId = uuidv4();
+  request.id = requestId;
+  reply.header('X-Request-Id', requestId);
+
+  const xff = request.headers['x-forwarded-for'];
+
+  logger.info({
+    reqId: requestId,
+    ip: request.ip,
+    method: request.method,
+    url: request.url,
+    xForwardedFor: xff,
+  }, 'Incoming request');
+});
+
+// Log response with status and response time
+fastify.addHook('onResponse', async (request, reply) => {
+  const responseTime = reply.getResponseTime().toFixed(2);
+
+  logger.info({
+    reqId: request.id,
+    method: request.method,
+    url: request.url,
+    statusCode: reply.statusCode,
+    responseTime: `${responseTime}ms`,
+    ip: request.ip,
+  }, 'Request completed');
+});
 
 // Authentication decorator
 fastify.decorate('authenticate', async function(request, reply) {
@@ -167,15 +214,18 @@ async function registerRoutes() {
         reply.code(404).send({ error: 'Application not built. Run "npm run build" first.' });
       }
     } catch (error) {
-      fastify.log.error(error);
+      logger.error(error);
       reply.code(500).send({ error: 'Internal server error' });
     }
   });
 }
 
-// Error handler
+// Error handler with requestId in logs
 fastify.setErrorHandler((error, request, reply) => {
-  fastify.log.error(error);
+  logger.error({
+    reqId: request?.id,
+    error: error,
+  });
 
   if (error.validation) {
     reply.code(400).send({
@@ -196,17 +246,45 @@ fastify.setErrorHandler((error, request, reply) => {
   }
 });
 
-// Graceful shutdown
-const gracefulShutdown = (signal) => {
-  fastify.log.info(`Received ${signal}, shutting down gracefully`);
-  fastify.close(() => {
-    fastify.log.info('Server closed');
+// Graceful shutdown with forceCloseConnections and timeout fallback
+const gracefulShutdown = async (signal) => {
+  logger.info(`Received ${signal}, shutting down gracefully`);
+
+  const shutdownTimeout = setTimeout(() => {
+    logger.error('Force exiting process after timeout');
+    process.exit(1);
+  }, 10000); // 10 seconds max wait
+
+  try {
+    // Close Fastify with forceCloseConnections option if supported
+    if (fastify.close.length === 1) {
+      await fastify.close({ forceCloseConnections: true });
+    } else {
+      await fastify.close();
+    }
+
+    // Close underlying native server if open
+    if (fastify.server && fastify.server.listening) {
+      await new Promise((resolve, reject) => {
+        fastify.server.close((err) => (err ? reject(err) : resolve()));
+      });
+      logger.info('Underlying HTTP server closed');
+    }
+
+    clearTimeout(shutdownTimeout);
+    logger.info('Shutdown complete, exiting process');
     process.exit(0);
-  });
+
+  } catch (err) {
+    logger.error('Error during shutdown:', err);
+    clearTimeout(shutdownTimeout);
+    process.exit(1);
+  }
 };
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+// Bind signal handlers once, using process.once
+process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.once('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start server
 const start = async () => {
@@ -219,12 +297,12 @@ const start = async () => {
       host: HOST 
     });
 
-    fastify.log.info(`🚀 LunaStream server running on http://${HOST}:${PORT}`);
-    fastify.log.info(`📊 Admin panel available at http://${HOST}:${PORT}/admin`);
-    fastify.log.info(`🔐 Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
+    logger.info(`🚀 LunaStream server running on http://${HOST}:${PORT}`);
+    logger.info(`📊 Admin panel available at http://${HOST}:${PORT}/admin`);
+    logger.info(`🔐 Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
     
   } catch (err) {
-    fastify.log.error(err);
+    logger.error(err);
     process.exit(1);
   }
 };
