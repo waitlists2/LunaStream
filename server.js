@@ -8,7 +8,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
 import cookie from '@fastify/cookie';
-import rateLimit from '@fastify/rate-limit'; // NEW: Rate limit import
+import rateLimit from '@fastify/rate-limit'; 
 
 import dotenv from 'dotenv';
 
@@ -46,7 +46,6 @@ async function registerPlugins() {
 
   await fastify.register(cookie);
 
-  // NEW: Register rate limit
   await fastify.register(rateLimit, {
     max: 100, // 100 requests per IP
     timeWindow: '1 minute',
