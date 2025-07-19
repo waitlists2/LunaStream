@@ -8,7 +8,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
 import cookie from '@fastify/cookie';
-import rateLimit from '@fastify/rate-limit'; 
+import rateLimit from '@fastify/rate-limit';
 
 import dotenv from 'dotenv';
 
@@ -26,6 +26,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-t
 
 const fastify = Fastify({
   logger: true,
+  bodyLimit: 10 * 1024, // 10KB limit to prevent large payload attacks
+  maxParamLength: 100, // Prevent long URL abuse
+  keepAliveTimeout: 5, // Protect against slow-loris
+  requestTimeout: 5000  // Drop slow requests after 5 seconds
 });
 
 // Register plugins
@@ -47,12 +51,10 @@ async function registerPlugins() {
   await fastify.register(cookie);
 
   await fastify.register(rateLimit, {
-    max: 100, // 100 requests per IP
+    max: 100,
     timeWindow: '1 minute',
-    ban: 3, // Ban after 3 breaches
-    allowList: (req, key) => {
-      return req.ip === '127.0.0.1' || req.ip === '::1'; // Allowlist local IPs
-    },
+    ban: 3,
+    allowList: (req, key) => req.ip === '127.0.0.1' || req.ip === '::1',
     addHeaders: {
       'x-ratelimit-limit': true,
       'x-ratelimit-remaining': true,
@@ -79,9 +81,16 @@ async function registerRoutes() {
   fastify.post('/api/admin/login', {
     config: {
       rateLimit: {
-        max: 5, // NEW: Stricter login limit
+        max: 5,
         timeWindow: '1 minute'
       }
+    },
+    preValidation: (request, reply, done) => {
+      const { username, password } = request.body || {};
+      if (!username || !password || username.length > 50 || password.length > 50) {
+        return reply.code(400).send({ error: 'Invalid request format' });
+      }
+      done();
     }
   }, async (request, reply) => {
     const { username, password } = request.body;
