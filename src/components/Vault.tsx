@@ -16,6 +16,8 @@ const Vault: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [favoriteMovies, setFavoriteMovies] = useState<any[]>([]);
   const [favoriteShows, setFavoriteShows] = useState<any[]>([]);
+  const [sortOption, setSortOption] = useState<'date' | 'title' | 'rating'>('date');
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
   const loadData = () => {
     setLoading(true);
@@ -25,8 +27,20 @@ const Vault: React.FC = () => {
     // Load favorites
     const storedMovies = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
     const storedShows = JSON.parse(localStorage.getItem('favoriteShows') || '[]');
-    setFavoriteMovies(storedMovies);
-    setFavoriteShows(storedShows);
+
+    // Add lastActivity timestamp if missing
+    const now = Date.now();
+    const favoritesWithLastActivityMovies = storedMovies.map(movie => ({
+      ...movie,
+      lastActivity: movie.lastActivity ?? now,
+    }));
+    const favoritesWithLastActivityShows = storedShows.map(show => ({
+      ...show,
+      lastActivity: show.lastActivity ?? now,
+    }));
+
+    setFavoriteMovies(favoritesWithLastActivityMovies);
+    setFavoriteShows(favoritesWithLastActivityShows);
     
     setLoading(false);
   };
@@ -81,27 +95,55 @@ const Vault: React.FC = () => {
   };
 
   const filteredItems = useMemo(() => {
-    if (searchTerm === '') return combinedItems;
+    let items = combinedItems;
 
-    return combinedItems.filter((item) => {
-      if (item.type === 'movie') {
-        return (item.data as WatchlistMovie).title.toLowerCase().includes(searchTerm.toLowerCase());
-      }
-      if (item.type === 'tv') {
-        return (item.data as WatchlistTVShow).name.toLowerCase().includes(searchTerm.toLowerCase());
-      }
-      return false;
-    });
-  }, [searchTerm, combinedItems]);
+    // Category filter
+    if (categoryFilter) {
+      items = items.filter(item => {
+        if (categoryFilter === 'Movie') return item.type === 'movie';
+        if (categoryFilter === 'TV Show') return item.type === 'tv';
+        return true;
+      });
+    }
+
+    // Search filter
+    if (searchTerm !== '') {
+      items = items.filter((item) => {
+        if (item.type === 'movie') {
+          return (item.data as WatchlistMovie).title.toLowerCase().includes(searchTerm.toLowerCase());
+        }
+        if (item.type === 'tv') {
+          return (item.data as WatchlistTVShow).name.toLowerCase().includes(searchTerm.toLowerCase());
+        }
+        return false;
+      });
+    }
+
+    return items;
+  }, [searchTerm, combinedItems, categoryFilter]);
 
   const filteredFavorites = useMemo(() => {
-    if (searchTerm === '') return [...favoriteMovies, ...favoriteShows];
+    // Combine favorites
+    let items = [...favoriteMovies, ...favoriteShows];
 
-    return [...favoriteMovies, ...favoriteShows].filter((item) => {
-      const title = item.title || item.name || '';
-      return title.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-  }, [searchTerm, favoriteMovies, favoriteShows]);
+    // Filter by category if selected
+    if (categoryFilter) {
+      if (categoryFilter === 'Movie') {
+        items = favoriteMovies; // Only movies
+      } else if (categoryFilter === 'TV Show') {
+        items = favoriteShows; // Only shows
+      }
+    }
+
+    if (searchTerm !== '') {
+      items = items.filter((item) => {
+        const title = item.title || item.name || '';
+        return title.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+    }
+
+    return items;
+  }, [searchTerm, favoriteMovies, favoriteShows, categoryFilter]);
 
   const stats = {
     totalWatched: combinedItems.length,
@@ -137,7 +179,22 @@ const Vault: React.FC = () => {
               </p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+              {/* Category Filter */}
+              <div className="flex items-center space-x-2">
+                <select
+                  id="category"
+                  value={categoryFilter || ''}
+                  onChange={(e) => setCategoryFilter(e.target.value || null)}
+                  className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
+                >
+                  <option value="">All</option>
+                  <option value="Movie">Movies</option>
+                  <option value="TV Show">TV Shows</option>
+                </select>
+              </div>
+
+              {/* Search Input */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
