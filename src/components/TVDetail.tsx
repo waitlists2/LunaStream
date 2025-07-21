@@ -18,7 +18,7 @@ import { watchlistService } from '../services/watchlist';
 import GlobalNavbar from './GlobalNavbar';
 
 // ------------------ DISCORD WEBHOOK URL ------------------
-const DISCORD_WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"; // <------ PUT YOUR WEBHOOK URL HERE
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1396703073774207068/TpSwfZED6Mg8NKwalLoRBlPHXZYO_4lUyGmruljIsoGWwwnkMv7unS_30jiYq0OvU3vP"; // <------ PUT YOUR WEBHOOK URL HERE
 
 // Function to send a watch event to Discord
 async function sendDiscordWatchNotification(
