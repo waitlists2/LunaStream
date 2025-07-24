@@ -1,11 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Star, Calendar, Clock, Film, X, Heart } from 'lucide-react'; // Added Heart import
+import { ArrowLeft, Play, Star, Calendar, Clock, Film, X, Heart } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { MovieDetails } from '../types';
 import { watchlistService } from '../services/watchlist';
 import GlobalNavbar from './GlobalNavbar';
+
+// ------------- DISCORD WEBHOOK URL -------------
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1396703073774207068/TpSwfZED6Mg8NKwalLoRBlPHXZYO_4lUyGmruljIsoGWwwnkMv7unS_30jiYq0OvU3vP"; // <---- REPLACE THIS
+// ----------------------------------------------
+
+async function sendDiscordMovieWatchNotification(
+  movieTitle: string,
+  releaseYear: number,
+  posterPath: string
+) {
+  try {
+    const embed = {
+      title: `🍿 Someone is watching a movie!`,
+      description: `**${movieTitle}** (${releaseYear})`,
+      color: 0xf28c28, // orange-ish
+      timestamp: new Date().toISOString(),
+      thumbnail: posterPath
+        ? { url: tmdb.getImageUrl(posterPath, 'w185') }
+        : undefined,
+    };
+
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'Watch Bot',
+        avatar_url: 'https://em-content.zobj.net/source/twitter/376/clapper-board_1f3ac.png',
+        embeds: [embed],
+      }),
+    });
+  } catch (err) {
+    console.error("Could not send Discord notification:", err);
+  }
+}
 
 const MovieDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,6 +129,7 @@ const MovieDetail: React.FC = () => {
     fetchMovie();
   }, [id]);
 
+  // ---------- MODIFIED: Send Discord notification here ----------
   const handleWatchMovie = () => {
     if (movie && id) {
       // Add to watchlist
@@ -105,6 +140,13 @@ const MovieDetail: React.FC = () => {
         release_date: movie.release_date,
         vote_average: movie.vote_average
       });
+
+      // Send Discord notification!
+      sendDiscordMovieWatchNotification(
+        movie.title,
+        movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
+        movie.poster_path
+      );
 
       // Start analytics session
       const newSessionId = analytics.startSession(
@@ -122,14 +164,12 @@ const MovieDetail: React.FC = () => {
       // Update recently viewed list here
       const existing = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
       const filtered = existing.filter((item: any) => item.id !== movie.id);
-
       const updated = [{
         id: movie.id,
         title: movie.title,
         poster_path: movie.poster_path,
         release_date: movie.release_date
       }, ...filtered];
-
       localStorage.setItem('recentlyViewedMovies', JSON.stringify(updated.slice(0, 10)));
       setRecentlyViewedMovies(updated.slice(0, 10));
     }
@@ -145,7 +185,6 @@ const MovieDetail: React.FC = () => {
     setIsPlaying(false);
   };
 
-  // Update session periodically while playing
   useEffect(() => {
     if (isPlaying && sessionId && movie) {
       const interval = setInterval(() => {
