@@ -15,6 +15,7 @@ import ScrollToTopButton from './components/ScrollToTop';
 import Discover from './components/Discover';
 import Watchlist from './components/Watchlist';
 import Vault from './components/Vault'
+import ComingSoon from './components/ComingSoon';
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -61,7 +62,6 @@ function App() {
         <Route path="/v" element={<VersionPage />} />
         <Route path="/last-updated" element={<LastUpdated />} />
         <Route path="/donate" element={<DonatePage />} />
-        <Route path="/discover" element={<Discover />} />
         <Route 
           path="/admin"
           element={
@@ -72,6 +72,8 @@ function App() {
             )
           } 
         />
+        <Route path="/soon" element={<ComingSoon />} />
+        <Route path="/discover" element={<Discover />} />
         <Route path="/vault" element={<Vault />} />
         <Route path="/watchlist" element={<Watchlist />} /> {/* Redirects to /vault */}
         <Route path="*" element={<NotFoundPage />} />

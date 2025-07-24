@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Film, Archive, Home, Search, Compass } from 'lucide-react';
+import { Film, Archive, Home, Search, Compass, Calendar } from 'lucide-react'; // ← Added Calendar icon
 import ThemeToggle from './ThemeToggle';
 
 const GlobalNavbar: React.FC = () => {
@@ -16,6 +16,7 @@ const GlobalNavbar: React.FC = () => {
     { path: '/', label: 'Home', icon: Home },
     { path: '/search', label: 'Search', icon: Search },
     { path: '/discover', label: 'Discover', icon: Compass },
+    /*{ path: '/soon', label: 'Upcoming', icon: Calendar },*/
     { path: '/vault', label: 'Vault', icon: Archive },
   ];
 
@@ -32,7 +33,7 @@ const GlobalNavbar: React.FC = () => {
             </span>
           </Link>
 
-          {/* Navigation Items */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1 absolute left-1/2 transform -translate-x-1/2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -52,7 +53,7 @@ const GlobalNavbar: React.FC = () => {
               );
             })}
           </div>
-          
+
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center space-x-1 ml-auto z-10">
             {navItems.map((item) => {
@@ -73,7 +74,7 @@ const GlobalNavbar: React.FC = () => {
               );
             })}
           </div>
-          
+
           <div className="flex items-center ml-auto z-10">
             <ThemeToggle />
           </div>
