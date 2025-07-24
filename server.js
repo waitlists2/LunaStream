@@ -11,13 +11,22 @@ import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
 import pino from 'pino';
 import { v4 as uuidv4 } from 'uuid';
-
 import dotenv from 'dotenv';
+import fetch from 'node-fetch'; // Make sure to install node-fetch@2 or compatible version
 
 // Setup __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config();
+
+// Check for TMDB_API key and exit if missing
+if (!process.env.TMDB_API) {
+  console.error('Error: TMDB_API environment variable is missing. Please set it and restart the server.');
+  process.exit(1);
+}
+
+const TMDB_API_KEY = process.env.TMDB_API;
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 // Environment variables with defaults
 const PORT = process.env.PORT || 3000;
@@ -40,8 +49,6 @@ const fastify = Fastify({
   trustProxy: true,
   bodyLimit: 10 * 1024,
   maxParamLength: 100,
-  // Removed keepAliveTimeout to avoid lingering sockets on shutdown
-  // keepAliveTimeout: 5,
   requestTimeout: 5000
 });
 
@@ -202,6 +209,70 @@ async function registerRoutes() {
     };
   });
 
+  // TMDB proxy endpoint: forwards requests to TMDB API
+  fastify.all('/api/tmdb/*', async (request, reply) => {
+    try {
+      // Extract TMDB endpoint path after /api/tmdb/
+      const tmdbPath = request.url.replace('/api/tmdb', '');
+
+      // Build TMDB URL with API key appended as query param
+      const url = new URL(`${TMDB_BASE_URL}${tmdbPath}`);
+
+      // Append TMDB API key to query parameters
+      url.searchParams.set('api_key', TMDB_API_KEY);
+
+      // Append any existing query parameters from original request
+      // (Except api_key which we already set)
+      for (const [key, value] of Object.entries(request.query || {})) {
+        if (key !== 'api_key') {
+          url.searchParams.set(key, value);
+        }
+      }
+
+      // Setup fetch options with method, headers, body if POST/PUT/PATCH
+      const fetchOptions = {
+        method: request.method,
+        headers: {
+          // Forward original headers except host-related
+          ...request.headers,
+          host: undefined,
+          'content-length': undefined,
+        }
+      };
+
+      if (['POST', 'PUT', 'PATCH'].includes(request.method.toUpperCase()) && request.body) {
+        fetchOptions.body = JSON.stringify(request.body);
+        fetchOptions.headers['content-type'] = 'application/json';
+      }
+
+      const tmdbResponse = await fetch(url.toString(), fetchOptions);
+
+      // Forward TMDB response status
+      reply.status(tmdbResponse.status);
+
+      // Forward TMDB response headers (some safe subset)
+      tmdbResponse.headers.forEach((value, key) => {
+        if (!['content-encoding', 'content-length', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+          reply.header(key, value);
+        }
+      });
+
+      // Parse and forward response body
+      const contentType = tmdbResponse.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await tmdbResponse.json();
+        return data;
+      } else {
+        const text = await tmdbResponse.text();
+        return text;
+      }
+
+    } catch (error) {
+      logger.error({ err: error, reqId: request.id }, 'Error proxying TMDB request');
+      reply.code(500).send({ error: 'Failed to fetch from TMDB API' });
+    }
+  });
+
   // SPA catch-all handler
   fastify.setNotFoundHandler(async (request, reply) => {
     const indexPath = path.join(__dirname, 'dist', 'index.html');
@@ -256,14 +327,12 @@ const gracefulShutdown = async (signal) => {
   }, 10000); // 10 seconds max wait
 
   try {
-    // Close Fastify with forceCloseConnections option if supported
     if (fastify.close.length === 1) {
       await fastify.close({ forceCloseConnections: true });
     } else {
       await fastify.close();
     }
 
-    // Close underlying native server if open
     if (fastify.server && fastify.server.listening) {
       await new Promise((resolve, reject) => {
         fastify.server.close((err) => (err ? reject(err) : resolve()));
@@ -282,7 +351,6 @@ const gracefulShutdown = async (signal) => {
   }
 };
 
-// Bind signal handlers once, using process.once
 process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.once('SIGINT', () => gracefulShutdown('SIGINT'));
 

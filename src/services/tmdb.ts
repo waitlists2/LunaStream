@@ -65,6 +65,22 @@ export const tmdb = {
     return response.json();
   },
 
+  discoverMovies: async (params: string) => {
+    const response = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&${params}`);
+    return response.json();
+  },
+
+  discoverTV: async (params: string) => {
+    const response = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&${params}`);
+    return response.json();
+  },
+
+  searchMulti: async (query: string) => {
+    const response = await fetch(
+      `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+    );
+    return response.json();
+  },
 
   getImageUrl: (path: string | null, size: string = 'w500') => {
     if (!path)

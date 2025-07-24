@@ -4,7 +4,6 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 
 import { tmdb } from '../services/tmdb';
 import { Movie, TVShow } from '../types';
-import { watchlistService } from '../services/watchlist';
 import GlobalNavbar from './GlobalNavbar';
 
 const HomePage: React.FC = () => {

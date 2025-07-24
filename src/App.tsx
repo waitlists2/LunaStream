@@ -12,6 +12,7 @@ import AdminPanel from './components/AdminPanel';
 import CustomCursor from './components/CustomCursor';
 import NotFoundPage from './components/NotFoundPage';
 import ScrollToTopButton from './components/ScrollToTop';
+import Discover from './components/Discover';
 import Watchlist from './components/Watchlist';
 import Vault from './components/Vault'
 
@@ -60,6 +61,7 @@ function App() {
         <Route path="/v" element={<VersionPage />} />
         <Route path="/last-updated" element={<LastUpdated />} />
         <Route path="/donate" element={<DonatePage />} />
+        <Route path="/discover" element={<Discover />} />
         <Route 
           path="/admin"
           element={
