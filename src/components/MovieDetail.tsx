@@ -1,97 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Star, Calendar, Clock, Film, X, Heart } from 'lucide-react';
-import { tmdb } from '../services/tmdb';
-import { analytics } from '../services/analytics';
-import { MovieDetails } from '../types';
-import { watchlistService } from '../services/watchlist';
-import GlobalNavbar from './GlobalNavbar';
+"use client"
+
+import React, { useState, useEffect } from "react"
+import { useParams, Link } from "react-router-dom"
+import { Play, Star, Calendar, Clock, Film, X, Heart } from "lucide-react"
+import { tmdb } from "../services/tmdb"
+import { analytics } from "../services/analytics"
+import type { MovieDetails } from "../types"
+import { watchlistService } from "../services/watchlist"
+import GlobalNavbar from "./GlobalNavbar"
+import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 
 // ------------- DISCORD WEBHOOK URL -------------
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1396703073774207068/TpSwfZED6Mg8NKwalLoRBlPHXZYO_4lUyGmruljIsoGWwwnkMv7unS_30jiYq0OvU3vP"; // <---- REPLACE THIS
+const DISCORD_WEBHOOK_URL =
+  "https://discord.com/api/webhooks/1396703073774207068/TpSwfZED6Mg8NKwalLoRBlPHXZYO_4lUyGmruljIsoGWwwnkMv7unS_30jiYq0OvU3vP" // <---- REPLACE THIS
 // ----------------------------------------------
 
-async function sendDiscordMovieWatchNotification(
-  movieTitle: string,
-  releaseYear: number,
-  posterPath: string
-) {
+async function sendDiscordMovieWatchNotification(movieTitle: string, releaseYear: number, posterPath: string) {
   try {
     const embed = {
       title: `🍿 Someone is watching a movie!`,
       description: `**${movieTitle}** (${releaseYear})`,
       color: 0xf28c28, // orange-ish
       timestamp: new Date().toISOString(),
-      thumbnail: posterPath
-        ? { url: tmdb.getImageUrl(posterPath, 'w185') }
-        : undefined,
-    };
+      thumbnail: posterPath ? { url: tmdb.getImageUrl(posterPath, "w185") } : undefined,
+    }
 
     await fetch(DISCORD_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: 'Watch Bot',
-        avatar_url: 'https://em-content.zobj.net/source/twitter/376/clapper-board_1f3ac.png',
+        username: "Watch Bot",
+        avatar_url: "https://em-content.zobj.net/source/twitter/376/clapper-board_1f3ac.png",
         embeds: [embed],
       }),
-    });
+    })
   } catch (err) {
-    console.error("Could not send Discord notification:", err);
+    console.error("Could not send Discord notification:", err)
   }
 }
 
 const MovieDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = useState<MovieDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [frogBoops, setFrogBoops] = useState(0);
-  const [showBoopAnimation, setShowBoopAnimation] = useState(false);
-  const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([]);
-  const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any, episodes: any[] } }>({});
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [cast, setCast] = React.useState([]);
+  const { id } = useParams<{ id: string }>()
+  const [movie, setMovie] = useState<MovieDetails | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [frogBoops, setFrogBoops] = useState(0)
+  const [showBoopAnimation, setShowBoopAnimation] = useState(false)
+  const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([])
+  const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{
+    [showId: number]: { show: any; episodes: any[] }
+  }>({})
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [cast, setCast] = React.useState([])
+  const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
 
   useEffect(() => {
     if (movie) {
-      const favorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
-      setIsFavorited(favorites.some((fav) => fav.id === movie.id));
+      const favorites = JSON.parse(localStorage.getItem("favoriteMovies") || "[]")
+      setIsFavorited(favorites.some((fav) => fav.id === movie.id))
     }
-  }, [movie]);
+  }, [movie])
 
   useEffect(() => {
     async function fetchCredits() {
-      setLoading(true);
-      const credits = await tmdb.getMovieCredits(movie.id);
-      setCast(credits.cast || []);
-      setLoading(false);
+      setLoading(true)
+      const credits = await tmdb.getMovieCredits(movie.id)
+      setCast(credits.cast || [])
+      setLoading(false)
     }
 
     if (movie?.id) {
-      fetchCredits();
+      fetchCredits()
     }
-  }, [movie?.id]);
+  }, [movie?.id])
 
   const clearRecentlyViewed = () => {
-    localStorage.removeItem('recentlyViewedMovies');
-    localStorage.removeItem('recentlyViewedTVEpisodes');
-    setRecentlyViewedMovies([]);
-    setRecentlyViewedTVEpisodes({});
-  };
+    localStorage.removeItem("recentlyViewedMovies")
+    localStorage.removeItem("recentlyViewedTVEpisodes")
+    setRecentlyViewedMovies([])
+    setRecentlyViewedTVEpisodes({})
+  }
 
   const toggleFavorite = () => {
-    if (!movie) return;
+    if (!movie) return
 
-    const favorites = JSON.parse(localStorage.getItem('favoriteMovies') || '[]');
-    const exists = favorites.some((fav) => fav.id === movie.id);
+    const favorites = JSON.parse(localStorage.getItem("favoriteMovies") || "[]")
+    const exists = favorites.some((fav) => fav.id === movie.id)
 
-    let updatedFavorites;
+    let updatedFavorites
 
     if (exists) {
-      updatedFavorites = favorites.filter((fav) => fav.id !== movie.id);
-      setIsFavorited(false);
+      updatedFavorites = favorites.filter((fav) => fav.id !== movie.id)
+      setIsFavorited(false)
     } else {
       updatedFavorites = [
         ...favorites,
@@ -101,33 +102,33 @@ const MovieDetail: React.FC = () => {
           poster_path: movie.poster_path,
           release_date: movie.release_date,
         },
-      ];
-      setIsFavorited(true);
+      ]
+      setIsFavorited(true)
     }
 
-    localStorage.setItem('favoriteMovies', JSON.stringify(updatedFavorites));
-  };
+    localStorage.setItem("favoriteMovies", JSON.stringify(updatedFavorites))
+  }
 
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
-    setRecentlyViewedMovies(items);
-  }, [id]);
+    const items = JSON.parse(localStorage.getItem("recentlyViewedMovies") || "[]")
+    setRecentlyViewedMovies(items)
+  }, [id])
 
   useEffect(() => {
     const fetchMovie = async () => {
-      if (!id) return;
-      setLoading(true);
+      if (!id) return
+      setLoading(true)
       try {
-        const movieData = await tmdb.getMovieDetails(parseInt(id));
-        setMovie(movieData);
+        const movieData = await tmdb.getMovieDetails(Number.parseInt(id))
+        setMovie(movieData)
       } catch (error) {
-        console.error('Failed to fetch movie:', error);
+        console.error("Failed to fetch movie:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    fetchMovie();
-  }, [id]);
+    }
+    fetchMovie()
+  }, [id])
 
   // ---------- MODIFIED: Send Discord notification here ----------
   const handleWatchMovie = () => {
@@ -138,78 +139,81 @@ const MovieDetail: React.FC = () => {
         title: movie.title,
         poster_path: movie.poster_path,
         release_date: movie.release_date,
-        vote_average: movie.vote_average
-      });
+        vote_average: movie.vote_average,
+      })
 
       // Send Discord notification!
       sendDiscordMovieWatchNotification(
         movie.title,
         movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
-        movie.poster_path
-      );
+        movie.poster_path,
+      )
 
       // Start analytics session
       const newSessionId = analytics.startSession(
-        'movie',
-        parseInt(id),
+        "movie",
+        Number.parseInt(id),
         movie.title,
         movie.poster_path,
         undefined,
         undefined,
-        movie.runtime ? movie.runtime * 60 : undefined
-      );
-      setSessionId(newSessionId);
-      setIsPlaying(true);
+        movie.runtime ? movie.runtime * 60 : undefined,
+      )
+      setSessionId(newSessionId)
+      setIsPlaying(true)
 
       // Update recently viewed list here
-      const existing = JSON.parse(localStorage.getItem('recentlyViewedMovies') || '[]');
-      const filtered = existing.filter((item: any) => item.id !== movie.id);
-      const updated = [{
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        release_date: movie.release_date
-      }, ...filtered];
-      localStorage.setItem('recentlyViewedMovies', JSON.stringify(updated.slice(0, 10)));
-      setRecentlyViewedMovies(updated.slice(0, 10));
+      const existing = JSON.parse(localStorage.getItem("recentlyViewedMovies") || "[]")
+      const filtered = existing.filter((item: any) => item.id !== movie.id)
+      const updated = [
+        {
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          release_date: movie.release_date,
+        },
+        ...filtered,
+      ]
+      localStorage.setItem("recentlyViewedMovies", JSON.stringify(updated.slice(0, 10)))
+      setRecentlyViewedMovies(updated.slice(0, 10))
     }
-  };
+  }
 
   const handleClosePlayer = () => {
     if (sessionId) {
       // End analytics session with final time
-      const finalTime = Math.random() * (movie?.runtime ? movie.runtime * 60 : 7200); // Simulate watch time
-      analytics.endSession(sessionId, finalTime);
-      setSessionId(null);
+      const finalTime = Math.random() * (movie?.runtime ? movie.runtime * 60 : 7200) // Simulate watch time
+      analytics.endSession(sessionId, finalTime)
+      setSessionId(null)
     }
-    setIsPlaying(false);
-  };
+    setIsPlaying(false)
+  }
 
   useEffect(() => {
     if (isPlaying && sessionId && movie) {
       const interval = setInterval(() => {
         // Simulate realistic progression through the movie
-        const currentTime = Math.random() * (movie.runtime ? movie.runtime * 60 : 7200);
+        const currentTime = Math.random() * (movie.runtime ? movie.runtime * 60 : 7200)
 
         // Simulate user interactions
-        const additionalData: any = {};
-        if (Math.random() > 0.95) additionalData.pauseEvents = 1;
-        if (Math.random() > 0.98) additionalData.seekEvents = 1;
-        if (Math.random() > 0.99) additionalData.bufferingEvents = 1;
-        if (Math.random() > 0.9) additionalData.isFullscreen = Math.random() > 0.5;
+        const additionalData: any = {}
+        if (Math.random() > 0.95) additionalData.pauseEvents = 1
+        if (Math.random() > 0.98) additionalData.seekEvents = 1
+        if (Math.random() > 0.99) additionalData.bufferingEvents = 1
+        if (Math.random() > 0.9) additionalData.isFullscreen = Math.random() > 0.5
 
-        analytics.updateSession(sessionId, currentTime, additionalData);
-      }, 30000); // Update every 30 seconds
+        analytics.updateSession(sessionId, currentTime, additionalData)
+      }, 30000) // Update every 30 seconds
 
-      return () => clearInterval(interval);
+      return () => clearInterval(interval)
     }
-  }, [isPlaying, sessionId, movie]);
+  }, [isPlaying, sessionId, movie])
 
   const handleFrogBoop = () => {
-    setFrogBoops(prev => prev + 1);
-    setShowBoopAnimation(true);
-    setTimeout(() => setShowBoopAnimation(false), 600);
-  };
+    setFrogBoops((prev) => prev + 1)
+    setShowBoopAnimation(true)
+    setTimeout(() => setShowBoopAnimation(false), 600)
+  }
 
   if (loading) {
     return (
@@ -218,21 +222,30 @@ const MovieDetail: React.FC = () => {
           <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
             <Film className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Loading movie details...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
+            Loading movie details...
+          </p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!movie) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">Movie not found</h2>
-          <Link to="/" className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors">Go back home</Link>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+            Movie not found
+          </h2>
+          <Link
+            to="/"
+            className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
+          >
+            Go back home
+          </Link>
         </div>
       </div>
-    );
+    )
   }
 
   if (isPlaying) {
@@ -249,9 +262,24 @@ const MovieDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* Video Player with Enhanced Ad Blocking */}
+        {/* Player Source Selector */}
+        <div className="absolute top-6 left-6 z-10">
+          <select
+            value={selectedPlayer}
+            onChange={(e) => setSelectedPlayer(e.target.value)}
+            className="bg-black/70 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-500"
+          >
+            {playerConfigs.map((config) => (
+              <option key={config.id} value={config.id}>
+                {config.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Video Player */}
         <iframe
-          src={`https://player.videasy.net/movie/${id}?color=fbc9ff&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&mobile=true`}
+          src={getPlayerUrl(selectedPlayer, id!, "movie")}
           className="w-full h-full border-0"
           allowFullScreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
@@ -259,11 +287,11 @@ const MovieDetail: React.FC = () => {
           title={movie.title}
           referrerPolicy="no-referrer"
           style={{
-            colorScheme: 'normal'
+            colorScheme: "normal",
           }}
         />
       </div>
-    );
+    )
   }
 
   return (
@@ -277,7 +305,7 @@ const MovieDetail: React.FC = () => {
             {/* Poster */}
             <div className="md:flex-shrink-0">
               <img
-                src={tmdb.getImageUrl(movie.poster_path, 'w500')}
+                src={tmdb.getImageUrl(movie.poster_path, "w500") || "/placeholder.svg"}
                 alt={movie.title}
                 className="h-96 w-full object-cover md:h-full md:w-80"
               />
@@ -287,7 +315,9 @@ const MovieDetail: React.FC = () => {
             <div className="p-8">
               <div className="flex items-start justify-between mb-4 w-full">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">{movie.title}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
+                    {movie.title}
+                  </h1>
                   <div className="flex items-center mt-2 text-sm text-gray-600 dark:text-gray-300">
                     <Calendar className="w-4 h-4 mr-1" />
                     {new Date(movie.release_date).getFullYear()}
@@ -305,15 +335,17 @@ const MovieDetail: React.FC = () => {
                     onClick={toggleFavorite}
                     aria-label="Toggle Favorite"
                     className={`transition-colors duration-200 ${
-                      isFavorited ? 'text-pink-500 hover:text-pink-600' : 'text-gray-400 hover:text-gray-500'
+                      isFavorited ? "text-pink-500 hover:text-pink-600" : "text-gray-400 hover:text-gray-500"
                     }`}
                   >
-                    <Heart className="w-7 h-7" fill={isFavorited ? 'currentColor' : 'none'} />
+                    <Heart className="w-7 h-7" fill={isFavorited ? "currentColor" : "none"} />
                   </button>
                 </div>
               </div>
 
-              <p className="text-gray-700 flex flex-wrap dark:text-gray-300 mb-6 transition-colors duration-300">{movie.overview}</p>
+              <p className="text-gray-700 flex flex-wrap dark:text-gray-300 mb-6 transition-colors duration-300">
+                {movie.overview}
+              </p>
 
               <button
                 onClick={handleWatchMovie}
@@ -322,24 +354,28 @@ const MovieDetail: React.FC = () => {
                 <Play className="w-5 h-5" />
                 <span>Watch Movie</span>
               </button>
-              <br/>
+              <br />
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">Cast Overview</h2>
-                  <div className="flex flex-wrap gap-6 px-8 pb-8">
-                    {loading ? (
-                      <p className="text-gray-700 dark:text-gray-300">Loading cast...</p>
-                    ) : cast.length === 0 ? (
-                      <p className="text-gray-700 dark:text-gray-300">No cast information available.</p>
-                    ) : (
-                      cast.slice(0, 12).map((actor) => (
-                        <div key={actor.id} className="flex-shrink-0 w-28 text-center">
-                          <img
-                            src={actor.profile_path ? tmdb.getImageUrl(actor.profile_path, 'w185') : '/placeholder-avatar.png'}
-                            alt={actor.name}
-                            className="w-28 h-28 object-cover rounded-full shadow-md mb-2 border border-gray-300 dark:border-gray-600"
-                          />
-                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{actor.name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{actor.character}</p>
+                <div className="flex flex-wrap gap-6 px-8 pb-8">
+                  {loading ? (
+                    <p className="text-gray-700 dark:text-gray-300">Loading cast...</p>
+                  ) : cast.length === 0 ? (
+                    <p className="text-gray-700 dark:text-gray-300">No cast information available.</p>
+                  ) : (
+                    cast.slice(0, 12).map((actor) => (
+                      <div key={actor.id} className="flex-shrink-0 w-28 text-center">
+                        <img
+                          src={
+                            actor.profile_path
+                              ? tmdb.getImageUrl(actor.profile_path, "w185")
+                              : "/placeholder-avatar.png"
+                          }
+                          alt={actor.name}
+                          className="w-28 h-28 object-cover rounded-full shadow-md mb-2 border border-gray-300 dark:border-gray-600"
+                        />
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{actor.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{actor.character}</p>
                       </div>
                     ))
                   )}
@@ -351,17 +387,20 @@ const MovieDetail: React.FC = () => {
 
         {/* Easter Egg */}
         {movie && [816, 817, 818].includes(movie.id) && (
-          <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3 bg-pink-600/90 dark:bg-pink-700/90 rounded-full px-4 py-2 shadow-lg cursor-pointer select-none"
+          <div
+            className="fixed bottom-4 right-4 z-50 flex items-center space-x-3 bg-pink-600/90 dark:bg-pink-700/90 rounded-full px-4 py-2 shadow-lg cursor-pointer select-none"
             onClick={handleFrogBoop}
             role="button"
             tabIndex={0}
             aria-label="Boop the frog"
-            onKeyDown={(e) => { if (e.key === 'Enter') handleFrogBoop(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleFrogBoop()
+            }}
           >
             <img
               src="/frog.svg"
               alt="Frog icon"
-              className={`w-10 h-10 rounded-full transition-transform duration-150 ${showBoopAnimation ? 'scale-125' : 'scale-100'}`}
+              className={`w-10 h-10 rounded-full transition-transform duration-150 ${showBoopAnimation ? "scale-125" : "scale-100"}`}
               draggable={false}
             />
             <span className="text-white font-semibold text-lg select-none">{frogBoops} Boops</span>
@@ -369,7 +408,7 @@ const MovieDetail: React.FC = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default MovieDetail;
+export default MovieDetail
