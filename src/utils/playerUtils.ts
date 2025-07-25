@@ -17,9 +17,9 @@ export const playerConfigs: PlayerConfig[] = [
     name: "Videasy",
     generateUrl: ({ tmdbId, seasonNumber, episodeNumber, mediaType }) => {
       if (mediaType === "movie") {
-        return `https://player.videasy.net/movie/${tmdbId}?color=${THEME_COLOR}&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&mobile=true`
+        return `https://player.videasy.net/movie/${tmdbId}?color=${THEME_COLOR}&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&mobile=true&ads=false&redirect=false&popups=false&external=false`
       } else {
-        return `https://player.videasy.net/tv/${tmdbId}/${seasonNumber}/${episodeNumber}?color=${THEME_COLOR}&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&mobile=true`
+        return `https://player.videasy.net/tv/${tmdbId}/${seasonNumber}/${episodeNumber}?color=${THEME_COLOR}&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&noRedirect=true&adblock=true&popup=false&mobile=true&ads=false&redirect=false&popups=false&external=false`
       }
     },
   },
