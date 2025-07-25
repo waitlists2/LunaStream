@@ -23,7 +23,7 @@ export const playerConfigs: PlayerConfig[] = [
       }
     },
   },
-  /*{
+  {
     id: "vidlink",
     name: "Vidlink",
     generateUrl: ({ tmdbId, seasonNumber, episodeNumber, mediaType }) => {
@@ -33,7 +33,7 @@ export const playerConfigs: PlayerConfig[] = [
         return `https://vidlink.pro/tv/${tmdbId}/${seasonNumber}/${episodeNumber}?primaryColor=${THEME_COLOR}&secondaryColor=${THEME_COLOR}&iconColor=${THEME_COLOR}&title=false&poster=true&autoplay=true`
       }
     },
-  },*/
+  },
   {
     id: "vidjoy",
     name: "Vidjoy",
@@ -55,7 +55,7 @@ export const playerConfigs: PlayerConfig[] = [
         return `https://vidsrc.to/embed/tv/${tmdbId}/${seasonNumber}/${episodeNumber}`
       }
     },
-  },/*
+  },
   {
     id: "vidsrcpro",
     name: "Vidsrc Pro",
@@ -66,7 +66,7 @@ export const playerConfigs: PlayerConfig[] = [
         return `https://vidsrc.pro/embed/tv/${tmdbId}/${seasonNumber}/${episodeNumber}`
       }
     },
-  },*/
+  },
 ]
 
 export const getPlayerUrl = (

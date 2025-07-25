@@ -348,11 +348,11 @@ const TVDetail: React.FC = () => {
           </button>
         </div>
         {/* Player Source Selector */}
-        <div className="absolute top-6 left-6 z-10">
+        <div className="absolute top-6 left-6 z-10 group relative w-32 h-10">
           <select
             value={selectedPlayer}
             onChange={(e) => setSelectedPlayer(e.target.value)}
-            className="bg-black/70 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="opacity-0 group-hover:opacity-100 absolute inset-0 bg-black/70 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-500 appearance-none transition-opacity duration-200"
           >
             {playerConfigs.map((config) => (
               <option key={config.id} value={config.id}>
@@ -361,21 +361,18 @@ const TVDetail: React.FC = () => {
             ))}
           </select>
         </div>
-
-        {/* Video Player */}
         <iframe
           src={getPlayerUrl(selectedPlayer, id!, "tv", currentEpisode.season_number, currentEpisode.episode_number)}
           className="w-full h-full border-0"
           allowFullScreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          sandbox="allow-scripts allow-same-origin allow-forms"
           title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
           referrerPolicy="no-referrer"
           style={{
             colorScheme: "normal",
           }}
         />
-      </div>
+    </div>
     )
   }
 
