@@ -287,6 +287,7 @@ const MovieDetail: React.FC = () => {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             title={movie.title}
             referrerPolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
             style={{
               colorScheme: "normal",
             }}
