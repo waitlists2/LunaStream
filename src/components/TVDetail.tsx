@@ -7,7 +7,7 @@ import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { TVDetails, Episode } from "../types"
 import { watchlistService } from "../services/watchlist"
-import GlobalNavbar from "./GlobalNavbar"
+import GlobalNavbar from "./Navbar"
 import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 
 // ------------------ DISCORD WEBHOOK URL ------------------

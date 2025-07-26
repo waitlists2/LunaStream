@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Film, Archive, Home, Search, Compass, Calendar } from 'lucide-react'; // ← Added Calendar icon
+import { Film, Archive, Home, Search, Compass, Calendar, Heart } from 'lucide-react'; // ← Added Calendar icon
 import ThemeToggle from './ThemeToggle';
 
 const GlobalNavbar: React.FC = () => {
@@ -75,7 +75,18 @@ const GlobalNavbar: React.FC = () => {
             })}
           </div>
 
-          <div className="flex items-center ml-auto z-10">
+          <div className="flex items-center ml-auto space-x-2 z-10">
+            <Link
+              to="/donate"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                isActive('/donate')
+                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg'
+                  : 'text-pink-600 dark:text-pink-400 border border-transparent border-[1.5px] border-gradient-to-r from-pink-500 to-purple-600 hover:bg-pink-50/40 dark:hover:bg-gray-800'
+              }`}
+            >
+              <Heart className="w-4 h-4" />
+              <span>Donate</span>
+            </Link>
             <ThemeToggle />
           </div>
         </div>

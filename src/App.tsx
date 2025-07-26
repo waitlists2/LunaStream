@@ -16,6 +16,7 @@ import Discover from './components/Discover';
 import Watchlist from './components/Watchlist';
 import Vault from './components/Vault'
 import ComingSoon from './components/ComingSoon';
+import Footer from './components/Footer';
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -78,6 +79,10 @@ function App() {
         <Route path="/watchlist" element={<Watchlist />} /> {/* Redirects to /vault */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+      <footer>
+        <Footer />
+      </footer>
     </Router>
   );
 }

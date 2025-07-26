@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Film } from 'lucide-react';
-import GlobalNavbar from './GlobalNavbar';
+import GlobalNavbar from './Navbar';
 
 const LastUpdated: React.FC = () => {
   const lastUpdated = new Date(document.lastModified);
