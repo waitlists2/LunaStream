@@ -96,7 +96,7 @@ const DonatePage: React.FC = () => {
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Development:</strong> Hiring someone to help out. contact x@fbi.monster</p>
+                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>Development:</strong> Hiring someone to help out. contact admin@lunastream.watch</p>
               </div>
             </div>
             <div className="space-y-4">
