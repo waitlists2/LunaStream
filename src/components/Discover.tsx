@@ -285,7 +285,7 @@ const Discover: React.FC = () => {
           <select
             onChange={handleMediaTypeChange}
             value={mediaType}
-            className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white appearance-none"
           >
             <option value="movie">Movies</option>
             <option value="tv">TV Shows</option>
@@ -296,7 +296,7 @@ const Discover: React.FC = () => {
             <select
               onChange={handleGenreChange}
               value={selectedGenre}
-              className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+              className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white appearance-none"
             >
               <option value="">All Genres</option>
               {genres.map(genre => (
@@ -310,7 +310,7 @@ const Discover: React.FC = () => {
           <select
             onChange={handleSortByChange}
             value={sortBy}
-            className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+            className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white appearance-none"
           >
             <option value="popularity.desc">Popularity (Desc)</option>
             <option value="popularity.asc">Popularity (Asc)</option>
