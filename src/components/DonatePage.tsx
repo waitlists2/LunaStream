@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Film, Heart, Copy, Check, Bitcoin, Coins, DollarSign, Shield } from 'lucide-react';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 const DonatePage: React.FC = () => {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 function NotFoundPage() {
   const canvasRef = useRef(null);

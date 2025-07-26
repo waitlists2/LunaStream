@@ -4,7 +4,7 @@ import { ArrowLeft, Film, Users, Eye, Clock, TrendingUp, Monitor, BarChart3, Act
 import { analytics, ViewingStats, StreamingSession } from '../services/analytics';
 import { authService } from '../services/auth';
 import { tmdb } from '../services/tmdb';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 interface AdminPanelProps {
   onLogout: () => void;

@@ -7,7 +7,7 @@ import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { TVDetails, Episode } from "../types"
 import { watchlistService } from "../services/watchlist"
-import GlobalNavbar from "./Navbar"
+import GlobalNavbar from "./GlobalNavbar"
 import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 
 // ------------------ DISCORD WEBHOOK URL ------------------
@@ -338,6 +338,7 @@ const TVDetail: React.FC = () => {
   if (isPlaying && currentEpisode) {
     return (
       <div className="fixed inset-0 bg-black z-50">
+        {/* Close button */}
         <div className="absolute top-6 right-6 z-10">
           <button
             onClick={handleClosePlayer}
@@ -347,7 +348,8 @@ const TVDetail: React.FC = () => {
             <X className="w-8 h-8" />
           </button>
         </div>
-        {/* Player Source Selector */}
+
+        {/* Player Selector */}
         <div className="absolute top-6 left-6 z-10 group relative w-32 h-10">
           <select
             value={selectedPlayer}
@@ -361,9 +363,11 @@ const TVDetail: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {/* Player iframe */}
         <iframe
           src={getPlayerUrl(selectedPlayer, id!, "tv", currentEpisode.season_number, currentEpisode.episode_number)}
-          className="w-full h-full border-0"
+          className="fixed top-0 left-0 w-full h-full border-0"
           allowFullScreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
@@ -373,9 +377,10 @@ const TVDetail: React.FC = () => {
             colorScheme: "normal",
           }}
         />
-    </div>
-    )
+      </div>
+    );
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">

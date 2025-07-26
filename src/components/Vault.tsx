@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Film, Search, Trash2, Play, Calendar, Star, ArrowLeft, Heart, Archive, TrendingUp, Users, BarChart3, Clock, Target, Award } from 'lucide-react';
 import { watchlistService, WatchlistMovie, WatchlistTVShow } from '../services/watchlist';
 import { tmdb } from '../services/tmdb';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 type CombinedItem =
   | { type: 'movie'; data: WatchlistMovie; lastActivity: number }

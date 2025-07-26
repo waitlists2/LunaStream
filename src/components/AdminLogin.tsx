@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Film, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../services/auth';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 interface AdminLoginProps {
   onLogin: () => void;

@@ -4,7 +4,7 @@ import { Search, Film, Star, Calendar } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import Fuse from 'fuse.js';
 import { Movie, TVShow } from '../types';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 

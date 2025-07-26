@@ -6,7 +6,7 @@ import { useNavigate, useParams, Link } from "react-router-dom"
 
 import { tmdb } from "../services/tmdb"
 import type { Movie, TVShow } from "../types"
-import GlobalNavbar from "./Navbar"
+import GlobalNavbar from "./GlobalNavbar"
 
 const HomePage: React.FC = () => {
   const { id } = useParams<{ id: string }>()

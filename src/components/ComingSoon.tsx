@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { Link } from 'react-router-dom';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 interface MediaItem {
   id: number;

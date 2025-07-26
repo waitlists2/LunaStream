@@ -7,7 +7,7 @@ import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { MovieDetails } from "../types"
 import { watchlistService } from "../services/watchlist"
-import GlobalNavbar from "./Navbar"
+import GlobalNavbar from "./GlobalNavbar"
 import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 
 // ------------- DISCORD WEBHOOK URL -------------
@@ -277,25 +277,24 @@ const MovieDetail: React.FC = () => {
           </select>
         </div>
 
-
-        {/* Video Player Wrapper */}
-        <div className="w-full max-w-screen max-h-screen aspect-video mx-auto overflow-hidden">
-          <iframe
-            src={getPlayerUrl(selectedPlayer, id!, "movie")}
-            className="w-full h-full border-0"
-            allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-            title={movie.title}
-            referrerPolicy="no-referrer"
-            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-            style={{
-              colorScheme: "normal",
-            }}
-          />
-        </div>
+        {/* Player iframe */}
+        <iframe
+          src={getPlayerUrl(selectedPlayer, id!, "movie")}
+          className="fixed top-0 left-0 w-full h-full border-0"
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          title={movie.title}
+          referrerPolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+          style={{
+            colorScheme: "normal",
+          }}
+        />
       </div>
-    )
+    );
   }
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative transition-colors duration-300">

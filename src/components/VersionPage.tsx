@@ -14,7 +14,7 @@ import {
   Info,
 } from 'lucide-react';
 import { github, GitHubCommit, GitHubRepo } from '../services/github';
-import GlobalNavbar from './Navbar';
+import GlobalNavbar from './GlobalNavbar';
 
 const VersionPage: React.FC = () => {
   const [commitInfo, setCommitInfo] = useState<GitHubCommit | null>(null);
