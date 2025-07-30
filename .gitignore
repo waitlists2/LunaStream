@@ -26,3 +26,4 @@ dist-ssr
 electron_app/
 bank/
 app/
+electron-dist/
