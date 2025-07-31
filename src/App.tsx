@@ -17,6 +17,7 @@ import Watchlist from './components/Watchlist';
 import Vault from './components/Vault'
 import ComingSoon from './components/ComingSoon';
 import Footer from './components/Footer';
+import { LanguageProvider } from './components/LanguageContext';
 
 function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -51,39 +52,41 @@ function App() {
   };
 
   return (
-    <Router>
-      {/*<CustomCursor />*/}
-      <ScrollToTopButton />
-      {/* Define routes for the application */}
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/movie/:id" element={<MovieDetail />} />
-        <Route path="/tv/:id" element={<TVDetail />} />
-        <Route path="/v" element={<VersionPage />} />
-        <Route path="/last-updated" element={<LastUpdated />} />
-        <Route path="/donate" element={<DonatePage />} />
-        <Route 
-          path="/admin"
-          element={
-            isAdminAuthenticated ? (
-              <AdminPanel onLogout={handleAdminLogout} />
-            ) : (
-              <AdminLogin onLogin={handleAdminLogin} />
-            )
-          } 
-        />
-        <Route path="/soon" element={<ComingSoon />} />
-        <Route path="/discover" element={<Discover />} />
-        <Route path="/vault" element={<Vault />} />
-        <Route path="/watchlist" element={<Watchlist />} /> {/* Redirects to /vault */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+    <LanguageProvider>
+      <Router>
+        {/*<CustomCursor />*/}
+        <ScrollToTopButton />
+        {/* Define routes for the application */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/tv/:id" element={<TVDetail />} />
+          <Route path="/v" element={<VersionPage />} />
+          <Route path="/last-updated" element={<LastUpdated />} />
+          <Route path="/donate" element={<DonatePage />} />
+          <Route 
+            path="/admin"
+            element={
+              isAdminAuthenticated ? (
+                <AdminPanel onLogout={handleAdminLogout} />
+              ) : (
+                <AdminLogin onLogin={handleAdminLogin} />
+              )
+            } 
+          />
+          <Route path="/soon" element={<ComingSoon />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/vault" element={<Vault />} />
+          <Route path="/watchlist" element={<Watchlist />} /> {/* Redirects to /vault */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
 
-      <footer>
-        <Footer />
-      </footer>
-    </Router>
+        <footer>
+          <Footer />
+        </footer>
+      </Router>
+    </LanguageProvider>
   );
 }
 

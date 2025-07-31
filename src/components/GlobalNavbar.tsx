@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Film, Archive, Home, Search, Compass, Calendar, Heart } from 'lucide-react'; // ← Added Calendar icon
+import { Film, Archive, Home, Search, Compass, Heart } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { languages, translations } from '../data/i18n';
+
+import { useLanguage } from './LanguageContext';
 
 const GlobalNavbar: React.FC = () => {
   const location = useLocation();
+  const { language, setLanguage } = useLanguage();
+
+  const t = translations[language] || translations.en;
 
   const isActive = (path: string) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -12,13 +18,82 @@ const GlobalNavbar: React.FC = () => {
     return false;
   };
 
+  // Define nav items with translated labels
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/search', label: 'Search', icon: Search },
-    { path: '/discover', label: 'Discover', icon: Compass },
-    /*{ path: '/soon', label: 'Upcoming', icon: Calendar },*/
-    { path: '/vault', label: 'Vault', icon: Archive },
+    { path: '/', label: t.home, icon: Home },
+    { path: '/search', label: t.search, icon: Search },
+    { path: '/discover', label: t.discover, icon: Compass },
+    // { path: '/soon', label: t.coming_soon, icon: Calendar }, // optional
+    { path: '/vault', label: t.vault, icon: Archive },
   ];
+
+  // Custom Language Selector component (inside same file)
+  const LanguageSelectorCustom = () => {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (ref.current && !ref.current.contains(event.target as Node)) {
+          setOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSelect = (lang: string) => {
+      setLanguage(lang);
+      setOpen(false);
+    };
+
+    return (
+      <div ref={ref} className="relative inline-block max-w-[100px]">
+        <button
+          onClick={() => setOpen(!open)}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          className="inline-flex items-center justify-between w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-2xl text-gray-900 dark:text-gray-100 text-xl font-semibold cursor-pointer select-none
+            hover:bg-gray-200 dark:hover:bg-gray-700 transition-shadow shadow-sm dark:shadow-none focus:outline-none focus:ring-2 focus:ring-pink-500"
+        >
+          {language.toUpperCase()}
+          <svg
+            className={`ml-2 h-5 w-5 text-gray-500 dark:text-gray-300 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {open && (
+          <ul
+            role="listbox"
+            tabIndex={-1}
+            className="absolute right-0 mt-2 w-full rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none
+              text-gray-900 dark:text-gray-100 text-sm origin-top-right"
+            style={{ transformOrigin: 'top right', transform: 'scale(0.9)', transition: 'transform 0.15s ease' }}
+          >
+            {languages.map(({ shortname }) => (
+              <li
+                key={shortname}
+                role="option"
+                aria-selected={language === shortname}
+                onClick={() => handleSelect(shortname)}
+                className={`cursor-pointer px-4 py-2 hover:bg-pink-500 hover:text-white ${
+                  language === shortname ? 'bg-pink-500 text-white' : ''
+                }`}
+              >
+                {shortname.toUpperCase()}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
 
   return (
     <nav className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-pink-200/50 dark:border-gray-600/30 sticky top-0 z-50 transition-all duration-300">
@@ -75,7 +150,8 @@ const GlobalNavbar: React.FC = () => {
             })}
           </div>
 
-          <div className="flex items-center ml-auto space-x-2 z-10">
+          {/* Right side controls: Donate, ThemeToggle, LanguageSelector */}
+          <div className="flex items-center ml-auto space-x-3 z-10">
             <Link
               to="/donate"
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
@@ -85,9 +161,13 @@ const GlobalNavbar: React.FC = () => {
               }`}
             >
               <Heart className="w-4 h-4" />
-              <span>Donate</span>
+              <span>{t.donate}</span>
             </Link>
+
             <ThemeToggle />
+
+            {/* Custom Language selector */}
+            <LanguageSelectorCustom />
           </div>
         </div>
       </div>

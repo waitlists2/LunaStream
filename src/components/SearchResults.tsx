@@ -6,6 +6,10 @@ import Fuse from 'fuse.js';
 import { Movie, TVShow } from '../types';
 import GlobalNavbar from './GlobalNavbar';
 
+import { languages, translations } from '../data/i18n'
+
+import { useLanguage } from "./LanguageContext"
+
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
 const fuseOptions: Fuse.IFuseOptions<MediaItem> = {
@@ -75,6 +79,9 @@ const SearchResults: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [warningVisible, setWarningVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const { language, setLanguage } = useLanguage()
+  const t = translations[language] || translations.en
 
   const resultsPerPage = 18;
   const totalPages = Math.ceil(results.length / resultsPerPage);
@@ -169,7 +176,7 @@ const SearchResults: React.FC = () => {
         }
       } catch (err) {
         console.error(err);
-        setError('Failed to fetch search results.');
+        setError(t.search_fail);
         setResults([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -227,8 +234,8 @@ const SearchResults: React.FC = () => {
               className="h-12 px-6 rounded-r-xl border border-l-0 border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-800/95 text-gray-900 dark:text-gray-100 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
               style={{ paddingRight: '1.5rem' }} // extra right padding so text doesn't get too close to edge
             >
-              <option value="popularity">Popularity</option>
-              <option value="score">Relevance</option>
+              <option value="popularity">{t.popularity}</option>
+              <option value="score">{t.relevance}</option>
             </select>
           </div>
 
@@ -241,13 +248,13 @@ const SearchResults: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-lg w-full text-center">
             <h2 className="text-3xl font-bold mb-4 text-pink-600 dark:text-pink-400">Haiii!</h2>
             <p className="mb-6 text-gray-700 dark:text-gray-300">
-              Based on your search term, you might find disturbing content. Please stay safe.
+              {t.stay_safe}
             </p>
             <button
               onClick={() => setWarningVisible(false)}
               className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg focus:ring-4 focus:ring-pink-400"
             >
-              Continue anyway
+              {t.stay_safe_continue}
             </button>
           </div>
         </div>
@@ -257,10 +264,10 @@ const SearchResults: React.FC = () => {
       <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${warningVisible ? 'blur-sm pointer-events-none' : ''}`}>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Search Results for "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
+            {t.search_results_for} "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Showing {paginatedResults.length} of {results.length} result{results.length !== 1 ? 's' : ''}
+            {t.showing} {paginatedResults.length} {t.of} {results.length} {t.result}{results.length !== 1 ? t.plural_s : ''}
           </p>
         </div>
 
@@ -280,7 +287,7 @@ const SearchResults: React.FC = () => {
 
         {!loading && !error && paginatedResults.length === 0 && (
           <div className="text-center text-gray-700 dark:text-gray-300 py-10">
-            No results found for &quot;{query}&quot;.
+            {t.no_results_found_for} &quot;{query}&quot;.
           </div>
         )}
 
@@ -298,7 +305,7 @@ const SearchResults: React.FC = () => {
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
-                      No Image
+                      {t.no_image}
                     </div>
                   )}
                   <div className="p-3">
@@ -328,7 +335,7 @@ const SearchResults: React.FC = () => {
               disabled={currentPage === 1}
               className="px-3 py-1 rounded-md bg-pink-600 text-white disabled:bg-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
             >
-              Previous
+              {t.previous}
             </button>
 
             {[...Array(totalPages)].map((_, idx) => {
@@ -354,7 +361,7 @@ const SearchResults: React.FC = () => {
               disabled={currentPage === totalPages}
               className="px-3 py-1 rounded-md bg-pink-600 text-white disabled:bg-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
             >
-              Next
+              {t.next}
             </button>
           </nav>
         )}

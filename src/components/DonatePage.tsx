@@ -78,7 +78,7 @@ const DonatePage: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed transition-colors duration-300">
-            Help me keep LunaStream free and available for everyone. Your donations directly support my website to provide the best streaming experience.
+            Help us keep LunaStream free and available for everyone. Your donations directly support our website to provide the best streaming experience.
           </p>
         </div>
 

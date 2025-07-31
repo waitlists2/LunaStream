@@ -5,6 +5,10 @@ import { watchlistService, WatchlistMovie, WatchlistTVShow } from '../services/w
 import { tmdb } from '../services/tmdb';
 import GlobalNavbar from './GlobalNavbar';
 
+import { languages, translations } from '../data/i18n'
+
+import { useLanguage } from "./LanguageContext"
+
 type CombinedItem =
   | { type: 'movie'; data: WatchlistMovie; lastActivity: number }
   | { type: 'tv'; data: WatchlistTVShow; lastActivity: number };
@@ -18,6 +22,9 @@ const Vault: React.FC = () => {
   const [favoriteShows, setFavoriteShows] = useState<any[]>([]);
   const [sortOption, setSortOption] = useState<'date' | 'title' | 'rating'>('date');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  const { language, setLanguage } = useLanguage()
+  const t = translations[language] || translations.en
 
   const loadData = () => {
     setLoading(true);
@@ -128,9 +135,9 @@ const Vault: React.FC = () => {
 
     // Filter by category if selected
     if (categoryFilter) {
-      if (categoryFilter === 'Movie') {
+      if (categoryFilter === 'Movie' || 'Film') {
         items = favoriteMovies; // Only movies
-      } else if (categoryFilter === 'TV Show') {
+      } else if (categoryFilter === 'TV Show' || 'TV-serie') {
         items = favoriteShows; // Only shows
       }
     }
@@ -155,9 +162,9 @@ const Vault: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'watchlist', label: 'Watchlist', icon: Play, count: combinedItems.length },
-    { id: 'favorites', label: 'Favorites', icon: Heart, count: stats.totalFavorites },
-    { id: 'stats', label: 'Statistics', icon: BarChart3, count: null },
+    { id: 'watchlist', label: t.watchlist, icon: Play, count: combinedItems.length },
+    { id: 'favorites', label: t.favorites, icon: Heart, count: stats.totalFavorites },
+    { id: 'stats', label: t.statistics, icon: BarChart3, count: null },
   ];
 
   return (
@@ -171,11 +178,11 @@ const Vault: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 <span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                  My Vault
+                  {t.my_c} {t.vault}
                 </span>
               </h1>
               <p className="text-gray-600 dark:text-gray-200">
-                Your personal collection of movies, shows, and favorites
+                {t.vault_tagline}
               </p>
             </div>
             
@@ -188,9 +195,9 @@ const Vault: React.FC = () => {
                   onChange={(e) => setCategoryFilter(e.target.value || null)}
                   className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
                 >
-                  <option value="">All</option>
-                  <option value="Movie">Movies</option>
-                  <option value="TV Show">TV Shows</option>
+                  <option value="">{t.all}</option>
+                  <option value="Movie">{t.movies}</option>
+                  <option value="TV Show">{t.tvs}</option>
                 </select>
               </div>
 
@@ -199,7 +206,7 @@ const Vault: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search your vault..."
+                  placeholder={`${t.search_your_vault}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
@@ -260,7 +267,7 @@ const Vault: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Recently Watched ({filteredItems.length})
+                    {t.recently_watched} ({filteredItems.length})
                   </h2>
                   {combinedItems.length > 0 && (
                     <button
@@ -268,7 +275,7 @@ const Vault: React.FC = () => {
                       className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       <Trash2 className="w-4 h-4" />
-                      <span className="hidden sm:inline">Clear All</span>
+                      <span className="hidden sm:inline">{t.clear_all_1}</span>
                     </button>
                   )}
                 </div>
@@ -293,7 +300,7 @@ const Vault: React.FC = () => {
                         className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
                         <ArrowLeft className="w-4 h-4" />
-                        <span>Browse Content</span>
+                        <span>{t.browse_content}</span>
                       </Link>
                     )}
                   </div>
@@ -373,7 +380,7 @@ const Vault: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Favorites ({filteredFavorites.length})
+                    {t.favorites} ({filteredFavorites.length})
                   </h2>
                   {(favoriteMovies.length > 0 || favoriteShows.length > 0) && (
                     <button
@@ -381,7 +388,7 @@ const Vault: React.FC = () => {
                       className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       <Trash2 className="w-4 h-4" />
-                      <span className="hidden sm:inline">Clear All</span>
+                      <span className="hidden sm:inline">{t.clear_all_1}</span>
                     </button>
                   )}
                 </div>
@@ -406,7 +413,7 @@ const Vault: React.FC = () => {
                         className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
                         <ArrowLeft className="w-4 h-4" />
-                        <span>Browse Content</span>
+                        <span>{t.browse_content}</span>
                       </Link>
                     )}
                   </div>
@@ -455,7 +462,7 @@ const Vault: React.FC = () => {
                                 </span>
                                 <div className="flex items-center space-x-1">
                                   <Heart className="w-3 h-3 text-pink-500 fill-current" />
-                                  <span className="text-xs text-pink-600 dark:text-pink-400 font-medium">Favorite</span>
+                                  <span className="text-xs text-pink-600 dark:text-pink-400 font-medium">{t.favorite}</span>
                                 </div>
                               </div>
                             </div>
@@ -484,7 +491,7 @@ const Vault: React.FC = () => {
             {activeTab === 'stats' && (
               <div className="space-y-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  Your Vault Statistics
+                  {t.vault_statistics}
                 </h2>
 
                 {/* Overview Stats */}
@@ -492,7 +499,7 @@ const Vault: React.FC = () => {
                   <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-600/30 p-6 transition-colors duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Watched</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.total} {t.watched}</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalWatched}</p>
                       </div>
                       <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-pink-600 rounded-lg flex items-center justify-center">
@@ -504,7 +511,7 @@ const Vault: React.FC = () => {
                   <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-600/30 p-6 transition-colors duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Favorites</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.total} {t.favorites}</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalFavorites}</p>
                       </div>
                       <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -516,7 +523,7 @@ const Vault: React.FC = () => {
                   <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-indigo-200/50 dark:border-gray-600/30 p-6 transition-colors duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Movies Watched</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.movies} {t.watched}</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.moviesWatched}</p>
                       </div>
                       <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
@@ -528,7 +535,7 @@ const Vault: React.FC = () => {
                   <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-green-200/50 dark:border-gray-600/30 p-6 transition-colors duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Shows Watched</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.tvs} {t.watched}</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.showsWatched}</p>
                       </div>
                       <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
@@ -543,11 +550,11 @@ const Vault: React.FC = () => {
                   <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-600/30 p-6 transition-colors duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                       <BarChart3 className="w-5 h-5 mr-2 text-pink-500" />
-                      Content Breakdown
+                      {t.content_breakdown}
                     </h3>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Movies</span>
+                        <span className="text-gray-600 dark:text-gray-300">{t.movies}</span>
                         <div className="flex items-center space-x-2">
                           <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
@@ -559,7 +566,7 @@ const Vault: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">TV Shows</span>
+                        <span className="text-gray-600 dark:text-gray-300">{t.tvs}</span>
                         <div className="flex items-center space-x-2">
                           <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
@@ -576,11 +583,11 @@ const Vault: React.FC = () => {
                   <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-600/30 p-6 transition-colors duration-300">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
                       <Heart className="w-5 h-5 mr-2 text-purple-500" />
-                      Favorites Breakdown
+                      {t.favorites}{t.breakdown}
                     </h3>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Favorite Movies</span>
+                        <span className="text-gray-600 dark:text-gray-300">{t.favorite} {t.movies}</span>
                         <div className="flex items-center space-x-2">
                           <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
@@ -592,7 +599,7 @@ const Vault: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600 dark:text-gray-300">Favorite Shows</span>
+                        <span className="text-gray-600 dark:text-gray-300">{t.favorite} {t.tvs}</span>
                         <div className="flex items-center space-x-2">
                           <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
@@ -609,9 +616,9 @@ const Vault: React.FC = () => {
 
                 {/* Quick Actions */}
                 <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl p-8 text-white">
-                  <h3 className="text-2xl font-bold mb-4">Keep Building Your Vault!</h3>
+                  <h3 className="text-2xl font-bold mb-4">{t.keep_building}</h3>
                   <p className="text-lg opacity-90 mb-6">
-                    Discover new content and continue growing your personal collection.
+                    {t.keep_building_sub}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link
@@ -626,7 +633,7 @@ const Vault: React.FC = () => {
                       className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 transition-all text-white font-semibold"
                     >
                       <Search className="w-5 h-5" />
-                      Search Content
+                      {t.search_content}
                     </Link>
                   </div>
                 </div>

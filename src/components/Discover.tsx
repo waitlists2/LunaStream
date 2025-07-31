@@ -4,6 +4,10 @@ import { tmdb } from '../services/tmdb';
 import { Link } from 'react-router-dom';
 import GlobalNavbar from './GlobalNavbar';
 
+import { languages, translations } from '../data/i18n'
+
+import { useLanguage } from "./LanguageContext"
+
 interface Genre {
   id: number;
   name: string;
@@ -46,6 +50,9 @@ const Discover: React.FC = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { language, setLanguage } = useLanguage()
+  const t = translations[language] || translations.en
 
   // State and ref for pagination input
   const [inputPage, setInputPage] = useState('1');
@@ -276,7 +283,7 @@ const Discover: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
         <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-10">
           <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            Discover {mediaType === 'all' ? 'Everything' : mediaType === 'movie' ? 'Movies' : 'TV Shows'}
+            {t.discover} {mediaType === 'all' ? t.everything : mediaType === 'movie' ? t.movies : t.tvs}
           </span>
         </h1>
 
@@ -287,9 +294,9 @@ const Discover: React.FC = () => {
             value={mediaType}
             className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white appearance-none"
           >
-            <option value="movie">Movies</option>
-            <option value="tv">TV Shows</option>
-            <option value="all">All</option>
+            <option value="movie">{t.movies}</option>
+            <option value="tv">{t.tvs}</option>
+            <option value="all">{t.all}</option>
           </select>
 
           {mediaType !== 'all' && (
@@ -298,7 +305,7 @@ const Discover: React.FC = () => {
               value={selectedGenre}
               className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white appearance-none"
             >
-              <option value="">All Genres</option>
+              <option value="">{t.all} {t.genres}</option>
               {genres.map(genre => (
                 <option key={genre.id} value={genre.id}>
                   {genre.name}
@@ -312,22 +319,22 @@ const Discover: React.FC = () => {
             value={sortBy}
             className="px-4 py-2 rounded-lg border dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white appearance-none"
           >
-            <option value="popularity.desc">Popularity (Desc)</option>
-            <option value="popularity.asc">Popularity (Asc)</option>
-            <option value="vote_average.desc">Rating (Desc)</option>
-            <option value="vote_average.asc">Rating (Asc)</option>
-            <option value="release_date.desc">Release Date (Newest)</option>
-            <option value="release_date.asc">Release Date (Oldest)</option>
+            <option value="popularity.desc">{t.popularity} ({t.descending_short})</option>
+            <option value="popularity.asc">{t.popularity} ({t.ascending_short})</option>
+            <option value="vote_average.desc">{t.popularity} ({t.descending_short})</option>
+            <option value="vote_average.asc">{t.rating} ({t.ascending_short})</option>
+            <option value="release_date.desc">{t.release_date} ({t.newest})</option>
+            <option value="release_date.asc">{t.release_date} ({t.oldest})</option>
           </select>
         </div>
 
         {/* Results */}
         {loading ? (
-          <div className="text-center py-20 text-gray-700 dark:text-gray-300">Loading...</div>
+          <div className="text-center py-20 text-gray-700 dark:text-gray-300">{t.loading}...</div>
         ) : error ? (
           <div className="text-center text-red-500">{error}</div>
         ) : pagedResults.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400">No results found.</div>
+          <div className="text-center text-gray-500 dark:text-gray-400">{t.no_results_found}.</div>
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
