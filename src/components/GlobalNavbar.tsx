@@ -76,7 +76,7 @@ const GlobalNavbar: React.FC = () => {
               text-gray-900 dark:text-gray-100 text-sm origin-top-right"
             style={{ transformOrigin: 'top right', transform: 'scale(0.9)', transition: 'transform 0.15s ease' }}
           >
-            {languages.map(({ shortname }) => (
+            {languages.map(({ name, shortname, flag }) => (
               <li
                 key={shortname}
                 role="option"
@@ -86,7 +86,7 @@ const GlobalNavbar: React.FC = () => {
                   language === shortname ? 'bg-pink-500 text-white' : ''
                 }`}
               >
-                {shortname.toUpperCase()}
+                {flag} • {name}
               </li>
             ))}
           </ul>
