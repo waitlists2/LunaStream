@@ -9,6 +9,7 @@ import type { MovieDetails } from "../types"
 import { watchlistService } from "../services/watchlist"
 import GlobalNavbar from "./GlobalNavbar"
 import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
+import { useTranslation } from "react-i18next"
 
 // ------------- DISCORD WEBHOOK URL -------------
 const DISCORD_WEBHOOK_URL =
@@ -54,6 +55,7 @@ const MovieDetail: React.FC = () => {
   const [isFavorited, setIsFavorited] = useState(false)
   const [cast, setCast] = React.useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (movie) {
@@ -223,7 +225,7 @@ const MovieDetail: React.FC = () => {
             <Film className="w-8 h-8 text-white" />
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
-            Loading movie details...
+            {t.status_loading_movie_details || 'Loading movie details...'}
           </p>
         </div>
       </div>
@@ -235,13 +237,13 @@ const MovieDetail: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-            Movie not found
+            {t.movie_not_found || 'Movie not found'}
           </h2>
           <Link
             to="/"
             className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
           >
-            Go back home
+            {t.error_404_go_home}
           </Link>
         </div>
       </div>
@@ -354,16 +356,16 @@ const MovieDetail: React.FC = () => {
                 className="flex items-center space-x-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-full font-semibold transition-colors duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-300 dark:focus:ring-pink-600"
               >
                 <Play className="w-5 h-5" />
-                <span>Watch Movie</span>
+                <span>{t.action_watch_movie || 'Watch Movie'}</span>
               </button>
               <br />
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">Cast Overview</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">{t.cast_overview || 'Cast Overview'}</h2>
                 <div className="flex flex-wrap gap-6 px-8 pb-8">
                   {loading ? (
-                    <p className="text-gray-700 dark:text-gray-300">Loading cast...</p>
+                    <p className="text-gray-700 dark:text-gray-300">{t.status_loading_cast || 'Loading cast...'}</p>
                   ) : cast.length === 0 ? (
-                    <p className="text-gray-700 dark:text-gray-300">No cast information available.</p>
+                    <p className="text-gray-700 dark:text-gray-300">{t.status_no_cast_info || 'No cast information available.'}</p>
                   ) : (
                     cast.slice(0, 12).map((actor) => (
                       <div key={actor.id} className="flex-shrink-0 w-28 text-center">

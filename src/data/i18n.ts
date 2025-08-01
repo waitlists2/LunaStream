@@ -252,6 +252,15 @@ export const translations = {
     footer_follow_tiktok: 'Follow us on TikTok',
     footer_follow_twitter: 'Follow us on Twitter',
     footer_join_telegram: 'Join our Telegram',
+    // Additions for missing translation keys (future-proofing)
+    loading: 'Loading',
+    no_image: 'No Image',
+    favorite: 'Favorite',
+    keep_building: 'Keep Building Your Vault!',
+    keep_building_sub: 'Discover new content and continue growing your personal collection.',
+    search_content: 'Search Content',
+    coming_soon_prev: 'Prev',
+    coming_soon_next: 'Next',
   },
   
   dk: {
@@ -502,6 +511,15 @@ export const translations = {
     footer_follow_tiktok: 'Følg os på TikTok',
     footer_follow_twitter: 'Følg os på Twitter',
     footer_join_telegram: 'Tilslut dig vores Telegram',
+    // Additions for missing translation keys (future-proofing)
+    loading: 'Indlæser',
+    no_image: 'Intet billede',
+    favorite: 'Favorit',
+    keep_building: 'Fortsæt med at opbygge dit arkiv!',
+    keep_building_sub: 'Udforsk nyt indhold og fortsæt med at udvide din personlige samling.',
+    search_content: 'Søg indhold',
+    coming_soon_prev: 'Forrige',
+    coming_soon_next: 'Næste',
   },
 };
 

@@ -189,7 +189,7 @@ const ComingSoon: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
         <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-6">
           <span className="bg-gradient-to-l from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Coming Soon
+            {t.coming_soon_title || 'Coming Soon'}
           </span>
         </h1>
 
@@ -197,7 +197,7 @@ const ComingSoon: React.FC = () => {
         <div className="flex justify-center mb-8">
           <input
             type="text"
-            placeholder="Search by title or name..."
+            placeholder={t.coming_soon_search_placeholder || 'Search by title or name...'}
             className="w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
