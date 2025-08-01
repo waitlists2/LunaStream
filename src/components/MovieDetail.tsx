@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Play, Star, Calendar, Clock, Film, X, Heart, ChevronDown, Tv } from "lucide-react"
+import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info } from "lucide-react"
 import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { MovieDetails } from "../types"
