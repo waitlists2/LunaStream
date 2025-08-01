@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronUp } from 'lucide-react'; // Lucide for a clean arrow icon
+import { useLanguage } from './LanguageContext';
+import { translations } from '../data/i18n';
 
 const ScrollToTopButton: React.FC = () => {
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -20,7 +24,7 @@ const ScrollToTopButton: React.FC = () => {
   return (
     <button
       onClick={scrollToTop}
-      aria-label="Scroll to top"
+      aria-label={t.scroll_to_top || 'Scroll to top'}
       className={`
         fixed bottom-8 right-8 w-20 h-20 rounded-full
         bg-white/90 dark:bg-gray-800/90

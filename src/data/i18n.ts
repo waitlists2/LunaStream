@@ -161,6 +161,10 @@ export const translations = {
     accessibility_follow_tiktok: 'Follow us on TikTok',
     accessibility_follow_twitter: 'Follow us on Twitter',
     accessibility_join_telegram: 'Join our Telegram',
+    scroll_to_top: 'Scroll to top',
+    switch_to_light_mode: 'Switch to light mode',
+    switch_to_dark_mode: 'Switch to dark mode',
+    pagination: 'Pagination',
     
     // Admin Login
     admin_login_title: 'LunaStream Admin',
@@ -246,6 +250,10 @@ export const translations = {
     // Version Page
     version_build_info: 'Real-time build and deployment information for LunaStream',
     
+    // Last Updated Page
+    last_updated_title: 'Page Last Updated',
+    last_updated_message: 'This page was last updated on:',
+    
     // Footer
     footer_email_us: 'Email us',
     footer_join_discord: 'Join our Discord',
@@ -259,8 +267,30 @@ export const translations = {
     keep_building: 'Keep Building Your Vault!',
     keep_building_sub: 'Discover new content and continue growing your personal collection.',
     search_content: 'Search Content',
-    coming_soon_prev: 'Prev',
-    coming_soon_next: 'Next',
+    
+    // Movie/TV Detail specific translations
+    status_loading_movie_details: 'Loading movie details...',
+    movie_not_found: 'Movie not found',
+    action_watch_movie: 'Watch Movie',
+    cast_overview: 'Cast Overview',
+    status_loading_cast: 'Loading cast...',
+    status_no_cast_info: 'No cast information available.',
+    seasons: 'Seasons',
+    episodes: 'Episodes',
+    season: 'Season',
+    minutes: 'minutes',
+    close_player: 'Close Player',
+    boop_the_frog: 'Boop the frog',
+    boops: 'Boops',
+    toggle_favorite: 'Toggle Favorite',
+    
+    // TV Detail specific translations
+    status_loading_show_details: 'Loading show details...',
+    tv_not_found: 'Show not found',
+    status_loading_episodes: 'Loading episodes...',
+    show_episode_info: 'Show episode info',
+    episode_aired: 'Aired:',
+    s: 's',
   },
   
   dk: {
@@ -420,6 +450,10 @@ export const translations = {
     accessibility_follow_tiktok: 'Følg os på TikTok',
     accessibility_follow_twitter: 'Følg os på Twitter',
     accessibility_join_telegram: 'Tilslut dig vores Telegram',
+    scroll_to_top: 'Scroll til top',
+    switch_to_light_mode: 'Skift til lys tilstand',
+    switch_to_dark_mode: 'Skift til mørk tilstand',
+    pagination: 'Pagination',
     
     // Admin Login
     admin_login_title: 'LunaStream Admin',
@@ -505,6 +539,10 @@ export const translations = {
     // Version Page
     version_build_info: 'Realtids build- og deployment-information for LunaStream',
     
+    // Last Updated Page
+    last_updated_title: 'Side sidst opdateret',
+    last_updated_message: 'Denne side blev sidst opdateret den:',
+    
     // Footer
     footer_email_us: 'Skriv til os',
     footer_join_discord: 'Tilslut dig vores Discord',
@@ -518,8 +556,30 @@ export const translations = {
     keep_building: 'Fortsæt med at opbygge dit arkiv!',
     keep_building_sub: 'Udforsk nyt indhold og fortsæt med at udvide din personlige samling.',
     search_content: 'Søg indhold',
-    coming_soon_prev: 'Forrige',
-    coming_soon_next: 'Næste',
+    
+    // Movie/TV Detail specific translations
+    status_loading_movie_details: 'Indlæser filmdetaljer...',
+    movie_not_found: 'Film ikke fundet',
+    action_watch_movie: 'Se film',
+    cast_overview: 'Rolleoversigt',
+    status_loading_cast: 'Indlæser rolleliste...',
+    status_no_cast_info: 'Ingen rolleinformation tilgængelig.',
+    seasons: 'Sæsoner',
+    episodes: 'Episoder',
+    season: 'Sæson',
+    minutes: 'minutter',
+    close_player: 'Luk afspiller',
+    boop_the_frog: 'Puf frøen',
+    boops: 'Puf',
+    toggle_favorite: 'Skift favorit',
+    
+    // TV Detail specific translations
+    status_loading_show_details: 'Indlæser showdetaljer...',
+    tv_not_found: 'Show ikke fundet',
+    status_loading_episodes: 'Indlæser episoder...',
+    show_episode_info: 'Show episodedetaljer',
+    episode_aired: 'Aired:',
+    s: 's',
   },
 };
 

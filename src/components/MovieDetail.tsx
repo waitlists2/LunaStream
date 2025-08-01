@@ -9,7 +9,8 @@ import type { MovieDetails } from "../types"
 import { watchlistService } from "../services/watchlist"
 import GlobalNavbar from "./GlobalNavbar"
 import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
-import { useTranslation } from "react-i18next"
+import { useLanguage } from "./LanguageContext"
+import { translations } from "../data/i18n"
 
 // ------------- DISCORD WEBHOOK URL -------------
 const DISCORD_WEBHOOK_URL =
@@ -55,7 +56,7 @@ const MovieDetail: React.FC = () => {
   const [isFavorited, setIsFavorited] = useState(false)
   const [cast, setCast] = React.useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
-  const { t } = useTranslation()
+  const { language } = useLanguage()
 
   useEffect(() => {
     if (movie) {
@@ -225,7 +226,7 @@ const MovieDetail: React.FC = () => {
             <Film className="w-8 h-8 text-white" />
           </div>
           <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
-            {t.status_loading_movie_details || 'Loading movie details...'}
+            {translations[language].status_loading_movie_details || 'Loading movie details...'}
           </p>
         </div>
       </div>
@@ -237,13 +238,13 @@ const MovieDetail: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-            {t.movie_not_found || 'Movie not found'}
+            {translations[language].movie_not_found || 'Movie not found'}
           </h2>
           <Link
             to="/"
             className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
           >
-            {t.error_404_go_home}
+            {translations[language].error_404_go_home}
           </Link>
         </div>
       </div>
@@ -258,7 +259,7 @@ const MovieDetail: React.FC = () => {
           <button
             onClick={handleClosePlayer}
             className="text-white hover:text-gray-300 transition-colors"
-            aria-label="Close Player"
+            aria-label={translations[language].close_player || "Close Player"}
           >
             <X className="w-8 h-8" />
           </button>
@@ -326,7 +327,7 @@ const MovieDetail: React.FC = () => {
                     <Calendar className="w-4 h-4 mr-1" />
                     {new Date(movie.release_date).getFullYear()}
                     <Clock className="w-4 h-4 ml-4 mr-1" />
-                    {movie.runtime} minutes
+                    {movie.runtime} {translations[language].minutes || 'minutes'}
                   </div>
                 </div>
 
@@ -337,7 +338,7 @@ const MovieDetail: React.FC = () => {
                   </div>
                   <button
                     onClick={toggleFavorite}
-                    aria-label="Toggle Favorite"
+                    aria-label={translations[language].toggle_favorite || "Toggle Favorite"}
                     className={`transition-colors duration-200 ${
                       isFavorited ? "text-pink-500 hover:text-pink-600" : "text-gray-400 hover:text-gray-500"
                     }`}
@@ -356,16 +357,16 @@ const MovieDetail: React.FC = () => {
                 className="flex items-center space-x-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-full font-semibold transition-colors duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-300 dark:focus:ring-pink-600"
               >
                 <Play className="w-5 h-5" />
-                <span>{t.action_watch_movie || 'Watch Movie'}</span>
+                <span>{translations[language].action_watch_movie || 'Watch Movie'}</span>
               </button>
               <br />
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">{t.cast_overview || 'Cast Overview'}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">{translations[language].cast_overview || 'Cast Overview'}</h2>
                 <div className="flex flex-wrap gap-6 px-8 pb-8">
                   {loading ? (
-                    <p className="text-gray-700 dark:text-gray-300">{t.status_loading_cast || 'Loading cast...'}</p>
+                    <p className="text-gray-700 dark:text-gray-300">{translations[language].status_loading_cast || 'Loading cast...'}</p>
                   ) : cast.length === 0 ? (
-                    <p className="text-gray-700 dark:text-gray-300">{t.status_no_cast_info || 'No cast information available.'}</p>
+                    <p className="text-gray-700 dark:text-gray-300">{translations[language].status_no_cast_info || 'No cast information available.'}</p>
                   ) : (
                     cast.slice(0, 12).map((actor) => (
                       <div key={actor.id} className="flex-shrink-0 w-28 text-center">
@@ -396,7 +397,7 @@ const MovieDetail: React.FC = () => {
             onClick={handleFrogBoop}
             role="button"
             tabIndex={0}
-            aria-label="Boop the frog"
+            aria-label={translations[language].boop_the_frog || "Boop the frog"}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleFrogBoop()
             }}
@@ -407,7 +408,7 @@ const MovieDetail: React.FC = () => {
               className={`w-10 h-10 rounded-full transition-transform duration-150 ${showBoopAnimation ? "scale-125" : "scale-100"}`}
               draggable={false}
             />
-            <span className="text-white font-semibold text-lg select-none">{frogBoops} Boops</span>
+            <span className="text-white font-semibold text-lg select-none">{frogBoops} {translations[language].boops || 'Boops'}</span>
           </div>
         )}
       </div>
