@@ -286,12 +286,12 @@ const Vault: React.FC = () => {
                       <Play className="w-10 h-10 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                      {searchTerm ? t.vault_no_results_found : 'Your watchlist is empty'}
+                      {searchTerm ? t.vault_no_results_found : t.vault_watchlist_empty}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-200 mb-6 text-center max-w-md">
                       {searchTerm 
-                        ? `No items in your watchlist match "${searchTerm}".`
-                        : 'Start watching movies and TV shows to build your personal watchlist.'
+                        ? `${t.vault_no_watchlist_match} "${searchTerm}".`
+                        : t.vault_start_adding_watchlist
                       }
                     </p>
                     {!searchTerm && (
@@ -626,7 +626,7 @@ const Vault: React.FC = () => {
                       className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 transition-all text-white font-semibold"
                     >
                       <TrendingUp className="w-5 h-5" />
-                      Browse Trending
+                      {t.vault_browse_trending}
                     </Link>
                     <Link
                       to="/search"
