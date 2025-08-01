@@ -375,7 +375,7 @@ const Discover: React.FC = () => {
                 onClick={handleFirstPage}
                 disabled={page === 1 || loading}
                 className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
-                title="First Page"
+                title={t.nav_first_page || "First Page"}
               >
                 <ChevronsLeft size={18} />
               </button>
@@ -384,12 +384,12 @@ const Discover: React.FC = () => {
                 disabled={page === 1 || loading}
                 className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
               >
-                <ArrowLeft className="inline-block mr-2" size={18} /> Prev
+                <ArrowLeft className="inline-block mr-2" size={18} /> {t.nav_previous || 'Prev'}
               </button>
 
               {/* Pagination Controls continued */}
               <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                Page{' '}
+                {t.nav_page || 'Page'}{' '}
                 <input
                   type="text"
                   ref={inputRef}
@@ -399,7 +399,7 @@ const Discover: React.FC = () => {
                   onKeyDown={handleInputKeyDown}
                   className="w-12 text-center bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md text-gray-900 dark:text-white"
                 />{' '}
-                of {totalPages}
+                {t.nav_of || 'of'} {totalPages}
               </span>
 
               <button
@@ -407,13 +407,13 @@ const Discover: React.FC = () => {
                 disabled={page === totalPages || loading}
                 className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
               >
-                Next <ArrowRight className="inline-block ml-2" size={18} />
+                {t.nav_next || 'Next'} <ArrowRight className="inline-block ml-2" size={18} />
               </button>
               <button
                 onClick={handleLastPage}
                 disabled={page === totalPages || loading}
                 className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
-                title="Last Page"
+                title={t.nav_last_page || "Last Page"}
               >
                 <ChevronsRight size={18} />
               </button>

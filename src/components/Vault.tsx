@@ -197,7 +197,7 @@ const Vault: React.FC = () => {
                 >
                   <option value="">{t.filter_all}</option>
                   <option value="Movie">{t.movies}</option>
-                  <option value="TV Show">{t.tvs}</option>
+                  <option value="TV Show">{t.content_tv_plural}</option>
                 </select>
               </div>
 
@@ -363,7 +363,7 @@ const Vault: React.FC = () => {
                               removeItem(item);
                             }}
                             className="absolute top-2 right-2 w-8 h-8 bg-red-500/90 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
-                            title="Remove from watchlist"
+                            title={t.action_remove_from_watchlist || "Remove from watchlist"}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -475,7 +475,7 @@ const Vault: React.FC = () => {
                               removeFavorite(item.id, isMovie ? 'movie' : 'tv');
                             }}
                             className="absolute top-2 right-2 w-8 h-8 bg-red-500/90 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
-                            title="Remove from favorites"
+                            title={t.action_remove_from_favorites || "Remove from favorites"}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

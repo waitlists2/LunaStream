@@ -329,7 +329,7 @@ const SearchResults: React.FC = () => {
 
         {/* Pagination */}
         {!loading && totalPages > 1 && (
-          <nav aria-label="Pagination" className="flex justify-center mt-8 space-x-2">
+                          <nav aria-label={t.pagination || "Pagination"} className="flex justify-center mt-8 space-x-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
