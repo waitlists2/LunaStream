@@ -11,6 +11,7 @@ import GlobalNavbar from "./GlobalNavbar"
 import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
+import Loading from "./Loading"
 
 // ------------------ DISCORD WEBHOOK URL ------------------
 const DISCORD_WEBHOOK_URL =
@@ -70,6 +71,8 @@ const TVDetail: React.FC = () => {
   const [cast, setCast] = React.useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
   const { language } = useLanguage()
+
+  const t = translations[language];
 
   useEffect(() => {
     if (!show) return
@@ -306,37 +309,26 @@ const TVDetail: React.FC = () => {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
-            <Film className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
-            {translations[language].status_loading_show_details || 'Loading show details...'}
-          </p>
-        </div>
-      </div>
-    )
-  }
+      return <Loading message={t.status_loading_show_details || 'Loading show details...'} />
+    }
 
-  if (!show) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-            {translations[language].tv_not_found || 'Show not found'}
-          </h2>
-          <Link
-            to="/"
-            className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
-          >
-            {translations[language].error_404_go_home}
-          </Link>
+    if (!show) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+              {t.tv_not_found || 'Show not found'}
+            </h2>
+            <Link
+              to="/"
+              className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
+            >
+              {t.error_404_go_home}
+            </Link>
+          </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
 
   if (isPlaying && currentEpisode) {
     return (

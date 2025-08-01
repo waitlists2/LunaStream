@@ -12,6 +12,9 @@ import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
 
+import Loading from "./Loading"
+
+
 // ------------- DISCORD WEBHOOK URL -------------
 const DISCORD_WEBHOOK_URL =
   "https://discord.com/api/webhooks/1396703073774207068/TpSwfZED6Mg8NKwalLoRBlPHXZYO_4lUyGmruljIsoGWwwnkMv7unS_30jiYq0OvU3vP" // <---- REPLACE THIS
@@ -57,6 +60,8 @@ const MovieDetail: React.FC = () => {
   const [cast, setCast] = React.useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
   const { language } = useLanguage()
+
+  const t = translations[language];
 
   useEffect(() => {
     if (movie) {
@@ -219,37 +224,26 @@ const MovieDetail: React.FC = () => {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mb-4 shadow-lg">
-            <Film className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">
-            {translations[language].status_loading_movie_details || 'Loading movie details...'}
-          </p>
-        </div>
-      </div>
-    )
-  }
+      return <Loading message={t.status_loading_movie_details || 'Loading movie details...'} />
+    }
 
-  if (!movie) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-            {translations[language].movie_not_found || 'Movie not found'}
-          </h2>
-          <Link
-            to="/"
-            className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
-          >
-            {translations[language].error_404_go_home}
-          </Link>
+    if (!movie) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+              {t.movie_not_found || 'Movie not found'}
+            </h2>
+            <Link
+              to="/"
+              className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
+            >
+              {t.error_404_go_home}
+            </Link>
+          </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
 
   if (isPlaying) {
     return (
@@ -259,7 +253,7 @@ const MovieDetail: React.FC = () => {
           <button
             onClick={handleClosePlayer}
             className="text-white hover:text-gray-300 transition-colors"
-            aria-label={translations[language].close_player || "Close Player"}
+            aria-label={t.close_player || "Close Player"}
           >
             <X className="w-8 h-8" />
           </button>
@@ -296,8 +290,6 @@ const MovieDetail: React.FC = () => {
       </div>
     );
   }
-
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative transition-colors duration-300">

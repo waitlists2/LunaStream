@@ -86,7 +86,7 @@ const GlobalNavbar: React.FC = () => {
                   language === shortname ? 'bg-pink-500 text-white' : ''
                 }`}
               >
-                {flag} • {name}
+                {name}
               </li>
             ))}
           </ul>

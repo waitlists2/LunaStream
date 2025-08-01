@@ -133,6 +133,8 @@ export const translations = {
     
     // Status messages
     status_loading: 'Loading...',
+    status_loading_movie_details: 'Loading movie details...',
+    status_loading_tv_details: 'Loading TV details...',
     status_error: 'Error',
     status_success: 'Success',
     status_no_data: 'No data available',
@@ -218,6 +220,8 @@ export const translations = {
     error_404_title: '404',
     error_404_message: 'Page Not Found',
     error_404_go_home: 'Go Home',
+    movie_not_found: 'Movie not found',
+    show_not_found: 'Show not found',
     
     // Donate Page
     donate_support_title: 'Support LunaStream',
@@ -383,6 +387,8 @@ export const translations = {
     
     // Status messages
     status_loading: 'Indlæser...',
+    status_loading_movie_details: 'Indlæser filmdetaljer...',
+    status_loading_show_details: 'Indlæser seriedetaljer...',
     status_error: 'Fejl',
     status_success: 'Succes',
     status_no_data: 'Ingen data tilgængelig',
@@ -468,6 +474,8 @@ export const translations = {
     error_404_title: '404',
     error_404_message: 'Side ikke fundet',
     error_404_go_home: 'Gå hjem',
+    movie_not_found: 'Film ikke fundet',
+    show_not_found: 'Serie ikke fundet',
     
     // Donate Page
     donate_support_title: 'Støt LunaStream',
