@@ -5,6 +5,7 @@ export const languages = [
 
 export const translations = {
   en: {
+    s: 's',
     // Navigation
     nav_home: 'Home',
     nav_search: 'Search',
@@ -16,7 +17,9 @@ export const translations = {
     
     // generic
     seaason: "Season",
+    seasons: "Seasons",
     episode_aired: 'Aired',
+    episodes: 'Episodes',
     
     // Home page
     home_heading_title: 'Watch Movies & TV Shows',
@@ -263,6 +266,8 @@ export const translations = {
   },
   
   dk: {
+    s: 'er',
+    
     // Navigation
     nav_home: 'Hjem',
     nav_search: 'Søg',
@@ -274,7 +279,9 @@ export const translations = {
     
     // generic
     season: 'Sæson',
+    seasons: 'Sæsoner',
     episode_aired: 'Sendt',
+    episodes: 'Episoder',
 
     // Home page
     home_heading_title: 'Se film og TV-serier',
