@@ -421,7 +421,7 @@ const TVDetail: React.FC = () => {
                   {new Date(show.first_air_date).getFullYear()}
                 </div>
                 <div>
-                  {show.number_of_seasons} {translations[language].seasons}
+                  {show.number_of_seasons} {translations[language].season}
                   {show.number_of_seasons !== 1 ? translations[language].s : ""}
                 </div>
                 <div>{show.number_of_episodes} {translations[language].episodes}</div>
