@@ -549,7 +549,7 @@ const TVDetail: React.FC = () => {
                         {episode.air_date && (
                           <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-2 transition-colors duration-300">
                             <Calendar className="w-4 h-4 mr-2" />
-                            <span className="font-medium">{translations[language].episode_aired || 'Aired:'}</span>
+                            <span className="font-medium">{translations[language].episode_aired || 'Aired'}</span>
                             <span className="ml-1">{formatAirDate(episode.air_date)}</span>
                           </div>
                         )}

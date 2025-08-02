@@ -14,6 +14,10 @@ export const translations = {
     nav_language: 'Language',
     nav_theme: 'Theme',
     
+    // generic
+    seaason: "Season",
+    episode_aired: 'Aired',
+    
     // Home page
     home_heading_title: 'Watch Movies & TV Shows',
     home_heading_subtitle: 'Discover and stream your favorite content with our beautiful, easy-to-use platform',
@@ -268,6 +272,10 @@ export const translations = {
     nav_language: 'Sprog',
     nav_theme: 'Tema',
     
+    // generic
+    season: 'Sæson',
+    episode_aired: 'Sendt',
+
     // Home page
     home_heading_title: 'Se film og TV-serier',
     home_heading_subtitle: 'Udforsk og stream dit yndlingsindhold med vores smukke og brugervenlige platform',
