@@ -7,7 +7,6 @@ export const BANNED_TMDB_IDS = new Set([
   1014602,
   40467,
   268006,
-  954,
   244194,
   36644,
   36645,
