@@ -1,5 +1,5 @@
 // TMDB ID ban list - content that should not appear on the site
-export const BANNED_TMDB_IDS = new Set([
+export const BANNED_TMDB_MOVIE_IDS = new Set([
   46853,
   1415064,
   871943,
@@ -62,7 +62,7 @@ export const BANNED_TMDB_IDS = new Set([
  * Check if a TMDB ID is banned
  */
 export const isBanned = (tmdbId: number): boolean => {
-  return BANNED_TMDB_IDS.has(tmdbId);
+  return BANNED_TMDB_MOVIE_IDS.has(tmdbId);
 };
 
 /**
