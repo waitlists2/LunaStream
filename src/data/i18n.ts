@@ -17,7 +17,7 @@ export const translations = {
     nav_theme: 'Theme',
     
     // generic
-    seaason: "Season",
+    season: "Season",
     seasons: "Seasons",
     episode_aired: 'Aired',
     episodes: 'Episodes',
