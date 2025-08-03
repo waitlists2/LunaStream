@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight } from 'lucide-react
 import { tmdb } from '../services/tmdb';
 import { Link } from 'react-router-dom';
 import GlobalNavbar from './GlobalNavbar';
+import { filterBannedContent } from '../utils/banList';
 import { useLanguage } from './LanguageContext';
 import { translations } from '../data/i18n';
 
@@ -74,8 +75,10 @@ const ComingSoon: React.FC = () => {
           'tv'
         );
 
-        // Combine and sort by date ascending
-        const combined = [...movies, ...tvShows].sort((a, b) => {
+        // Filter banned content, combine and sort by date ascending
+        const filteredMovies = filterBannedContent(movies);
+        const filteredTVShows = filterBannedContent(tvShows);
+        const combined = [...filteredMovies, ...filteredTVShows].sort((a, b) => {
           const dateA = new Date(a.release_date || a.first_air_date || '').getTime();
           const dateB = new Date(b.release_date || b.first_air_date || '').getTime();
           return dateA - dateB;

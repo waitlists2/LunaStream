@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info } from "lucide-react"
 import { tmdb } from "../services/tmdb"
+import { isBanned } from "../utils/banList"
 import { analytics } from "../services/analytics"
 import type { TVDetails, Episode } from "../types"
 import { watchlistService } from "../services/watchlist"
@@ -126,9 +127,18 @@ const TVDetail: React.FC = () => {
   useEffect(() => {
     const fetchShow = async () => {
       if (!id) return
+      
+      // Check if the show ID is banned
+      const showId = Number.parseInt(id);
+      if (isBanned(showId)) {
+        setShow(null);
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true)
       try {
-        const showData = await tmdb.getTVDetails(Number.parseInt(id))
+        const showData = await tmdb.getTVDetails(showId)
         setShow(showData)
         if (showData.seasons && showData.seasons.length > 0) {
           const firstSeason = showData.seasons.find((s) => s.season_number > 0) || showData.seasons[0]

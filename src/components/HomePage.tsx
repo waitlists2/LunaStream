@@ -7,6 +7,7 @@ import { useNavigate, useParams, Link } from "react-router-dom"
 import { tmdb } from "../services/tmdb"
 import type { Movie, TVShow } from "../types"
 import GlobalNavbar from "./GlobalNavbar"
+import { filterBannedContent } from "../utils/banList"
 import { languages, translations } from '../data/i18n'
 
 import { useLanguage } from "./LanguageContext"
@@ -182,7 +183,10 @@ const HomePage: React.FC = () => {
                             }),
                           )
 
-                          const combined = [...movieResults, ...tvResults]
+                          // Filter banned content from suggestions
+                          const filteredMovies = filterBannedContent(movieResults);
+                          const filteredTV = filterBannedContent(tvResults);
+                          const combined = [...filteredMovies, ...filteredTV]
                             .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
                             .slice(0, 6)
                           setSuggestions(combined)

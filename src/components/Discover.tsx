@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight } from 'lucide-react
 import { tmdb } from '../services/tmdb';
 import { Link } from 'react-router-dom';
 import GlobalNavbar from './GlobalNavbar';
+import { filterBannedContent } from '../utils/banList';
 
 import { languages, translations } from '../data/i18n'
 
@@ -115,7 +116,8 @@ const Discover: React.FC = () => {
             media_type: mediaType,
           }));
 
-          combinedResults = combinedResults.concat(typedResults);
+          const filteredResults = filterBannedContent(typedResults);
+          combinedResults = combinedResults.concat(filteredResults);
 
           if (p >= data.total_pages) break;
         }
@@ -137,14 +139,14 @@ const Discover: React.FC = () => {
           ]);
 
           if (movieData && movieData.results) {
-            movieResults = movieResults.concat(
-              movieData.results.map((m: any) => ({ ...m, media_type: 'movie' }))
-            );
+            const typedMovies = movieData.results.map((m: any) => ({ ...m, media_type: 'movie' }));
+            const filteredMovies = filterBannedContent(typedMovies);
+            movieResults = movieResults.concat(filteredMovies);
           }
           if (tvData && tvData.results) {
-            tvResults = tvResults.concat(
-              tvData.results.map((t: any) => ({ ...t, media_type: 'tv' }))
-            );
+            const typedTV = tvData.results.map((t: any) => ({ ...t, media_type: 'tv' }));
+            const filteredTV = filterBannedContent(typedTV);
+            tvResults = tvResults.concat(filteredTV);
           }
 
           if (p >= movieData.total_pages && p >= tvData.total_pages) break;

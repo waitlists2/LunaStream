@@ -1,3 +1,5 @@
+import { filterBannedSearchResults, filterBannedContent } from '../utils/banList';
+
 const API_KEY = '762f9abeaf5a0a96795dee0bb3989df9';
 const BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -6,28 +8,38 @@ export const tmdb = {
     const response = await fetch(
       `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
     );
-    return response.json();
+    const data = await response.json();
+    return filterBannedSearchResults(data);
   },
 
   searchTV: async (query: string) => {
     const response = await fetch(
       `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
     );
-    return response.json();
+    const data = await response.json();
+    return filterBannedSearchResults(data);
   },
 
   getTrendingMovies: async () => {
     const response = await fetch(
       `${BASE_URL}/trending/movie/week?api_key=${API_KEY}`
     );
-    return response.json();
+    const data = await response.json();
+    return {
+      ...data,
+      results: filterBannedContent(data.results || [])
+    };
   },
 
   getTrendingTV: async () => {
     const response = await fetch(
       `${BASE_URL}/trending/tv/week?api_key=${API_KEY}`
     );
-    return response.json();
+    const data = await response.json();
+    return {
+      ...data,
+      results: filterBannedContent(data.results || [])
+    };
   },
 
   getMovieDetails: async (id: number) => {
@@ -67,19 +79,28 @@ export const tmdb = {
 
   discoverMovies: async (params: string) => {
     const response = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&${params}`);
-    return response.json();
+    const data = await response.json();
+    return {
+      ...data,
+      results: filterBannedContent(data.results || [])
+    };
   },
 
   discoverTV: async (params: string) => {
     const response = await fetch(`${BASE_URL}/discover/tv?api_key=${API_KEY}&${params}`);
-    return response.json();
+    const data = await response.json();
+    return {
+      ...data,
+      results: filterBannedContent(data.results || [])
+    };
   },
 
   searchMulti: async (query: string) => {
     const response = await fetch(
       `${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
     );
-    return response.json();
+    const data = await response.json();
+    return filterBannedSearchResults(data);
   },
 
   getImageUrl: (path: string | null, size: string = 'w500') => {

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info } from "lucide-react"
 import { tmdb } from "../services/tmdb"
+import { isBanned } from "../utils/banList"
 import { analytics } from "../services/analytics"
 import type { MovieDetails } from "../types"
 import { watchlistService } from "../services/watchlist"
@@ -125,9 +126,18 @@ const MovieDetail: React.FC = () => {
   useEffect(() => {
     const fetchMovie = async () => {
       if (!id) return
+      
+      // Check if the movie ID is banned
+      const movieId = Number.parseInt(id);
+      if (isBanned(movieId)) {
+        setMovie(null);
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true)
       try {
-        const movieData = await tmdb.getMovieDetails(Number.parseInt(id))
+        const movieData = await tmdb.getMovieDetails(movieId)
         setMovie(movieData)
       } catch (error) {
         console.error("Failed to fetch movie:", error)
