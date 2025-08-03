@@ -6,9 +6,12 @@ import Fuse from 'fuse.js';
 import { Movie, TVShow } from '../types';
 import GlobalNavbar from './GlobalNavbar';
 
-import { languages, translations } from '../data/i18n'
+import MobileSearchResults from './SearchResultsMobile';
+import * as useIsMobile from '../hooks/useIsMobile'; // adjust path if needed
 
-import { useLanguage } from "./LanguageContext"
+import { languages, translations } from '../data/i18n';
+
+import { useLanguage } from "./LanguageContext";
 
 type MediaItem = (Movie | TVShow) & { media_type: 'movie' | 'tv'; popularity: number };
 
@@ -80,13 +83,15 @@ const SearchResults: React.FC = () => {
   const [warningVisible, setWarningVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { language, setLanguage } = useLanguage()
-  const t = translations[language] || translations.en
+  const { language } = useLanguage();
+  const t = translations[language] || translations.en;
 
   const resultsPerPage = 18;
   const totalPages = Math.ceil(results.length / resultsPerPage);
   const startIdx = (currentPage - 1) * resultsPerPage;
   const paginatedResults = results.slice(startIdx, startIdx + resultsPerPage);
+
+  const isMobile = useIsMobile.useIsMobile();
 
   useEffect(() => {
     const sortParam = searchParams.get('sort');
@@ -203,10 +208,75 @@ const SearchResults: React.FC = () => {
   const getDate = (item: MediaItem) => isMovie(item) ? item.release_date : (item as TVShow).first_air_date;
   const getLink = (item: MediaItem) => isMovie(item) ? `/movie/${item.id}` : `/tv/${item.id}`;
 
+  // Render mobile search results if isMobile is true
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
+        <GlobalNavbar />
+        <div className="backdrop-blur-md sticky top-16 z-40 transition-colors duration-300">
+          <div className="backdrop-blur-md sticky top-16 z-40 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex items-center space-x-0">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder={t.search_placeholder}
+                    value={searchInput}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 h-12 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-l-xl border border-pink-200/50 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="sticky top-16 z-30 py-2 flex items-center justify-between space-x-3 transition-colors duration-300">
+                <p className="text-sm text-gray-700 dark:text-gray-300 flex-1 truncate">
+                  {t.search_results_for} "<span className="font-semibold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>" — {results.length} {results.length === 1 ? t.result : t.results}
+                </p>
+                <select
+                  aria-label={t.filter_sort_label}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value === 'popularity' ? 'popularity' : 'score')}
+                  className="text-sm rounded-md border border-pink-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                >
+                  <option value="popularity">{t.filter_popularity}</option>
+                  <option value="score">{t.filter_relevance}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <MobileSearchResults
+          query={query}
+          results={results}
+          loading={loading}
+          error={error}
+          warningVisible={warningVisible}
+          setWarningVisible={setWarningVisible}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          resultsPerPage={resultsPerPage}
+          getTitle={getTitle}
+          getDate={getDate}
+          getLink={getLink}
+          t={t}
+        />
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
       <GlobalNavbar />
-      
+
       {/* Search Header */}
       <div className="backdrop-blur-md sticky top-16 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -234,11 +304,10 @@ const SearchResults: React.FC = () => {
               className="h-12 px-6 rounded-r-xl border border-l-0 border-pink-200/50 dark:border-gray-600/30 bg-white/95 dark:bg-gray-800/95 text-gray-900 dark:text-gray-100 text-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 appearance-none"
               style={{ paddingRight: '1.5rem' }} // extra right padding so text doesn't get too close to edge
             >
-                              <option value="popularity">{t.filter_popularity}</option>
-                <option value="score">{t.filter_relevance}</option>
+              <option value="popularity">{t.filter_popularity}</option>
+              <option value="score">{t.filter_relevance}</option>
             </select>
           </div>
-
         </div>
       </div>
 
@@ -254,7 +323,7 @@ const SearchResults: React.FC = () => {
               onClick={() => setWarningVisible(false)}
               className="bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg focus:ring-4 focus:ring-pink-400"
             >
-                              {t.search_stay_safe_continue}
+              {t.search_stay_safe_continue}
             </button>
           </div>
         </div>
@@ -266,102 +335,95 @@ const SearchResults: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {t.search_results_for} "<span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{query}</span>"
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            {t.filter_show_results} {paginatedResults.length} {t.filter_of} {results.length} {results.length === 1 ? t.filter_result_singular : t.filter_result_plural}
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">{results.length} {results.length === 1 ? t.result : t.results}</p>
+          {loading && <p className="text-gray-600 dark:text-gray-400">{t.search_loading}</p>}
+          {error && <p className="text-red-600 dark:text-red-400 font-semibold">{error}</p>}
         </div>
 
-        {loading && (
-          <div className="flex items-center justify-center py-10">
-            <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center shadow-lg">
-              <Search className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="text-center text-red-600 dark:text-red-400 font-semibold py-10">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && paginatedResults.length === 0 && (
-          <div className="text-center text-gray-700 dark:text-gray-300 py-10">
-            {t.search_no_results_for} &quot;{query}&quot;.
-          </div>
-        )}
-
-        {!loading && !error && paginatedResults.length > 0 && (
-          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {paginatedResults.map(item => (
-              <li key={`${item.media_type}-${item.id}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <Link to={getLink(item)} className="block focus:outline-none focus:ring-2 focus:ring-pink-500">
+        {/* Results grid */}
+        {!loading && !error && results.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {paginatedResults.map((item) => (
+              <Link
+                to={getLink(item)}
+                key={`${item.media_type}-${item.id}`}
+                className="group bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-[1.04] transition-transform duration-300 relative"
+                aria-label={`${getTitle(item)} (${getDate(item)?.slice(0, 4) || 'N/A'})`}
+              >
+                <div className="aspect-[2/3] w-full relative overflow-hidden bg-gray-200 dark:bg-gray-700 rounded-t-lg">
                   {item.poster_path ? (
                     <img
+                      loading="lazy"
                       src={`https://image.tmdb.org/t/p/w342${item.poster_path}`}
                       alt={getTitle(item)}
-                      className="w-full h-auto object-cover"
-                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
-                      {t.no_image}
+                    <div className="flex items-center justify-center w-full h-full bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300 text-xs uppercase font-semibold">
+                      {item.media_type === 'movie' ? 'No Poster' : 'No Poster'}
                     </div>
                   )}
-                  <div className="p-3">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={getTitle(item)}>
-                      {getTitle(item)}
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center space-x-1 mt-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{getDate(item) || t.content_n_a}</span>
-                    </p>
-                    <p className="text-xs text-yellow-500 flex items-center space-x-1 mt-1">
-                      <Star className="w-3 h-3" />
-                      <span>{item.vote_average?.toFixed(1) || '–'}</span>
-                    </p>
+                </div>
+                <div className="p-2 space-y-1">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate" title={getTitle(item)}>
+                    {getTitle(item)}
+                  </h3>
+                  <div className="flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-300 font-semibold">
+                    <span className="flex items-center">
+                      <Calendar className="w-3.5 h-3.5 mr-1" />
+                      {getDate(item) ? getDate(item).slice(0, 4) : 'N/A'}
+                    </span>
+                    <span className="flex items-center">
+                      <Star className="w-3.5 h-3.5 mr-1 text-yellow-500" />
+                      {item.vote_average.toFixed(1)}
+                    </span>
+                    <span className="flex items-center">
+                      <Film className="w-3.5 h-3.5 mr-1" />
+                      {item.media_type.toUpperCase()}
+                    </span>
                   </div>
-                </Link>
-              </li>
+                </div>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
 
         {/* Pagination */}
-        {!loading && totalPages > 1 && (
-                          <nav aria-label={t.pagination || "Pagination"} className="flex justify-center mt-8 space-x-2">
+        {totalPages > 1 && (
+          <nav
+            className="flex justify-center mt-8 space-x-3"
+            aria-label={t.pagination_label}
+          >
             <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded-md bg-pink-600 text-white disabled:bg-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="px-4 py-2 rounded-md bg-pink-600 text-white font-semibold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-pink-400"
             >
-              {t.previous}
+              {t.pagination_prev}
             </button>
-
             {[...Array(totalPages)].map((_, idx) => {
-              const page = idx + 1;
+              const pageNum = idx + 1;
               return (
                 <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  aria-current={currentPage === page ? 'page' : undefined}
-                  className={`px-3 py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 ${
-                    currentPage === page
-                      ? 'bg-pink-700 text-white'
-                      : 'bg-pink-300 dark:bg-pink-500 text-pink-900 dark:text-pink-100 hover:bg-pink-400'
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  aria-current={currentPage === pageNum ? 'page' : undefined}
+                  className={`px-4 py-2 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-pink-400 ${
+                    currentPage === pageNum
+                      ? 'bg-pink-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-pink-100 dark:hover:bg-pink-900'
                   }`}
                 >
-                  {page}
+                  {pageNum}
                 </button>
               );
             })}
-
             <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded-md bg-pink-600 text-white disabled:bg-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="px-4 py-2 rounded-md bg-pink-600 text-white font-semibold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-pink-400"
             >
-              {t.next}
+              {t.pagination_next}
             </button>
           </nav>
         )}

@@ -4,11 +4,21 @@ import { Film, Archive, Home, Search, Compass, Heart } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { languages, translations } from '../data/i18n';
 
+import { useIsMobile } from "../hooks/useIsMobile"
+import MobileNavbar from "./MobileNavbar"
+
 import { useLanguage } from './LanguageContext';
 
 const GlobalNavbar: React.FC = () => {
   const location = useLocation();
   const { language, setLanguage } = useLanguage();
+
+  const isMobile = useIsMobile()
+
+  // **Return MobileNavbar entirely on mobile**
+  if (isMobile) {
+    return <MobileNavbar />
+  }
 
   const t = translations[language] || translations.en;
 
