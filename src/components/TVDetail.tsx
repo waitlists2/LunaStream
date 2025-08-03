@@ -129,11 +129,6 @@ const TVDetail: React.FC = () => {
       
       // Check if the show ID is banned
       const showId = Number.parseInt(id);
-      if (isBanned(showId)) {
-        setShow(null);
-        setLoading(false);
-        return;
-      }
       
       setLoading(true)
       try {
