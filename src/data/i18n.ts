@@ -5,6 +5,7 @@ export const languages = [
 
 export const translations = {
   en: {
+    tv_not_found: 'Show not found',
     s: 's',
     // Navigation
     nav_home: 'Home',
@@ -267,7 +268,8 @@ export const translations = {
   
   dk: {
     s: 'er',
-    
+    tv_not_found: 'TV-serie ikke fundet',
+
     // Navigation
     nav_home: 'Hjem',
     nav_search: 'Søg',
