@@ -18,7 +18,7 @@ import Loading from "./Loading"
 
 // ------------- DISCORD WEBHOOK URL -------------
 const DISCORD_WEBHOOK_URL =
-  "https://discord.com/api/webhooks/1396703073774207068/TpSwfZED6Mg8NKwalLoRBlPHXZYO_4lUyGmruljIsoGWwwnkMv7unS_30jiYq0OvU3vP" // <---- REPLACE THIS
+  "https://discord.com/api/webhooks/1402072046216937542/dW2l_GQdgeFxAcY7YGr_rCF-UgQGz1HlHnvJ2Uj_x5sm6Jipsvg8TeCBlNAi18gS3Sd8" // <---- REPLACE THIS
 // ----------------------------------------------
 
 async function sendDiscordMovieWatchNotification(movieTitle: string, releaseYear: number, posterPath: string) {
