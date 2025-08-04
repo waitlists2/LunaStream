@@ -56,7 +56,8 @@ export const BANNED_TMDB_MOVIE_IDS = new Set([
   825016,
   855435,
   954914,
-  103275
+  103275,
+  1522256
 ]);
 
 /**
