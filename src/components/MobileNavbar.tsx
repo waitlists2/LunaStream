@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X, Home, Search, Compass, Archive, Heart } from "lucide-react"
+import { Menu, X, Home, Search, Compass, Archive, Heart, Film } from "lucide-react"
 import { translations, languages } from "../data/i18n"
 import { useLanguage } from "./LanguageContext"
 import ThemeToggle from "./ThemeToggle"
