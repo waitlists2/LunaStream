@@ -68,11 +68,26 @@ const TVDetail: React.FC = () => {
   const [isFavorited, setIsFavorited] = useState(false)
   const [cast, setCast] = React.useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
+  const [seasonCast, setSeasonCast] = React.useState<any[]>([])
   const { language } = useLanguage()
 
   const isMobile = useIsMobile()
 
   const t = translations[language];
+
+  useEffect(() => {
+    async function fetchSeasonCredits() {
+        if (!show?.id || !selectedSeason) return
+        try {
+        const credits = await tmdb.getTVCreditsForSeason(show.id, selectedSeason)
+        setSeasonCast(credits.cast || [])
+        } catch (error) {
+        console.error("Failed to fetch season credits:", error)
+        setSeasonCast([])
+        }
+    }
+    fetchSeasonCredits()
+    }, [show?.id, selectedSeason])
 
   useEffect(() => {
     if (!show) return
