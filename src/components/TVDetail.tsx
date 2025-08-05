@@ -559,14 +559,14 @@ const TVDetail: React.FC = () => {
                               className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
                               title="View Episode Details"
                             >
-                              <Info className="w-4 h-4" />
+                              <Grid className="w-4 h-4" />
                             </Link>
                             {episode.overview && (
                               <button
                                 onClick={() => toggleDescription(episode.id)}
                                 className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
                               >
-                                <Eye className="w-4 h-4" />
+                                <Info className="w-4 h-4" />
                               </button>
                             )}
                             <button
