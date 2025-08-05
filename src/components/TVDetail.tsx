@@ -60,13 +60,9 @@ const TVDetail: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
-  const [showDescriptions, setShowDescriptions] = useState<{
-    [key: number]: boolean
-  }>({})
+  const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({})
   const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([])
-  const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{
-    [showId: number]: { show: any; episodes: any[] }
-  }>({})
+  const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any; episodes: any[] } }>({})
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([])
   const [isFavorited, setIsFavorited] = useState(false)
   const [cast, setCast] = React.useState([])
@@ -130,7 +126,6 @@ const TVDetail: React.FC = () => {
     const fetchShow = async () => {
       if (!id) return
       
-      // Check if the show ID is banned
       const showId = Number.parseInt(id);
       
       setLoading(true)
@@ -316,26 +311,26 @@ const TVDetail: React.FC = () => {
   }
 
   if (loading) {
-      return <Loading message={t.status_loading_show_details || 'Loading show details...'} />
-    }
+    return <Loading message={t.status_loading_show_details || 'Loading show details...'} />
+  }
 
-    if (!show) {
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
-              {t.tv_not_found || 'Show not found'}
-            </h2>
-            <Link
-              to="/"
-              className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
-            >
-              {t.error_404_go_home}
-            </Link>
-          </div>
+  if (!show) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 flex items-center justify-center transition-colors duration-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
+            {t.tv_not_found || 'Show not found'}
+          </h2>
+          <Link
+            to="/"
+            className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
+          >
+            {t.error_404_go_home}
+          </Link>
         </div>
-      )
-    }
+      </div>
+    )
+  }
 
   if (isPlaying && currentEpisode) {
     return (
@@ -345,7 +340,7 @@ const TVDetail: React.FC = () => {
           <button
             onClick={handleClosePlayer}
             className="text-white hover:text-gray-300 transition-colors"
-                                aria-label={translations[language].close_player || "Close Player"}
+            aria-label={translations[language].close_player || "Close Player"}
           >
             <X className="w-8 h-8" />
           </button>
@@ -383,7 +378,6 @@ const TVDetail: React.FC = () => {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
       <GlobalNavbar />
@@ -391,21 +385,21 @@ const TVDetail: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Show Details */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
-          <div className="md:flex">
+          <div className={`md:flex ${isMobile ? "block" : ""}`}>
             <div className="md:flex-shrink-0">
               <img
                 src={tmdb.getImageUrl(show.poster_path, "w500") || "/placeholder.svg"}
                 alt={show.name}
-                className="h-96 w-full object-cover md:h-full md:w-80"
+                className={`h-96 w-full object-cover md:h-full md:w-80 ${isMobile ? "h-64 w-full" : ""}`}
               />
             </div>
 
-            <div className="p-8">
-              <div className="flex items-start justify-between mb-4">
+            <div className={`p-8 ${isMobile ? "px-4" : ""}`}>
+              <div className={`flex items-start justify-between mb-4 ${isMobile ? "flex-col items-center" : ""}`}>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
                   {show.name}
                 </h1>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 mt-2">
                   <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
                     <Star className="w-4 h-4 mr-1" />
                     {show.vote_average.toFixed(1)}
@@ -422,7 +416,11 @@ const TVDetail: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+              <div
+                className={`flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300 ${
+                  isMobile ? "flex-col items-center" : ""
+                }`}
+              >
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
                   {new Date(show.first_air_date).getFullYear()}
@@ -482,11 +480,12 @@ const TVDetail: React.FC = () => {
 
         {/* Season Selector & Episodes */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-          <div className={`flex items-center justify-between mb-6 ${isMobile ? 'flex-col space-y-4' : ''}`}>
+          {/* Adjust layout for mobile */}
+          <div className={`flex items-center justify-between mb-6 ${isMobile ? "flex-col space-y-4" : ""}`}>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
               {translations[language].episodes || 'Episodes'}
             </h2>
-            <div className={`flex items-center space-x-3 ${isMobile ? 'w-full justify-center' : ''}`}>
+            <div className={`flex items-center space-x-3 ${isMobile ? "w-full justify-center" : ""}`}>
               {/* Season View Button */}
               <Link
                 to={`/tv/${id}/season/${selectedSeason}`}
@@ -540,11 +539,11 @@ const TVDetail: React.FC = () => {
                           <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                             {episode.episode_number}
                           </span>
-                          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                          <h3 className={`font-semibold ${isMobile ? 'text-sm' : 'text-base'} text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors`}>
                             {episode.name}
                           </h3>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className={`flex items-center space-x-2 ${isMobile ? 'flex-col' : ''}`}>
                           <Link
                             to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
                             className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
