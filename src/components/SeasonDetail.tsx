@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Calendar, Info, Star, Tv } from 'lucide-react';
+import { ArrowLeft, Play, Calendar, Info, Star, Tv, Grid } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { watchlistService } from '../services/watchlist';
@@ -301,6 +301,13 @@ const SeasonDetail: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-1">
+                          <Link
+                            to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                            className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
+                            title="View Episode Details"
+                          >
+                            <Grid className="w-5 h-5" />
+                          </Link>
                           {episode.overview && (
                             <button
                               onClick={() => toggleDescription(episode.id)}
@@ -345,6 +352,13 @@ const SeasonDetail: React.FC = () => {
                           )}
                         </div>
                         <div className="flex items-center space-x-2">
+                          <Link
+                            to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                            className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
+                            title="View Episode Details"
+                          >
+                            <Grid className="w-5 h-5" />
+                          </Link>
                           {episode.overview && (
                             <button
                               onClick={() => toggleDescription(episode.id)}
