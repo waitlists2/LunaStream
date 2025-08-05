@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react"
 import { tmdb } from "../services/tmdb"
 import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
+import { Heart, Star, ChevronDown } from "lucide-react"
 
 interface HybridTVHeaderProps {
   show: TVDetails
