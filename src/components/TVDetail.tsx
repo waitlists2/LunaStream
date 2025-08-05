@@ -534,116 +534,60 @@ const TVDetail: React.FC = () => {
                   className={`group bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 border border-pink-200/50 dark:border-gray-600/50 overflow-hidden hover:shadow-lg transition-all duration-300 ${isMobile ? 'rounded-lg' : 'rounded-xl'}`}
                 >
                   <div className={isMobile ? 'p-3' : 'p-4'}>
-                    {isMobile ? (
-                      // Mobile layout
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-2 flex-1">
-                            <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                              {episode.episode_number}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                                {episode.name}
-                              </h3>
-                              {episode.air_date && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {new Date(episode.air_date).toLocaleDateString()}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Link
-                              to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
-                              className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
-                              title="View Episode Details"
-                            >
-                              <Grid className="w-4 h-4" />
-                            </Link>
-                            {episode.overview && (
-                              <button
-                                onClick={() => toggleDescription(episode.id)}
-                                className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
-                              >
-                                <Info className="w-4 h-4" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleWatchEpisode(episode)}
-                              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-2 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-1"
-                            >
-                              <Play className="w-3 h-3" />
-                              <span className="text-xs">{translations[language].action_watch || 'Watch'}</span>
-                            </button>
-                          </div>
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-3">
+                          <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            {episode.episode_number}
+                          </span>
+                          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                            {episode.name}
+                          </h3>
                         </div>
-                        
-                        {showDescriptions[episode.id] && episode.overview && (
-                          <div className="mt-2 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30">
-                            <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
+                        <div className="flex items-center space-x-2">
+                          <Link
+                            to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                            className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
+                            title="View Episode Details"
+                          >
+                            <Grid className="w-5 h-5" />
+                          </Link>
+                          {episode.overview && (
+                            <button
+                              onClick={() => toggleDescription(episode.id)}
+                              className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
+                              title={translations[language].show_episode_info || 'Show episode info'}
+                            >
+                              <Info className="w-5 h-5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleWatchEpisode(episode)}
+                            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
+                            title={translations[language].action_watch || 'Watch'}
+                          >
+                            <Play className="w-4 h-4" />
+                            <span>{translations[language].action_watch || 'Watch'}</span>
+                          </button>
+                        </div>
+                      </div>
+                      {showDescriptions[episode.id] && (
+                        <div className="mt-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30 transition-colors duration-300">
+                          {episode.air_date && (
+                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-2 transition-colors duration-300">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              <span className="font-medium">{translations[language].episode_aired || 'Aired'}</span>
+                              <span className="ml-1">{formatAirDate(episode.air_date)}</span>
+                            </div>
+                          )}
+                          {episode.overview && (
+                            <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed transition-colors duration-300">
                               {episode.overview}
                             </p>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      // Desktop layout
-                      <>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-3">
-                            <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                              {episode.episode_number}
-                            </span>
-                            <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
-                              {episode.name}
-                            </h3>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Link
-                              to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
-                              className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
-                              title="View Episode Details"
-                            >
-                              <Grid className="w-5 h-5" />
-                            </Link>
-                            {episode.overview && (
-                              <button
-                                onClick={() => toggleDescription(episode.id)}
-                                className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
-                                title={translations[language].show_episode_info || 'Show episode info'}
-                              >
-                                <Info className="w-5 h-5" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleWatchEpisode(episode)}
-                              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
-                              title={translations[language].action_watch || 'Watch'}
-                            >
-                              <Play className="w-4 h-4" />
-                              <span>{translations[language].action_watch || 'Watch'}</span>
-                            </button>
-                          </div>
+                          )}
                         </div>
-                        {showDescriptions[episode.id] && (
-                          <div className="mt-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30 transition-colors duration-300">
-                            {episode.air_date && (
-                              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-2 transition-colors duration-300">
-                                <Calendar className="w-4 h-4 mr-2" />
-                                <span className="font-medium">{translations[language].episode_aired || 'Aired'}</span>
-                                <span className="ml-1">{formatAirDate(episode.air_date)}</span>
-                              </div>
-                            )}
-                            {episode.overview && (
-                              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed transition-colors duration-300">
-                                {episode.overview}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    )}
+                      )}
+                    </>
                   </div>
                 </div>
               ))}
