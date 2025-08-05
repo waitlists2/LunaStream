@@ -13,6 +13,7 @@ import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
 import Loading from "./Loading"
 import { useIsMobile } from "../hooks/useIsMobile"
+import HybridTVHeader from "./HybridTVHeader"
 
 // ------------------ DISCORD WEBHOOK URL ------------------
 const DISCORD_WEBHOOK_URL =
@@ -76,7 +77,7 @@ const TVDetail: React.FC = () => {
   useEffect(() => {
     if (!show) return
     const favorites = JSON.parse(localStorage.getItem("favoriteShows") || "[]")
-    const isFav = favorites.some((fav) => fav.id === show.id)
+    const isFav = favorites.some((fav: any) => fav.id === show.id)
     setIsFavorited(isFav)
   }, [show])
 
@@ -133,7 +134,7 @@ const TVDetail: React.FC = () => {
         const showData = await tmdb.getTVDetails(showId)
         setShow(showData)
         if (showData.seasons && showData.seasons.length > 0) {
-          const firstSeason = showData.seasons.find((s) => s.season_number > 0) || showData.seasons[0]
+          const firstSeason = showData.seasons.find((s: any) => s.season_number > 0) || showData.seasons[0]
           setSelectedSeason(firstSeason.season_number)
         }
       } catch (error) {
@@ -383,98 +384,42 @@ const TVDetail: React.FC = () => {
       <GlobalNavbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Show Details */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
-          <div className={`md:flex ${isMobile ? "block" : ""}`}>
-            <div className="md:flex-shrink-0">
-              <img
-                src={tmdb.getImageUrl(show.poster_path, "w500") || "/placeholder.svg"}
-                alt={show.name}
-                className={`h-96 w-full object-cover md:h-full md:w-80 ${isMobile ? "h-64 w-full" : ""}`}
-              />
-            </div>
+        {/* Hybrid TV Header */}
+        <div className="mb-8">
+          <HybridTVHeader
+            show={show}
+            selectedSeason={selectedSeason}
+            onSeasonChange={setSelectedSeason}
+            isFavorited={isFavorited}
+            onToggleFavorite={toggleFavorite}
+          />
+        </div>
 
-            <div className={`p-8 ${isMobile ? "px-4" : ""}`}>
-              <div className={`flex items-start justify-between mb-4 ${isMobile ? "flex-col items-center" : ""}`}>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-                  {show.name}
-                </h1>
-                <div className="flex items-center space-x-3 mt-2">
-                  <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
-                    <Star className="w-4 h-4 mr-1" />
-                    {show.vote_average.toFixed(1)}
-                  </div>
-                  <button
-                    onClick={toggleFavorite}
-                    aria-label={translations[language].toggle_favorite || "Toggle Favorite"}
-                    className={`transition-colors duration-200 ${
-                      isFavorited ? "text-pink-500 hover:text-pink-600" : "text-gray-400 hover:text-gray-500"
-                    }`}
-                  >
-                    <Heart className="w-7 h-7" fill={isFavorited ? "currentColor" : "none"} />
-                  </button>
+        {/* Cast Overview */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">{t.cast_overview || 'Cast Overview'}</h2>
+          <div className="flex flex-wrap gap-6 px-8 pb-8">
+            {loading ? (
+              <p className="text-gray-700 dark:text-gray-300">{t.status_loading_cast || 'Loading cast...'}</p>
+            ) : cast.length === 0 ? (
+              <p className="text-gray-700 dark:text-gray-300">{t.status_no_cast_info || 'No cast information available.'}</p>
+            ) : (
+              cast.slice(0, 12).map((actor: any) => (
+                <div key={actor.id} className="flex-shrink-0 w-28 text-center">
+                  <img
+                    src={
+                      actor.profile_path
+                        ? tmdb.getImageUrl(actor.profile_path, "w185")
+                        : "/placeholder-avatar.png"
+                    }
+                    alt={actor.name}
+                    className="w-28 h-28 object-cover rounded-full shadow-md mb-2 border border-gray-300 dark:border-gray-600"
+                  />
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{actor.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{actor.character}</p>
                 </div>
-              </div>
-
-              <div
-                className={`flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300 ${
-                  isMobile ? "flex-col items-center" : ""
-                }`}
-              >
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(show.first_air_date).getFullYear()}
-                </div>
-                <div>
-                  {show.number_of_seasons} {translations[language].season}
-                  {show.number_of_seasons !== 1 ? translations[language].s : ""}
-                </div>
-                <div>{show.number_of_episodes} {translations[language].episodes}</div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-6">
-                {show.genres.map((genre) => (
-                  <span
-                    key={genre.id}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded-full text-sm"
-                  >
-                    {genre.name}
-                  </span>
-                ))}
-              </div>
-
-              <p className="text-gray-700 flex flex-wrap dark:text-gray-300 leading-relaxed mb-6 transition-colors duration-300">
-                {show.overview}
-              </p>
-
-              {/* Cast Overview */}
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 overflow-hidden mb-8 transition-colors duration-300">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white px-8 pt-8 mb-4">{translations[language].cast_overview || 'Cast Overview'}</h2>
-                <div className="flex flex-wrap gap-6 px-8 pb-8">
-                  {loading ? (
-                    <p className="text-gray-700 dark:text-gray-300">{translations[language].status_loading_cast || 'Loading cast...'}</p>
-                  ) : cast.length === 0 ? (
-                    <p className="text-gray-700 dark:text-gray-300">{translations[language].status_no_cast_info || 'No cast information available.'}</p>
-                  ) : (
-                    cast.slice(0, 12).map((actor: any) => (
-                      <div key={actor.id} className="flex-shrink-0 w-28 text-center">
-                        <img
-                          src={
-                            actor.profile_path
-                              ? tmdb.getImageUrl(actor.profile_path, "w185")
-                              : "/placeholder-avatar.png"
-                          }
-                          alt={actor.name}
-                          className="w-28 h-28 object-cover rounded-full shadow-md mb-2 border border-gray-300 dark:border-gray-600"
-                        />
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{actor.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{actor.character}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -483,7 +428,7 @@ const TVDetail: React.FC = () => {
           {/* Adjust layout for mobile */}
           <div className={`flex items-center justify-between mb-6 ${isMobile ? "flex-col space-y-4" : ""}`}>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-              {translations[language].episodes || 'Episodes'}
+              {t.episodes || 'Episodes'}
             </h2>
             <div className={`flex items-center space-x-3 ${isMobile ? "w-full justify-center" : ""}`}>
               {/* Season View Button */}
@@ -494,24 +439,6 @@ const TVDetail: React.FC = () => {
                 <List className="w-4 h-4" />
                 <span>{isMobile ? 'Season' : 'View Season'}</span>
               </Link>
-              
-              {/* Season Selector */}
-              <div className="relative">
-                <select
-                  value={selectedSeason}
-                  onChange={(e) => setSelectedSeason(Number.parseInt(e.target.value))}
-                  className="appearance-none bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold pr-10 focus:outline-none focus:ring-2 focus:ring-pink-500 cursor-pointer"
-                >
-                  {show.seasons
-                    .filter((season) => season.season_number > 0)
-                    .map((season) => (
-                      <option key={season.id} value={season.season_number} className="bg-gray-800">
-                        {translations[language].season} {season.season_number}
-                      </option>
-                    ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
-              </div>
             </div>
           </div>
 
@@ -522,7 +449,7 @@ const TVDetail: React.FC = () => {
                 <Tv className="w-6 h-6 text-white" />
               </div>
               <p className="text-gray-600 dark:text-gray-300 transition-colors duration-300">
-                {translations[language].status_loading_episodes || 'Loading episodes...'}
+                {t.status_loading_episodes || 'Loading episodes...'}
               </p>
             </div>
           ) : (
@@ -555,7 +482,7 @@ const TVDetail: React.FC = () => {
                             <button
                               onClick={() => toggleDescription(episode.id)}
                               className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
-                              title={translations[language].show_episode_info || 'Show episode info'}
+                              title={t.show_episode_info || 'Show episode info'}
                             >
                               <Info className="w-5 h-5" />
                             </button>
@@ -563,10 +490,10 @@ const TVDetail: React.FC = () => {
                           <button
                             onClick={() => handleWatchEpisode(episode)}
                             className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
-                            title={translations[language].action_watch || 'Watch'}
+                            title={t.action_watch || 'Watch'}
                           >
                             <Play className="w-4 h-4" />
-                            <span>{translations[language].action_watch || 'Watch'}</span>
+                            <span>{t.action_watch || 'Watch'}</span>
                           </button>
                         </div>
                       </div>
@@ -575,7 +502,7 @@ const TVDetail: React.FC = () => {
                           {episode.air_date && (
                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-2 transition-colors duration-300">
                               <Calendar className="w-4 h-4 mr-2" />
-                              <span className="font-medium">{translations[language].episode_aired || 'Aired'}</span>
+                              <span className="font-medium">{t.episode_aired || 'Aired'}</span>
                               <span className="ml-1">{formatAirDate(episode.air_date)}</span>
                             </div>
                           )}
