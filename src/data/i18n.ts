@@ -21,8 +21,26 @@ export const translations = {
     // generic
     season: "Season",
     seasons: "Seasons",
+    episode: "Episode",
     episode_aired: 'Aired',
     episodes: 'Episodes',
+    overview: 'Overview',
+    minutes: 'minutes',
+    
+    // New detail pages
+    season_not_found: 'Season not found',
+    episode_not_found: 'Episode not found',
+    back_to_show: 'Back to Show',
+    back_to_season: 'Back to Season',
+    show_episode_info: 'Show episode info',
+    close_player: 'Close Player',
+    toggle_favorite: 'Toggle Favorite',
+    
+    // Cast
+    cast_overview: 'Cast Overview',
+    status_loading_cast: 'Loading cast...',
+    status_no_cast_info: 'No cast information available.',
+    status_loading_episodes: 'Loading episodes...',
     
     // Home page
     home_heading_title: 'Watch Movies & TV Shows',
@@ -286,8 +304,26 @@ export const translations = {
     // generic
     season: 'Sæson',
     seasons: 'Sæsoner',
+    episode: 'Episode',
     episode_aired: 'Sendt',
     episodes: 'Episoder',
+    overview: 'Oversigt',
+    minutes: 'minutter',
+    
+    // New detail pages
+    season_not_found: 'Sæson ikke fundet',
+    episode_not_found: 'Episode ikke fundet',
+    back_to_show: 'Tilbage til serie',
+    back_to_season: 'Tilbage til sæson',
+    show_episode_info: 'Vis episode-info',
+    close_player: 'Luk afspiller',
+    toggle_favorite: 'Skift favorit',
+    
+    // Cast
+    cast_overview: 'Rollebesætning',
+    status_loading_cast: 'Indlæser rollebesætning...',
+    status_no_cast_info: 'Ingen rollebesætning tilgængelig.',
+    status_loading_episodes: 'Indlæser episoder...',
 
     // Home page
     home_heading_title: 'Se film og TV-serier',
