@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info } from "lucide-react"
+import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info, List, Grid } from "lucide-react"
 import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { TVDetails, Episode } from "../types"
@@ -12,6 +12,7 @@ import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
 import Loading from "./Loading"
+import { useIsMobile } from "../hooks/useIsMobile"
 
 // ------------------ DISCORD WEBHOOK URL ------------------
 const DISCORD_WEBHOOK_URL =
@@ -71,6 +72,8 @@ const TVDetail: React.FC = () => {
   const [cast, setCast] = React.useState([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
   const { language } = useLanguage()
+
+  const isMobile = useIsMobile()
 
   const t = translations[language];
 
@@ -479,31 +482,43 @@ const TVDetail: React.FC = () => {
 
         {/* Season Selector & Episodes */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
-          <div className="flex items-center justify-between mb-6">
+          <div className={`flex items-center justify-between mb-6 ${isMobile ? 'flex-col space-y-4' : ''}`}>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
               {translations[language].episodes || 'Episodes'}
             </h2>
-            <div className="relative">
-              <select
-                value={selectedSeason}
-                onChange={(e) => setSelectedSeason(Number.parseInt(e.target.value))}
-                className="appearance-none bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold pr-10 focus:outline-none focus:ring-2 focus:ring-pink-500 cursor-pointer"
+            <div className={`flex items-center space-x-3 ${isMobile ? 'w-full justify-center' : ''}`}>
+              {/* Season View Button */}
+              <Link
+                to={`/tv/${id}/season/${selectedSeason}`}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-indigo-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
               >
-                {show.seasons
-                  .filter((season) => season.season_number > 0)
-                  .map((season) => (
-                    <option key={season.id} value={season.season_number} className="bg-gray-800">
-                      {translations[language].season} {season.season_number}
-                    </option>
-                  ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
+                <List className="w-4 h-4" />
+                <span>{isMobile ? 'Season' : 'View Season'}</span>
+              </Link>
+              
+              {/* Season Selector */}
+              <div className="relative">
+                <select
+                  value={selectedSeason}
+                  onChange={(e) => setSelectedSeason(Number.parseInt(e.target.value))}
+                  className="appearance-none bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold pr-10 focus:outline-none focus:ring-2 focus:ring-pink-500 cursor-pointer"
+                >
+                  {show.seasons
+                    .filter((season) => season.season_number > 0)
+                    .map((season) => (
+                      <option key={season.id} value={season.season_number} className="bg-gray-800">
+                        {translations[language].season} {season.season_number}
+                      </option>
+                    ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
+              </div>
             </div>
           </div>
 
           {/* Episodes List */}
           {episodesLoading ? (
-            <div className="text-center py-8">
+            <div className={`text-center ${isMobile ? 'py-6' : 'py-8'}`}>
               <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full animate-spin flex items-center justify-center mx-auto mb-4">
                 <Tv className="w-6 h-6 text-white" />
               </div>
@@ -512,16 +527,135 @@ const TVDetail: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className={isMobile ? 'space-y-2' : 'space-y-3'}>
               {episodes.map((episode) => (
                 <div
                   key={episode.id}
-                  className="group bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl border border-pink-200/50 dark:border-gray-600/50 overflow-hidden hover:shadow-lg transition-all duration-300"
+                  className={`group bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 border border-pink-200/50 dark:border-gray-600/50 overflow-hidden hover:shadow-lg transition-all duration-300 ${isMobile ? 'rounded-lg' : 'rounded-xl'}`}
                 >
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <div className={isMobile ? 'p-3' : 'p-4'}>
+                    {isMobile ? (
+                      // Mobile layout
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-2 flex-1">
+                            <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                              {episode.episode_number}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                {episode.name}
+                              </h3>
+                              {episode.air_date && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {new Date(episode.air_date).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Link
+                              to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                              className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
+                              title="View Episode Details"
+                            >
+                              <Info className="w-4 h-4" />
+                            </Link>
+                            {episode.overview && (
+                              <button
+                                onClick={() => toggleDescription(episode.id)}
+                                className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleWatchEpisode(episode)}
+                              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-2 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-1"
+                            >
+                              <Play className="w-3 h-3" />
+                              <span className="text-xs">{translations[language].action_watch || 'Watch'}</span>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {showDescriptions[episode.id] && episode.overview && (
+                          <div className="mt-2 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30">
+                            <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
+                              {episode.overview}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      // Desktop layout
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-3">
+                            <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                              {episode.episode_number}
+                            </span>
+                            <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                              {episode.name}
+                            </h3>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Link
+                              to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                              className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
+                              title="View Episode Details"
+                            >
+                              <Grid className="w-5 h-5" />
+                            </Link>
+                            {episode.overview && (
+                              <button
+                                onClick={() => toggleDescription(episode.id)}
+                                className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
+                                title={translations[language].show_episode_info || 'Show episode info'}
+                              >
+                                <Info className="w-5 h-5" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleWatchEpisode(episode)}
+                              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
+                              title={translations[language].action_watch || 'Watch'}
+                            >
+                              <Play className="w-4 h-4" />
+                              <span>{translations[language].action_watch || 'Watch'}</span>
+                            </button>
+                          </div>
+                        </div>
+                        {showDescriptions[episode.id] && (
+                          <div className="mt-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30 transition-colors duration-300">
+                            {episode.air_date && (
+                              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-2 transition-colors duration-300">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                <span className="font-medium">{translations[language].episode_aired || 'Aired'}</span>
+                                <span className="ml-1">{formatAirDate(episode.air_date)}</span>
+                              </div>
+                            )}
+                            {episode.overview && (
+                              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed transition-colors duration-300">
+                                {episode.overview}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default TVDetail
                           {episode.episode_number}
                         </span>
                         <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">

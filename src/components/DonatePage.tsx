@@ -4,11 +4,13 @@ import { ArrowLeft, Film, Heart, Copy, Check, Bitcoin, Coins, DollarSign, Shield
 import GlobalNavbar from './GlobalNavbar';
 import { useLanguage } from './LanguageContext';
 import { translations } from '../data/i18n';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const DonatePage: React.FC = () => {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
+  const isMobile = useIsMobile();
 
   const cryptoAddresses = [
     {
@@ -72,78 +74,78 @@ const DonatePage: React.FC = () => {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div className={`text-center ${isMobile ? 'mb-8' : 'mb-12'}`}>
           <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Heart className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
+          <h1 className={`font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300 ${isMobile ? 'text-2xl' : 'text-4xl sm:text-5xl'}`}>
             <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
               {t.donate_support_title}
             </span>
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed transition-colors duration-300">
+          <p className={`text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed transition-colors duration-300 ${isMobile ? 'text-base' : 'text-xl'}`}>
             {t.donate_support_subtitle}
           </p>
         </div>
 
         {/* What Donations Do */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 mb-12 transition-colors duration-300">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
+        <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border border-pink-200/50 dark:border-gray-700/50 transition-colors duration-300 ${isMobile ? 'rounded-xl p-4 mb-6' : 'rounded-2xl p-8 mb-12'}`}>
+          <h2 className={`font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
             <DollarSign className="w-7 h-7 mr-3 text-green-500" />
             {t.donate_how_help_title}
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1 gap-4' : 'md:grid-cols-2'}`}>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>{t.donate_domain_costs}</strong> {t.donate_domain_costs_desc}</p>
+                <p className={`text-gray-700 dark:text-gray-300 transition-colors duration-300 ${isMobile ? 'text-sm' : ''}`}><strong>{t.donate_domain_costs}</strong> {t.donate_domain_costs_desc}</p>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>{t.donate_development}</strong> {t.donate_development_desc}</p>
+                <p className={`text-gray-700 dark:text-gray-300 transition-colors duration-300 ${isMobile ? 'text-sm' : ''}`}><strong>{t.donate_development}</strong> {t.donate_development_desc}</p>
               </div>
             </div>
-            <div className="space-y-4">
+            <div className={`space-y-4 ${isMobile ? 'mt-2' : ''}`}>
               <div className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700 dark:text-gray-300 transition-colors duration-300"><strong>{t.donate_accessibility}</strong> {t.donate_accessibility_desc}</p>
+                <p className={`text-gray-700 dark:text-gray-300 transition-colors duration-300 ${isMobile ? 'text-sm' : ''}`}><strong>{t.donate_accessibility}</strong> {t.donate_accessibility_desc}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Cryptocurrency Addresses */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-8 transition-colors duration-300">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300">
+        <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border border-pink-200/50 dark:border-gray-700/50 transition-colors duration-300 ${isMobile ? 'rounded-xl p-4' : 'rounded-2xl p-8'}`}>
+          <h2 className={`font-bold text-gray-900 dark:text-white mb-6 flex items-center transition-colors duration-300 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
             <Bitcoin className="w-7 h-7 mr-3 text-orange-500" />
             {t.donate_crypto_title}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300">
+          <p className={`text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300 ${isMobile ? 'text-sm mb-4' : ''}`}>
             {t.donate_crypto_desc}
           </p>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1 gap-3' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
             {cryptoAddresses.map((crypto) => {
               const IconComponent = crypto.icon;
               return (
                 <div
                   key={crypto.symbol}
-                  className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className={`group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-600 border border-gray-200 dark:border-gray-600 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${isMobile ? 'rounded-lg p-3' : 'rounded-xl p-4'}`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 bg-gradient-to-r ${crypto.color} rounded-lg flex items-center justify-center shadow-md`}>
+                      <div className={`bg-gradient-to-r ${crypto.color} rounded-lg flex items-center justify-center shadow-md ${isMobile ? 'w-8 h-8' : 'w-10 h-10'}`}>
                         <IconComponent className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white transition-colors duration-300">{crypto.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">{crypto.symbol}</p>
+                        <h3 className={`font-semibold text-gray-900 dark:text-white transition-colors duration-300 ${isMobile ? 'text-sm' : ''}`}>{crypto.name}</h3>
+                        <p className={`text-gray-500 dark:text-gray-400 transition-colors duration-300 ${isMobile ? 'text-xs' : 'text-sm'}`}>{crypto.symbol}</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 mb-3 transition-colors duration-300">
-                    <p className="text-xs font-mono text-gray-700 dark:text-gray-300 break-all leading-relaxed transition-colors duration-300">
+                  <div className={`bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 transition-colors duration-300 ${isMobile ? 'p-2' : 'p-3'}`}>
+                    <p className={`font-mono text-gray-700 dark:text-gray-300 break-all leading-relaxed transition-colors duration-300 ${isMobile ? 'text-xs' : 'text-xs'}`}>
                       {crypto.address}
                     </p>
                   </div>
@@ -154,16 +156,16 @@ const DonatePage: React.FC = () => {
                       copiedAddress === crypto.symbol
                         ? 'bg-green-500 text-white'
                         : `bg-gradient-to-r ${crypto.color} text-white hover:shadow-md`
-                    }`}
+                    } ${isMobile ? 'text-sm py-2' : ''}`}
                   >
                     {copiedAddress === crypto.symbol ? (
                       <>
-                        <Check className="w-4 h-4" />
+                        <Check className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
                         <span>{t.donate_copied}</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4" />
+                        <Copy className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
                         <span>{t.donate_copy_address}</span>
                       </>
                     )}
@@ -175,10 +177,10 @@ const DonatePage: React.FC = () => {
         </div>
 
         {/* Thank You Message */}
-        <div className="text-center mt-12">
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">{t.donate_thank_you_title}</h3>
-            <p className="text-lg opacity-90 max-w-2xl mx-auto">
+        <div className={`text-center ${isMobile ? 'mt-6' : 'mt-12'}`}>
+          <div className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white ${isMobile ? 'rounded-xl p-4' : 'rounded-2xl p-8'}`}>
+            <h3 className={`font-bold mb-4 ${isMobile ? 'text-lg' : 'text-2xl'}`}>{t.donate_thank_you_title}</h3>
+            <p className={`opacity-90 max-w-2xl mx-auto ${isMobile ? 'text-sm' : 'text-lg'}`}>
               {t.donate_thank_you_message}
             </p>
           </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Film, Archive, Home, Search, Compass, Heart } from 'lucide-react';
+import { Film, Archive, Home, Search, Compass, Heart, ChevronDown } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { languages, translations } from '../data/i18n';
 
@@ -37,8 +37,8 @@ const GlobalNavbar: React.FC = () => {
     { path: '/vault', label: t.nav_vault, icon: Archive },
   ];
 
-  // Custom Language Selector component (inside same file)
-  const LanguageSelectorCustom = () => {
+  // Language Selector component with flag emoji
+  const LanguageSelector = () => {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
@@ -57,49 +57,41 @@ const GlobalNavbar: React.FC = () => {
       setOpen(false);
     };
 
+    const getCurrentFlag = () => {
+      const currentLang = languages.find(lang => lang.shortname === language);
+      return currentLang?.flag || '🇬🇧';
+    };
+
     return (
-      <div ref={ref} className="relative inline-block max-w-[100px]">
+      <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(!open)}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          className="inline-flex items-center justify-between w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-2xl text-gray-900 dark:text-gray-100 text-xl font-semibold cursor-pointer select-none
-            hover:bg-gray-200 dark:hover:bg-gray-700 transition-shadow shadow-sm dark:shadow-none focus:outline-none focus:ring-2 focus:ring-pink-500"
+          className="p-2 text-gray-600 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200 flex items-center space-x-1"
+          aria-label="Language selector"
         >
-          {language.toUpperCase()}
-          <svg
-            className={`ml-2 h-5 w-5 text-gray-500 dark:text-gray-300 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <span className="text-xl">{getCurrentFlag()}</span>
+          <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
         </button>
 
         {open && (
-          <ul
-            role="listbox"
-            tabIndex={-1}
-            className="absolute right-0 mt-2 w-full rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none
-              text-gray-900 dark:text-gray-100 text-sm origin-top-right"
-            style={{ transformOrigin: 'top right', transform: 'scale(0.9)', transition: 'transform 0.15s ease' }}
+          <div
+            className="absolute right-0 mt-2 w-48 rounded-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-xl border border-pink-200/50 dark:border-gray-600/30 z-50"
           >
             {languages.map(({ name, shortname, flag }) => (
-              <li
+              <button
                 key={shortname}
-                role="option"
-                aria-selected={language === shortname}
                 onClick={() => handleSelect(shortname)}
-                className={`cursor-pointer px-4 py-2 hover:bg-pink-500 hover:text-white ${
-                  language === shortname ? 'bg-pink-500 text-white' : ''
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-pink-50 dark:hover:bg-gray-700/50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                  language === shortname 
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white' 
+                    : 'text-gray-900 dark:text-gray-100'
                 }`}
               >
-                {name}
-              </li>
+                <span className="text-xl">{flag}</span>
+                <span className="font-medium">{name}</span>
+              </button>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     );
@@ -177,7 +169,7 @@ const GlobalNavbar: React.FC = () => {
             <ThemeToggle />
 
             {/* Custom Language selector */}
-            <LanguageSelectorCustom />
+            <LanguageSelector />
           </div>
         </div>
       </div>

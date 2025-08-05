@@ -6,6 +6,7 @@ import GlobalNavbar from './GlobalNavbar';
 import { filterBannedContent } from '../utils/banList';
 import { useLanguage } from './LanguageContext';
 import { translations } from '../data/i18n';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface MediaItem {
   id: number;
@@ -32,6 +33,7 @@ const ComingSoon: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
+  const isMobile = useIsMobile();
 
   // Fetch all pages of movies and TV shows on mount
   useEffect(() => {
@@ -189,19 +191,19 @@ const ComingSoon: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
       <GlobalNavbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-6">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isMobile ? 'pt-8 pb-8' : 'pt-16 pb-12'}`}>
+        <h1 className={`font-bold text-center text-gray-900 dark:text-white mb-6 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
           <span className="bg-gradient-to-l from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
             {t.coming_soon_title || 'Coming Soon'}
           </span>
         </h1>
 
         {/* Search Bar */}
-        <div className="flex justify-center mb-8">
+        <div className={`flex justify-center ${isMobile ? 'mb-4' : 'mb-8'}`}>
           <input
             type="text"
             placeholder={t.coming_soon_search_placeholder || 'Search by title or name...'}
-            className="w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className={`w-full max-w-md px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isMobile ? 'text-sm' : ''}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             disabled={loading}
@@ -209,14 +211,14 @@ const ComingSoon: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-gray-700 dark:text-gray-300">{t.status_loading}</div>
+          <div className={`text-center text-gray-700 dark:text-gray-300 ${isMobile ? 'py-12' : 'py-20'}`}>{t.status_loading}</div>
         ) : error ? (
           <div className="text-center text-red-500">{error}</div>
         ) : paginatedResults.length === 0 ? (
           <div className="text-center text-gray-500 dark:text-gray-400">{t.status_no_upcoming_content}</div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div className={`grid gap-6 ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'}`}>
               {paginatedResults.map(item => {
                 const isMovie = item.media_type === 'movie';
                 const title = isMovie ? item.title : item.name;
@@ -226,7 +228,7 @@ const ComingSoon: React.FC = () => {
                   <Link
                     key={`${item.media_type}-${item.id}`}
                     to={`/${isMovie ? 'movie' : 'tv'}/${item.id}`}
-                    className="group bg-white/80 dark:bg-gray-800/80 rounded-xl overflow-hidden shadow hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+                    className={`group bg-white/80 dark:bg-gray-800/80 overflow-hidden shadow hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ${isMobile ? 'rounded-lg' : 'rounded-xl'}`}
                   >
                     <div className="aspect-[2/3] overflow-hidden">
                       <img
@@ -235,11 +237,11 @@ const ComingSoon: React.FC = () => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
-                    <div className="p-3">
-                      <h3 className="text-sm font-semibold text-gray-800 dark:text-white line-clamp-2 group-hover:text-pink-600 dark:group-hover:text-purple-400">
+                    <div className={isMobile ? 'p-2' : 'p-3'}>
+                      <h3 className={`font-semibold text-gray-800 dark:text-white line-clamp-2 group-hover:text-pink-600 dark:group-hover:text-purple-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                         {title}
                       </h3>
-                      <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      <div className={`flex justify-between mt-1 text-gray-500 dark:text-gray-400 ${isMobile ? 'text-xs' : 'text-xs'}`}>
                         <span>{date ? new Date(date).toLocaleDateString() : t.content_tba}</span>
                         <span>★ {item.vote_average.toFixed(1)}</span>
                       </div>
@@ -250,30 +252,30 @@ const ComingSoon: React.FC = () => {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center mt-10 gap-4 flex-wrap">
+            <div className={`flex justify-center items-center gap-4 flex-wrap ${isMobile ? 'mt-6 gap-2' : 'mt-10'}`}>
               <button
                 onClick={handleFirstPage}
                 disabled={page === 1 || loading}
-                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
+                className={`bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40 ${isMobile ? 'px-3 py-2' : 'px-4 py-2'}`}
                 title={t.nav_first_page}
               >
-                <ChevronsLeft size={18} />
+                <ChevronsLeft size={isMobile ? 16 : 18} />
               </button>
               <button
                 onClick={handlePrevPage}
                 disabled={page === 1 || loading}
-                className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
+                className={`bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40 ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-2'}`}
               >
-                <ArrowLeft className="inline-block mr-2" size={18} /> {t.coming_soon_prev}
+                <ArrowLeft className={`inline-block mr-2 ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} /> {t.coming_soon_prev}
               </button>
 
-              <span className="text-lg font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span className={`font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 ${isMobile ? 'text-sm' : 'text-lg'}`}>
                 {t.nav_page}
                 <input
                   type="text"
                   inputMode="numeric"
                   pattern="\d*"
-                  className="w-16 text-center rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className={`text-center rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${isMobile ? 'w-12 text-sm' : 'w-16'}`}
                   value={inputPage}
                   onChange={handlePageInputChange}
                   onBlur={handlePageInputSubmit}
@@ -287,17 +289,17 @@ const ComingSoon: React.FC = () => {
               <button
                 onClick={handleNextPage}
                 disabled={page === totalPages || loading}
-                className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
+                className={`bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40 ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-2'}`}
               >
-                {t.coming_soon_next} <ArrowRight className="inline-block ml-2" size={18} />
+                {t.coming_soon_next} <ArrowRight className={`inline-block ml-2 ${isMobile ? 'w-4 h-4' : 'w-5 h-5'}`} />
               </button>
               <button
                 onClick={handleLastPage}
                 disabled={page === totalPages || loading}
-                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40"
+                className={`bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full shadow disabled:opacity-40 ${isMobile ? 'px-3 py-2' : 'px-4 py-2'}`}
                 title={t.nav_last_page}
               >
-                <ChevronsRight size={18} />
+                <ChevronsRight size={isMobile ? 16 : 18} />
               </button>
             </div>
           </>
