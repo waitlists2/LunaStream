@@ -5,10 +5,13 @@ import { useParams, Link } from "react-router-dom"
 import { Play, Star, Calendar, Heart, Info, ChevronDown, List, Grid, Tv } from "lucide-react"
 import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
+import type { TVDetails, Episode } from "../types"
+import { watchlistService } from "../services/watchlist"
+import GlobalNavbar from "./GlobalNavbar"
+import { playerConfigs, getPlayerUrl } from "../utils/playerUtils"
 import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
 import Loading from "./Loading"
-import GlobalNavbar from "./GlobalNavbar"
 import { useIsMobile } from "../hooks/useIsMobile"
 import HybridTVHeader from "./HybridTVHeader"
 
@@ -47,74 +50,24 @@ async function sendDiscordWatchNotification(
 
 const TVDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const [show, setShow] = useState<any | null>(null)
-  const [selectedSeason, setSelectedSeason] = useState(0) // default to "Choose a season"
-  const [episodes, setEpisodes] = useState<any[]>([])
+  const [show, setShow] = useState<TVDetails | null>(null)
+  const [selectedSeason, setSelectedSeason] = useState(1)
+  const [episodes, setEpisodes] = useState<Episode[]>([])
   const [loading, setLoading] = useState(true)
   const [episodesLoading, setEpisodesLoading] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentEpisode, setCurrentEpisode] = useState<any | null>(null)
+  const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({})
   const [recentlyViewedTV, setRecentlyViewedTV] = useState<any[]>([])
   const [recentlyViewedTVEpisodes, setRecentlyViewedTVEpisodes] = useState<{ [showId: number]: { show: any; episodes: any[] } }>({})
   const [recentlyViewedMovies, setRecentlyViewedMovies] = useState<any[]>([])
   const [isFavorited, setIsFavorited] = useState(false)
-  const [cast, setCast] = useState<any[]>([])
-  const [seasonCast, setSeasonCast] = useState<any[]>([])
+  const [cast, setCast] = React.useState([])
+  const [seasonCast, setSeasonCast] = React.useState<any[]>([])
   const { language } = useLanguage()
   const isMobile = useIsMobile()
   const t = translations[language]
-
-  // Fetch show details and set default to "Choose a season" (0)
-  useEffect(() => {
-    const fetchShow = async () => {
-      if (!id) return
-      setLoading(true)
-      try {
-        const showData = await tmdb.getTVDetails(Number.parseInt(id))
-        setShow(showData)
-        // Don't auto-select a season; default to 0 ("Choose a season")
-        setSelectedSeason(0);
-      } catch (error) {
-        console.error("Failed to fetch TV show:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchShow()
-  }, [id])
-
-  // Fetch episodes when a season is selected (> 0)
-  useEffect(() => {
-    const fetchEpisodes = async () => {
-      if (!id || selectedSeason === 0) return
-      setEpisodesLoading(true)
-      try {
-        const seasonData = await tmdb.getTVSeasons(Number.parseInt(id), selectedSeason)
-        setEpisodes(seasonData.episodes || [])
-      } catch (error) {
-        console.error("Failed to fetch episodes:", error)
-      } finally {
-        setEpisodesLoading(false)
-      }
-    }
-    fetchEpisodes()
-  }, [id, selectedSeason])
-
-  // Fetch show-wide cast once
-  useEffect(() => {
-    async function fetchCredits() {
-      if (!show?.id) return
-      try {
-        const credits = await tmdb.getTVCredits(show.id)
-        setCast(credits.cast || [])
-      } catch (error) {
-        console.error("Failed to fetch TV credits:", error)
-      }
-    }
-    if (show?.id) fetchCredits()
-  }, [show])
 
   // Fetch season cast when show or season changes
   useEffect(() => {
@@ -131,27 +84,64 @@ const TVDetail: React.FC = () => {
     fetchSeasonCredits()
   }, [show?.id, selectedSeason])
 
-  const toggleFavorite = () => {
-      if (!show) return
-      const favorites = JSON.parse(localStorage.getItem("favoriteShows") || "[]")
-      const index = favorites.findIndex((fav: any) => fav.id === show.id)
-
-      if (index !== -1) {
-        favorites.splice(index, 1)
-        setIsFavorited(false)
-      } else {
-        favorites.unshift(show)
-        setIsFavorited(true)
+  // Fetch show-wide cast once
+  useEffect(() => {
+    async function fetchCredits() {
+      if (!show?.id) return
+      try {
+        const credits = await tmdb.getTVCredits(show.id)
+        setCast(credits.cast || [])
+      } catch (error) {
+        console.error("Failed to fetch TV credits:", error)
       }
-      localStorage.setItem("favoriteShows", JSON.stringify(favorites))
     }
+    if (show?.id) {
+      fetchCredits()
+    }
+  }, [show])
 
-    useEffect(() => {
+  // Set favorite status
+  useEffect(() => {
+    if (!show) return
+    const favorites = JSON.parse(localStorage.getItem("favoriteShows") || "[]")
+    const isFav = favorites.some((fav: any) => fav.id === show.id)
+    setIsFavorited(isFav)
+  }, [show])
+
+  const toggleFavorite = () => {
+    if (!show) return
+    const favorites = JSON.parse(localStorage.getItem("favoriteShows") || "[]")
+    const index = favorites.findIndex((fav: any) => fav.id === show.id)
+
+    if (index !== -1) {
+      favorites.splice(index, 1)
+      setIsFavorited(false)
+    } else {
+      favorites.unshift(show)
+      setIsFavorited(true)
+    }
+    localStorage.setItem("favoriteShows", JSON.stringify(favorites))
+  }
+
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("recentlyViewedTVEpisodes") || "{}")
+    const data2 = JSON.parse(localStorage.getItem("recentlyViewedMovies") || "[]")
+    setRecentlyViewedTVEpisodes(data)
+    setRecentlyViewedMovies(data2)
+  }, [])
+
+  const clearRecentlyViewed = () => {
+    localStorage.removeItem("recentlyViewedTVEpisodes")
+    setRecentlyViewedTVEpisodes({})
+    localStorage.removeItem("recentlyViewedMovies")
+    setRecentlyViewedMovies([])
+  }
+
+  // Fetch show details and seasons
+  useEffect(() => {
     const fetchShow = async () => {
       if (!id) return
-      
-      const showId = Number.parseInt(id);
-      
+      const showId = Number.parseInt(id)
       setLoading(true)
       try {
         const showData = await tmdb.getTVDetails(showId)
@@ -166,10 +156,10 @@ const TVDetail: React.FC = () => {
         setLoading(false)
       }
     }
-
     fetchShow()
   }, [id])
 
+  // Fetch episodes when season changes
   useEffect(() => {
     const fetchEpisodes = async () => {
       if (!id || selectedSeason === 0) return
@@ -183,10 +173,10 @@ const TVDetail: React.FC = () => {
         setEpisodesLoading(false)
       }
     }
-
     fetchEpisodes()
   }, [id, selectedSeason])
 
+  // Track recently viewed show
   useEffect(() => {
     if (show) {
       const existing = JSON.parse(localStorage.getItem("recentlyViewedTV") || "[]")
@@ -205,7 +195,7 @@ const TVDetail: React.FC = () => {
     }
   }, [show])
 
-  // -------------- UPDATED: Send Discord notification on watch -------------
+  // Handle episode watching (with Discord notification)
   const handleWatchEpisode = (episode: Episode) => {
     if (show && id) {
       watchlistService.addEpisodeToWatchlist(
@@ -226,7 +216,6 @@ const TVDetail: React.FC = () => {
       )
 
       const existing = JSON.parse(localStorage.getItem("recentlyViewedTVEpisodes") || "{}")
-
       const currentShowGroup = existing[show.id] || {
         show: {
           id: show.id,
@@ -237,10 +226,12 @@ const TVDetail: React.FC = () => {
         episodes: [],
       }
 
+      // Remove existing episode if any
       currentShowGroup.episodes = currentShowGroup.episodes.filter(
         (ep: any) => !(ep.season_number === episode.season_number && ep.episode_number === episode.episode_number),
-         )
+      )
 
+      // Add new episode
       currentShowGroup.episodes.unshift({
         id: episode.id,
         name: episode.name,
@@ -257,8 +248,9 @@ const TVDetail: React.FC = () => {
       }
 
       localStorage.setItem("recentlyViewedTVEpisodes", JSON.stringify(updated))
-      setRecentlyViewedTVEpisodes(updated)
-    // ------------ DISCORD NOTIFICATION -------------
+      // Also update state if needed
+      // setRecentlyViewedTVEpisodes(updated)
+
       sendDiscordWatchNotification(
         show.name,
         episode.season_number,
@@ -266,10 +258,11 @@ const TVDetail: React.FC = () => {
         episode.name,
         show.poster_path,
       )
-      // ----------------------------------------------
 
       const episodeDuration =
-        show.episode_run_time && show.episode_run_time.length > 0 ? show.episode_run_time[0] * 60 : 45 * 60
+        show.episode_run_time && show.episode_run_time.length > 0
+          ? show.episode_run_time[0] * 60
+          : 45 * 60
 
       const newSessionId = analytics.startSession(
         "tv",
@@ -279,17 +272,19 @@ const TVDetail: React.FC = () => {
         episode.season_number,
         episode.episode_number,
         episodeDuration,
-         )
+      )
       setSessionId(newSessionId)
       setCurrentEpisode(episode)
       setIsPlaying(true)
     }
   }
 
-   const handleClosePlayer = () => {
+  const handleClosePlayer = () => {
     if (sessionId) {
       const episodeDuration =
-        show?.episode_run_time && show.episode_run_time.length > 0 ? show.episode_run_time[0] * 60 : 45 * 60
+        show?.episode_run_time && show.episode_run_time.length > 0
+          ? show.episode_run_time[0] * 60
+          : 45 * 60
       const finalTime = Math.random() * episodeDuration
       analytics.endSession(sessionId, finalTime)
       setSessionId(null)
@@ -302,7 +297,9 @@ const TVDetail: React.FC = () => {
     if (isPlaying && sessionId && show) {
       const interval = setInterval(() => {
         const episodeDuration =
-          show.episode_run_time && show.episode_run_time.length > 0 ? show.episode_run_time[0] * 60 : 45 * 60
+          show.episode_run_time && show.episode_run_time.length > 0
+            ? show.episode_run_time[0] * 60
+            : 45 * 60
         const currentTime = Math.random() * episodeDuration
         const additionalData: any = {}
         if (Math.random() > 0.95) additionalData.pauseEvents = 1
@@ -311,6 +308,7 @@ const TVDetail: React.FC = () => {
         if (Math.random() > 0.9) additionalData.isFullscreen = Math.random() > 0.5
         analytics.updateSession(sessionId, currentTime, additionalData)
       }, 30000)
+
       return () => clearInterval(interval)
     }
   }, [isPlaying, sessionId, show])
@@ -332,12 +330,9 @@ const TVDetail: React.FC = () => {
     })
   }
 
-  // Decide which cast to display: seasonCast if a season is selected (>0), otherwise show cast
-  const currentCast =
-    selectedSeason > 0 && seasonCast.length > 0 ? seasonCast : cast
-
-  if (loading)
+  if (loading) {
     return <Loading message={t.status_loading_show_details || 'Loading show details...'} />
+  }
 
   if (!show) {
     return (
@@ -346,13 +341,20 @@ const TVDetail: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
             {t.tv_not_found || 'Show not found'}
           </h2>
-          <Link to="/" className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors">
+          <Link
+            to="/"
+            className="text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300 transition-colors"
+          >
             {t.error_404_go_home}
           </Link>
         </div>
       </div>
     )
   }
+
+  // Decide which cast to display: seasonCast if a season is selected, otherwise show cast
+  const currentCast =
+    selectedSeason && selectedSeason !== 0 && seasonCast.length > 0 ? seasonCast : cast
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-300">
@@ -376,13 +378,17 @@ const TVDetail: React.FC = () => {
           <div className="flex flex-wrap gap-6 px-8 pb-8">
             {loading ? (
               <p className="text-gray-700 dark:text-gray-300">{t.status_loading_cast || 'Loading cast...'}</p>
-            ) : (currentCast.length === 0 ? (
+            ) : currentCast.length === 0 ? (
               <p className="text-gray-700 dark:text-gray-300">{t.status_no_cast_info || 'No cast information available.'}</p>
             ) : (
               currentCast.slice(0, 12).map((actor: any) => (
                 <div key={actor.id} className="flex-shrink-0 w-28 text-center">
                   <img
-                    src={actor.profile_path ? tmdb.getImageUrl(actor.profile_path, "w185") : "/placeholder-avatar.png"}
+                    src={
+                      actor.profile_path
+                        ? tmdb.getImageUrl(actor.profile_path, "w185")
+                        : "/placeholder-avatar.png"
+                    }
                     alt={actor.name}
                     className="w-28 h-28 object-cover rounded-full shadow-md mb-2 border border-gray-300 dark:border-gray-600"
                   />
@@ -390,11 +396,11 @@ const TVDetail: React.FC = () => {
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{actor.character}</p>
                 </div>
               ))
-            ))}
+            )}
           </div>
         </div>
 
-        {/* Season Selector & Episodes */}
+{/* Season Selector & Episodes */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 transition-colors duration-300">
           {/* Adjust layout for mobile */}
           <div className={`flex items-center justify-between mb-6 ${isMobile ? "flex-col space-y-4" : ""}`}>
