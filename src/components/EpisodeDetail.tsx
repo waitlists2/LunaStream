@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Calendar, Star, Clock, Tv } from 'lucide-react';
+import { ArrowLeft, Play, Calendar, Star, Clock } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { watchlistService } from '../services/watchlist';
@@ -23,6 +23,13 @@ interface Episode {
   runtime: number;
 }
 
+interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
 const EpisodeDetail: React.FC = () => {
   const { id, seasonNumber, episodeNumber } = useParams<{ 
     id: string; 
@@ -31,6 +38,7 @@ const EpisodeDetail: React.FC = () => {
   }>();
   const [show, setShow] = useState<any>(null);
   const [episode, setEpisode] = useState<Episode | null>(null);
+  const [cast, setCast] = useState<CastMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id);
@@ -46,17 +54,24 @@ const EpisodeDetail: React.FC = () => {
       
       setLoading(true);
       try {
-        const [showData, seasonData] = await Promise.all([
+        const [showData, seasonData, episodeCredits] = await Promise.all([
           tmdb.getTVDetails(parseInt(id)),
-          tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber))
+          tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber)),
+          tmdb.getTVCredits(parseInt(id))  // Assuming you have this function in your tmdb service
         ]);
         
         const episodeData = seasonData.episodes?.find(
           (ep: any) => ep.episode_number === parseInt(episodeNumber)
         );
-        
+
+        // Filter cast for this episode if available (TMDB API gives show-level credits for TV)
+        // If you want episode-specific cast, you might have to call getTVCredits for episode instead.
+        // But TMDB does not support episode-level credits directly through one endpoint,
+        // so we show show-level main cast.
+
         setShow(showData);
         setEpisode(episodeData || null);
+        setCast(episodeCredits.cast || []);
       } catch (error) {
         console.error('Failed to fetch episode data:', error);
       } finally {
@@ -284,6 +299,39 @@ const EpisodeDetail: React.FC = () => {
                 </p>
               </div>
             )}
+
+            {/* Cast List */}
+            {cast.length > 0 && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+                <h4 className={`font-semibold text-gray-900 dark:text-white mb-4 ${isMobile ? 'text-sm' : 'text-lg'}`}>
+                  {t.cast || 'Cast'}
+                </h4>
+                <div className="flex flex-wrap gap-4 overflow-x-auto">
+                  {cast.slice(0, 12).map((member) => (
+                    <div key={member.id} className="w-20 text-center">
+                      {member.profile_path ? (
+                        <img
+                          src={tmdb.getImageUrl(member.profile_path, 'w185')}
+                          alt={member.name}
+                          className="w-20 h-28 rounded-lg object-cover mb-1"
+                        />
+                      ) : (
+                        <div className="w-20 h-28 bg-gray-300 dark:bg-gray-700 rounded-lg mb-1 flex items-center justify-center text-xs text-gray-600 dark:text-gray-400">
+                          No Image
+                        </div>
+                      )}
+                      <div className="text-xs font-semibold text-gray-900 dark:text-white truncate">
+                        {member.name}
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                        {member.character}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>

@@ -41,6 +41,7 @@ const SeasonDetail: React.FC = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showDescriptions, setShowDescriptions] = useState<{ [key: number]: boolean }>({});
+  const [seasonCast, setSeasonCast] = useState<any[]>([]);
   
   const { language } = useLanguage();
   const t = translations[language];
@@ -49,22 +50,25 @@ const SeasonDetail: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!id || !seasonNumber) return;
-      
+
       setLoading(true);
-      try {
-        const [showData, seasonData] = await Promise.all([
-          tmdb.getTVDetails(parseInt(id)),
-          tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber))
-        ]);
-        
-        setShow(showData);
-        setSeason(seasonData);
-      } catch (error) {
-        console.error('Failed to fetch season data:', error);
-      } finally {
-        setLoading(false);
-      }
+        try {
+          const [showData, seasonData, creditsData] = await Promise.all([
+            tmdb.getTVDetails(parseInt(id)),
+            tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber)),
+            tmdb.getTVSeasonCredits(parseInt(id), parseInt(seasonNumber)) // <-- Add this line
+          ]);
+
+          setShow(showData);
+          setSeason(seasonData);
+          setSeasonCast(creditsData.cast || []); // <-- Store cast
+        } catch (error) {
+          console.error('Failed to fetch season data:', error);
+        } finally {
+          setLoading(false);
+        }
     };
+
 
     fetchData();
   }, [id, seasonNumber]);
@@ -267,6 +271,37 @@ const SeasonDetail: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Cast Section */}
+        {seasonCast.length > 0 && (
+          <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 mb-8 ${isMobile ? 'rounded-xl p-4' : ''}`}>
+            <h3 className={`font-bold text-gray-900 dark:text-white mb-4 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
+              {t.cast || 'Cast'}
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {seasonCast.slice(0, 10).map((castMember) => (
+                <div key={castMember.id} className="flex flex-col items-center text-center">
+                  <img
+                    src={
+                      castMember.profile_path
+                        ? tmdb.getImageUrl(castMember.profile_path, 'w185')
+                        : '/placeholder-profile.png'
+                    }
+                    alt={castMember.name}
+                    className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-pink-300"
+                  />
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate w-full">
+                    {castMember.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate w-full">
+                    {castMember.character}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Episodes List */}
         <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-pink-200/50 dark:border-gray-700/50 p-6 ${isMobile ? 'rounded-xl p-4' : ''}`}>

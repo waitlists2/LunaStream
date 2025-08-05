@@ -77,6 +77,21 @@ export const tmdb = {
     return response.json();
   },
 
+  getTVSeasonCredits: async (tvId: number, seasonNumber: number) => {
+    const response = await fetch(
+      `${BASE_URL}/tv/${tvId}/season/${seasonNumber}/credits?api_key=${API_KEY}`
+    );
+    return response.json();
+  },
+
+  getTVEpisodeCredits: async (tvId: number, seasonNumber: number, episodeNumber: number) => {
+    const response = await fetch(
+      `${BASE_URL}/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}/credits?api_key=${API_KEY}`
+    );
+    return response.json();
+  },
+
+
   discoverMovies: async (params: string) => {
     const response = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&${params}`);
     const data = await response.json();
