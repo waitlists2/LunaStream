@@ -29,6 +29,7 @@ interface SeasonData {
   poster_path: string | null;
   season_number: number;
   episodes: Episode[];
+  vote_average: number; // Add vote_average to the SeasonData interface
 }
 
 const SeasonDetail: React.FC = () => {
@@ -52,23 +53,22 @@ const SeasonDetail: React.FC = () => {
       if (!id || !seasonNumber) return;
 
       setLoading(true);
-        try {
-          const [showData, seasonData, creditsData] = await Promise.all([
-            tmdb.getTVDetails(parseInt(id)),
-            tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber)),
-            tmdb.getTVSeasonCredits(parseInt(id), parseInt(seasonNumber)) // <-- Add this line
-          ]);
+      try {
+        const [showData, seasonData, creditsData] = await Promise.all([
+          tmdb.getTVDetails(parseInt(id)),
+          tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber)),
+          tmdb.getTVSeasonCredits(parseInt(id), parseInt(seasonNumber))
+        ]);
 
-          setShow(showData);
-          setSeason(seasonData);
-          setSeasonCast(creditsData.cast || []); // <-- Store cast
-        } catch (error) {
-          console.error('Failed to fetch season data:', error);
-        } finally {
-          setLoading(false);
-        }
+        setShow(showData);
+        setSeason(seasonData);
+        setSeasonCast(creditsData.cast || []);
+      } catch (error) {
+        console.error('Failed to fetch season data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-
 
     fetchData();
   }, [id, seasonNumber]);
@@ -154,46 +154,46 @@ const SeasonDetail: React.FC = () => {
   if (isPlaying && currentEpisode) {
     return (
       <div className="fixed inset-0 bg-black z-50">
-                {/* Close button */}
-                <div className="absolute top-6 right-6 z-10">
-                  <button
-                    onClick={handleClosePlayer}
-                    className="text-white hover:text-gray-300 transition-colors"
-                    aria-label={translations[language].close_player || "Close Player"}
-                  >
-                    <X className="w-8 h-8" />
-                  </button>
-                </div>
-      
-                {/* Player Selector */}
-                <div className="absolute top-6 left-6 z-10 group relative w-32 h-10">
-                  <select
-                    value={selectedPlayer}
-                    onChange={(e) => setSelectedPlayer(e.target.value)}
-                    className="opacity-0 group-hover:opacity-100 absolute inset-0 bg-black/70 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-500 appearance-none transition-opacity duration-200"
-                  >
-                    {playerConfigs.map((config) => (
-                      <option key={config.id} value={config.id}>
-                        {config.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-      
-                {/* Player iframe */}
-                <iframe
-                  src={getPlayerUrl(selectedPlayer, id!, "tv", currentEpisode.season_number, currentEpisode.episode_number)}
-                  className="fixed top-0 left-0 w-full h-full border-0"
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                  title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
-                  referrerPolicy="no-referrer"
-                  sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-                  style={{
-                    colorScheme: "normal",
-                  }}
-                />
-              </div>
+        {/* Close button */}
+        <div className="absolute top-6 right-6 z-10">
+          <button
+            onClick={handleClosePlayer}
+            className="text-white hover:text-gray-300 transition-colors"
+            aria-label={translations[language].close_player || "Close Player"}
+          >
+            <X className="w-8 h-8" />
+          </button>
+        </div>
+
+        {/* Player Selector */}
+        <div className="absolute top-6 left-6 z-10 group relative w-32 h-10">
+          <select
+            value={selectedPlayer}
+            onChange={(e) => setSelectedPlayer(e.target.value)}
+            className="opacity-0 group-hover:opacity-100 absolute inset-0 bg-black/70 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-500 appearance-none transition-opacity duration-200"
+          >
+            {playerConfigs.map((config) => (
+              <option key={config.id} value={config.id}>
+                {config.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Player iframe */}
+        <iframe
+          src={getPlayerUrl(selectedPlayer, id!, "tv", currentEpisode.season_number, currentEpisode.episode_number)}
+          className="fixed top-0 left-0 w-full h-full border-0"
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          title={`${show.name} - S${currentEpisode.season_number}E${currentEpisode.episode_number}`}
+          referrerPolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+          style={{
+            colorScheme: "normal",
+          }}
+        />
+      </div>
     );
   }
 
@@ -227,43 +227,53 @@ const SeasonDetail: React.FC = () => {
             )}
             
             <div className={isMobile ? '' : 'p-8'}>
-              {isMobile && (
-                <div className="flex items-start space-x-4 mb-4">
-                  <img
-                    src={tmdb.getImageUrl(season.poster_path || show.poster_path, 'w200')}
-                    alt={season.name}
-                    className="w-20 h-28 object-cover rounded-lg"
-                  />
+              <div className="flex items-start justify-between">
+                {isMobile && (
+                  <div className="flex items-start space-x-4 flex-1">
+                    <img
+                      src={tmdb.getImageUrl(season.poster_path || show.poster_path, 'w200')}
+                      alt={season.name}
+                      className="w-20 h-28 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                        {show.name}
+                      </h1>
+                      <h2 className="text-lg font-semibold text-pink-600 dark:text-pink-400">
+                        {season.name}
+                      </h2>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                        {season.episodes?.length || 0} {t.episodes}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {!isMobile && (
                   <div className="flex-1">
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                       {show.name}
                     </h1>
-                    <h2 className="text-lg font-semibold text-pink-600 dark:text-pink-400">
+                    <h2 className="text-2xl font-semibold text-pink-600 dark:text-pink-400 mb-4">
                       {season.name}
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
                       {season.episodes?.length || 0} {t.episodes}
                     </p>
                   </div>
-                </div>
-              )}
-              
-              {!isMobile && (
-                <>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {show.name}
-                  </h1>
-                  <h2 className="text-2xl font-semibold text-pink-600 dark:text-pink-400 mb-4">
-                    {season.name}
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    {season.episodes?.length || 0} {t.episodes}
-                  </p>
-                </>
-              )}
+                )}
+
+                {/* Season Rating Badge */}
+                {season.vote_average > 0 && (
+                  <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full ml-4">
+                    <Star className="w-4 h-4 mr-1" />
+                    <span className="text-sm font-semibold">{season.vote_average.toFixed(1)}</span>
+                  </div>
+                )}
+              </div>
               
               {season.overview && (
-                <p className={`text-gray-700 dark:text-gray-300 leading-relaxed ${isMobile ? 'text-sm' : ''}`}>
+                <p className={`text-gray-700 dark:text-gray-300 leading-relaxed mt-4 ${isMobile ? 'text-sm' : ''}`}>
                   {season.overview}
                 </p>
               )}
@@ -315,111 +325,73 @@ const SeasonDetail: React.FC = () => {
                 className={`group bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl border border-pink-200/50 dark:border-gray-600/50 overflow-hidden hover:shadow-lg transition-all duration-300 ${isMobile ? 'rounded-lg' : ''}`}
               >
                 <div className={isMobile ? 'p-3' : 'p-4'}>
-                  {isMobile ? (
-                    // Mobile layout
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-3 flex-1">
-                          <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                            {episode.episode_number}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                              {episode.name}
-                            </h4>
-                            {episode.air_date && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {new Date(episode.air_date).toLocaleDateString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Link
-                            to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
-                            className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
-                            title="View Episode Details"
-                          >
-                            <Grid className="w-5 h-5" />
-                          </Link>
-                          {episode.overview && (
-                            <button
-                              onClick={() => toggleDescription(episode.id)}
-                              className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
-                            >
-                              <Info className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleWatchEpisode(episode)}
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-1"
-                          >
-                            <Play className="w-3 h-3" />
-                            <span className="text-xs">{t.action_watch}</span>
-                          </button>
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <div className={`flex items-start flex-1 ${isMobile ? 'space-x-2' : 'space-x-4'}`}>
+                      <Link
+                        to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                        className={`md:flex-shrink-0 ${isMobile ? 'w-20' : 'w-48'}`}
+                      >
+                        <img
+                          src={tmdb.getImageUrl(episode.still_path || show.backdrop_path, isMobile ? 'w200' : 'w500')}
+                          alt={episode.name}
+                          className={`object-cover rounded-lg ${isMobile ? 'w-full h-auto' : 'w-48 h-28'}`}
+                        />
+                      </Link>
                       
-                      {showDescriptions[episode.id] && episode.overview && (
-                        <div className="mt-2 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30">
-                          <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">
-                            {episode.overview}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // Desktop layout
-                    <>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-3">
-                          <span className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                            {episode.episode_number}
-                          </span>
-                          <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
-                            {episode.name}
-                          </h4>
-                          {episode.air_date && (
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              • {new Date(episode.air_date).toLocaleDateString()}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center">
+                            <span className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white px-2 py-1 rounded-full font-semibold ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                              {episode.episode_number}
                             </span>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
-                            className="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors p-1"
-                            title="View Episode Details"
-                          >
-                            <Grid className="w-5 h-5" />
-                          </Link>
-                          {episode.overview && (
-                            <button
-                              onClick={() => toggleDescription(episode.id)}
-                              className="text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-1"
+                            <Link
+                              to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                              className={`font-semibold text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors ml-2 ${isMobile ? 'text-sm truncate' : 'text-lg'}`}
                             >
-                              <Info className="w-5 h-5" />
-                            </button>
+                              {episode.name}
+                            </Link>
+                          </div>
+                          
+                          {/* Episode Rating Badge */}
+                          {episode.vote_average > 0 && (
+                            <div className="flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full ml-auto">
+                              <Star className="w-3 h-3 mr-1" />
+                              <span className="text-xs font-semibold">{episode.vote_average.toFixed(1)}</span>
+                            </div>
                           )}
-                          <button
-                            onClick={() => handleWatchEpisode(episode)}
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-2"
-                          >
-                            <Play className="w-4 h-4" />
-                            <span>{t.action_watch}</span>
-                          </button>
                         </div>
-                      </div>
-                      
-                      {showDescriptions[episode.id] && episode.overview && (
-                        <div className="mt-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border border-pink-200/30 dark:border-gray-600/30">
-                          <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                            {episode.overview}
+                        
+                        {episode.air_date && (
+                          <p className={`text-gray-500 dark:text-gray-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                            <Calendar className="inline w-3 h-3 mr-1" />
+                            {new Date(episode.air_date).toLocaleDateString()}
+                          </p>
+                        )}
+                        
+                        <div className="mt-2 text-gray-700 dark:text-gray-300 leading-relaxed">
+                          <p className={`mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                            {episode.overview.length > 150 ? `${episode.overview.substring(0, 150)}...` : episode.overview}
+                            <Link
+                              to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                              className="text-pink-600 dark:text-pink-400 hover:underline ml-1"
+                            >
+                              {t.details || 'Details'}
+                            </Link>
                           </p>
                         </div>
-                      )}
-                    </>
-                  )}
+                      </div>
+                    </div>
+
+                    <div className="ml-4 flex-shrink-0 flex items-center space-x-2">
+                      <button
+                        onClick={() => handleWatchEpisode(episode)}
+                        className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-colors flex items-center space-x-1 shadow-lg ${isMobile ? 'px-2 py-1 rounded-lg text-xs' : 'px-4 py-2 rounded-xl text-sm'}`}
+                      >
+                        <Play className={isMobile ? 'w-3 h-3' : 'w-4 h-4'} />
+                        <span>{t.action_watch}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './components/HomePage';
+import HomePageWrapper from './components/HomePageWrapper';
 import SearchResults from './components/SearchResults';
 import MovieDetail from './components/MovieDetail';
 import TVDetail from './components/TVDetail';
@@ -60,7 +60,7 @@ function App() {
         <ScrollToTopButton />
         {/* Define routes for the application */}
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePageWrapper />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/tv/:id" element={<TVDetail />} />
