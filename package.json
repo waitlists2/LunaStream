@@ -62,7 +62,8 @@
     "files": [
       "dist/**/*",
       "app.cjs",
-      "favicon.ico"
+      "favicon.ico",
+      "favicon-large.ico"
     ],
     "directories": {
       "output": "electron-dist"
