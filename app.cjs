@@ -4,7 +4,7 @@ const isDev = !app.isPackaged;
 
 function createWindow() {
   const win = new BrowserWindow({
-    icon: "favicon.ico",
+    icon: "favicon-large.ico",
     width: 1280,
     height: 800,
     webPreferences: {

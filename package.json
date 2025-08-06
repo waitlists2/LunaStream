@@ -2,10 +2,10 @@
   "name": "lunastream-main",
   "author": "LunaStream",
   "private": true,
-  "version": "3.1.4",
+  "version": "3.2.0",
   "type": "module",
   "homepage": ".",
-  "main": "app.js",
+  "main": "app.cjs",
   "scripts": {
     "dev": "vite",
     "server": "node server.js",
@@ -61,7 +61,7 @@
     "productName": "LunaStream",
     "files": [
       "dist/**/*",
-      "app.js",
+      "app.cjs",
       "favicon.ico"
     ],
     "directories": {
@@ -70,12 +70,22 @@
     "win": {
       "target": [
         "nsis",
-        "portable"
-      ]
+        "portable",
+        "zip",
+        "appx"
+      ],
+      "icon": "favicon-large.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
+    },
+    "appx": {
+      "identityName": "watch.lunastream.app",
+      "publisher": "CN=LunaStream.Watch",
+      "publisherDisplayName": "LunaStream",
+      "applicationId": "LunaStreamApp",
+      "displayName": "LunaStream"
     }
   }
 }
