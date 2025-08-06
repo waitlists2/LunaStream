@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Calendar, Star, Clock } from 'lucide-react';
+import { ArrowLeft, Play, Calendar, Star, Clock, X } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { watchlistService } from '../services/watchlist';
@@ -157,49 +157,48 @@ const EpisodeDetail: React.FC = () => {
 
   if (isPlaying) {
     return (
-      <div className="fixed inset-0 bg-black z-50">
-        {/* Player controls */}
-        <div className="absolute top-6 right-6 z-10">
-          <button
-            onClick={handleClosePlayer}
-            className="text-white hover:text-gray-300 transition-colors"
-          >
-            <ArrowLeft className="w-8 h-8" />
-          </button>
-        </div>
-
-        <div className="absolute top-6 left-6 z-10">
-          <div className="bg-black/70 backdrop-blur-md rounded-xl p-4 text-white">
-            <div className="grid grid-cols-2 gap-2">
-              {playerConfigs.map((config) => (
-                <button
-                  key={config.id}
-                  onClick={() => setSelectedPlayer(config.id)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedPlayer === config.id
-                      ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
-                      : 'bg-white/20 text-white/80 hover:bg-white/30'
-                  }`}
-                >
-                  {config.name}
-                </button>
-              ))}
-            </div>
+<div className="fixed inset-0 bg-black z-50">
+          {/* Close button */}
+          <div className="absolute top-6 right-6 z-10">
+            <button
+              onClick={handleClosePlayer}
+              className="text-white hover:text-gray-300 transition-colors"
+              aria-label={translations[language].close_player || "Close Player"}
+            >
+              <X className="w-8 h-8" />
+            </button>
           </div>
-        </div>
 
-        <iframe
-          key={selectedPlayer}
-          src={getPlayerUrl(selectedPlayer, id!, 'tv', episode.season_number, episode.episode_number)}
-          className="w-full h-full border-0"
-          allowFullScreen
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          title={`${show.name} - S${episode.season_number}E${episode.episode_number}`}
-          referrerPolicy="no-referrer"
-          sandbox={['videasy', 'vidjoy'].includes(selectedPlayer) ? "allow-scripts allow-same-origin allow-presentation allow-forms" : undefined}
-        />
-      </div>
-    );
+          {/* Player Selector */}
+          <div className="absolute top-6 left-6 z-10 group relative w-32 h-10">
+            <select
+              value={selectedPlayer}
+              onChange={(e) => setSelectedPlayer(e.target.value)}
+              className="opacity-0 group-hover:opacity-100 absolute inset-0 bg-black/70 text-white px-3 py-2 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-pink-500 appearance-none transition-opacity duration-200"
+            >
+              {playerConfigs.map((config) => (
+                <option key={config.id} value={config.id}>
+                  {config.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Player iframe */}
+          <iframe
+            src={getPlayerUrl(selectedPlayer, id!, "tv", parseInt(seasonNumber), episodeNumber)}
+            className="fixed top-0 left-0 w-full h-full border-0"
+            allowFullScreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            title={`${show.name} - S${seasonNumber}E${episodeNumber}`}
+            referrerPolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+            style={{
+              colorScheme: "normal",
+            }}
+          />
+        </div>
+      );
   }
 
   return (
