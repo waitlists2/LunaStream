@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Star } from "lucide-react";
 import { tmdb } from "../services/tmdb";
 import { filterBannedContent } from "../utils/banList";
 import { useLanguage } from "./LanguageContext";
@@ -27,14 +27,19 @@ const MediaCard: React.FC<{ item: MediaItem; t: any }> = React.memo(({ item, t }
         {t.no_poster || "No Poster"}
       </div>
     )}
-    <p className="mt-1 text-xs text-gray-800 dark:text-gray-200 truncate">
+    <p className="mt-1 text-xs text-gray-900 dark:text-gray-100 truncate">
       {isMovie(item) ? item.title : item.name}
     </p>
+    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300 mt-0.5">
+      <Star className="w-3 h-3 text-yellow-400 mr-1" />
+      {item.vote_average?.toFixed(1) || "N/A"}
+    </div>
   </Link>
 ));
 
 const HomepageMobile: React.FC = () => {
   const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<MediaItem[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<MediaItem[]>([]);
   const [trendingTV, setTrendingTV] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,13 +73,39 @@ const HomepageMobile: React.FC = () => {
     fetchData();
   }, []);
 
-  const onSearch = () => {
-    if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+  // Search suggestions
+  useEffect(() => {
+    if (!query.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const fetchSuggestions = async () => {
+      try {
+        const results = await tmdb.searchMulti(query);
+        setSuggestions(
+          filterBannedContent(results.results ?? [])
+            .filter(item => item.media_type === "movie" || item.media_type === "tv")
+            .slice(0, 5)
+            .map(item => ({ ...item, media_type: item.media_type as "movie" | "tv" }))
+        );
+      } catch (err) {
+        console.error("Search suggestions failed", err);
+      }
+    };
+
+    const timeout = setTimeout(fetchSuggestions, 300); // debounce
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  const onSearch = (q?: string) => {
+    const searchQuery = q || query;
+    if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   const renderTrendingSection = (title: string, items: MediaItem[]) => (
     <section>
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">{title}</h2>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{title}</h2>
       <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
         {loading
           ? Array.from({ length: 6 }).map((_, idx) => (
@@ -93,31 +124,53 @@ const HomepageMobile: React.FC = () => {
       <GlobalNavbar />
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4 py-5 space-y-6">
         {/* Search Bar */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSearch();
-          }}
-          className="relative"
-        >
-          <Search className="absolute top-3.5 left-3 w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <div className="relative">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onSearch()}
             placeholder={t.search_placeholder}
-            className="w-full pl-10 pr-4 py-3 text-sm rounded-xl bg-white dark:bg-gray-800 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-white shadow focus:outline-none focus:ring-2 focus:ring-pink-400"
+            className="w-full pl-10 pr-4 py-3 text-sm rounded-xl bg-white dark:bg-gray-800 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-pink-400"
             aria-label={t.search_placeholder}
           />
-        </form>
+          <Search className="absolute top-3.5 left-3 w-5 h-5 text-gray-500 dark:text-gray-400" />
 
+          {/* Suggestions Dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
+              {suggestions.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  onClick={() => onSearch(isMovie(item) ? item.title : item.name)}
+                >
+                  {item.poster_path ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w92${item.poster_path}`}
+                      alt={isMovie(item) ? item.title : item.name}
+                      className="w-10 h-14 object-cover rounded mr-3"
+                    />
+                  ) : (
+                    <div className="w-10 h-14 bg-gray-300 dark:bg-gray-700 rounded mr-3 flex items-center justify-center text-xs text-gray-500 dark:text-gray-300">
+                      N/A
+                    </div>
+                  )}
+                  <div className="truncate text-gray-900 dark:text-gray-100">
+                    {isMovie(item) ? item.title : item.name}
+                    <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">({item.media_type})</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Page Heading */}
         <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
           {t.home_heading_title}
         </h1>
-        <p className="text-center text-gray-700 dark:text-gray-300">
-          {t.home_heading_subtitle}
-        </p>
-
+        <p className="text-center text-gray-900 dark:text-gray-200">{t.home_heading_subtitle}</p>
 
         {/* Trending Movies */}
         {renderTrendingSection(`${t.content_trending} ${t.content_movie_plural}`, trendingMovies)}
