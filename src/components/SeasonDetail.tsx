@@ -197,6 +197,19 @@ const SeasonDetail: React.FC = () => {
     );
   }
 
+  const getFormattedYearRange = (episodes: Episode[]) => {
+    if (!episodes || episodes.length === 0) return ""
+
+    const sortedEpisodes = [...episodes].sort((a, b) => new Date(a.air_date).getTime() - new Date(b.air_date).getTime())
+    const firstAirDate = sortedEpisodes[0]?.air_date
+    const lastAirDate = sortedEpisodes[sortedEpisodes.length - 1]?.air_date || firstAirDate
+
+    const startYear = new Date(firstAirDate).getFullYear()
+    const endYear = new Date(lastAirDate).getFullYear()
+
+    return startYear === endYear ? `${startYear}` : `${startYear}-${endYear}`
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <GlobalNavbar />
@@ -243,7 +256,7 @@ const SeasonDetail: React.FC = () => {
                         {season.name}
                       </h2>
                       <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                        {season.episodes?.length || 0} {t.episodes}
+                        {season.episodes?.length || 0} {t.episodes} · {getFormattedYearRange(season.episodes)}
                       </p>
                     </div>
                   </div>
@@ -257,8 +270,8 @@ const SeasonDetail: React.FC = () => {
                     <h2 className="text-2xl font-semibold text-pink-600 dark:text-pink-400 mb-4">
                       {season.name}
                     </h2>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      {season.episodes?.length || 0} {t.episodes}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      {season.episodes?.length || 0} {t.episodes} · {getFormattedYearRange(season.episodes)}
                     </p>
                   </div>
                 )}

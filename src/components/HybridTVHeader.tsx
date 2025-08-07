@@ -60,13 +60,24 @@ const HybridTVHeader: React.FC<HybridTVHeaderProps> = ({
   }, [show.id, selectedSeason])
 
   const getDisplayData = () => {
+    // Helper to format year range
+    const formatYearRange = (startDate: string, endDate?: string) => {
+      if (!startDate) return ""
+      const startYear = new Date(startDate).getFullYear()
+      const endYear = endDate ? new Date(endDate).getFullYear() : startYear
+      return startYear === endYear ? `${startYear}` : `${startYear}-${endYear}`
+    }
+
     if (selectedSeason === 0 || !seasonDetails) {
+      // Show overview mode
+      const firstYear = show.first_air_date
+      const lastYear = show.last_air_date
       return {
         title: show.name,
         overview: show.overview,
         poster: show.poster_path,
         backdrop: show.backdrop_path,
-        year: new Date(show.first_air_date).getFullYear(),
+        year: formatYearRange(firstYear, lastYear),
         rating: show.vote_average,
         genres: show.genres,
         episodeCount: show.number_of_episodes,
@@ -75,19 +86,25 @@ const HybridTVHeader: React.FC<HybridTVHeaderProps> = ({
       }
     }
 
+    // Season view
+    const seasonEpisodes = seasonDetails.episodes || []
+    const firstEpisode = seasonEpisodes[0]?.air_date
+    const lastEpisode = seasonEpisodes[seasonEpisodes.length - 1]?.air_date || firstEpisode
+
     return {
       title: `${show.name} - ${t.season} ${selectedSeason}`,
       overview: seasonDetails.overview || show.overview,
       poster: seasonDetails.poster_path || show.poster_path,
-      backdrop: seasonDetails.episodes?.[0]?.still_path || show.backdrop_path,
-      year: new Date(seasonDetails.air_date || show.first_air_date).getFullYear(),
+      backdrop: seasonEpisodes[0]?.still_path || show.backdrop_path,
+      year: formatYearRange(firstEpisode, lastEpisode),
       rating: show.vote_average,
       genres: show.genres,
-      episodeCount: seasonDetails.episodes?.length || 0,
+      episodeCount: seasonEpisodes.length,
       seasonCount: show.number_of_seasons,
       type: 'season'
     }
   }
+
 
   const displayData = getDisplayData()
   const availableSeasons = show.seasons.filter(s => s.season_number > 0)
