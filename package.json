@@ -2,7 +2,7 @@
   "name": "lunastream-main",
   "author": "LunaStream",
   "private": true,
-  "version": "3.2.0",
+  "version": "3.3.1",
   "type": "module",
   "homepage": ".",
   "main": "app.cjs",
@@ -18,8 +18,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor/cli": "^7.4.1",
-    "@capacitor/core": "^7.4.1",
+    "@capacitor/android": "^7.4.2",
+    "@capacitor/cli": "^7.4.2",
+    "@capacitor/core": "^7.4.2",
     "@fastify/cookie": "^6.0.0",
     "@fastify/cors": "^8.5.0",
     "@fastify/jwt": "^6.7.1",
