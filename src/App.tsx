@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePageWrapper from './components/HomePageWrapper';
 import SearchResults from './components/SearchResults';
 import MovieDetail from './components/MovieDetail';
-import TVDetail from './components/TVDetail';
+import TVDetailWrapper from './components/TVDetailWrapper';
 import LastUpdated from './components/LastUpdated';
 import DonatePage from './components/DonatePage';
 import VersionPage from './components/VersionPage';
@@ -63,7 +63,7 @@ function App() {
           <Route path="/" element={<HomePageWrapper />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/movie/:id" element={<MovieDetail />} />
-          <Route path="/tv/:id" element={<TVDetail />} />
+          <Route path="/tv/:id" element={<TVDetailWrapper />} />
           <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
           <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
           <Route path="/v" element={<VersionPage />} />
