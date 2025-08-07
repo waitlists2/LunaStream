@@ -13,6 +13,7 @@ import { useLanguage } from "./LanguageContext"
 import { translations } from "../data/i18n"
 import Loading from "./Loading"
 import { useIsMobile } from "../hooks/useIsMobile"
+import HybridTVHeader from "./HybridTVHeader"
 
 const TVDetailMobile: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -23,7 +24,6 @@ const TVDetailMobile: React.FC = () => {
   const [episodesLoading, setEpisodesLoading] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
-  const [sessionId, setSessionId] = useState<string | null>(null)
   const [isFavorited, setIsFavorited] = useState(false)
   const [cast, setCast] = useState<any[]>([])
   const [selectedPlayer, setSelectedPlayer] = useState(playerConfigs[0].id)
@@ -32,7 +32,7 @@ const TVDetailMobile: React.FC = () => {
   const { language } = useLanguage()
   const isMobile = useIsMobile()
 
-  const t = translations[language]
+  const t = translations[language as keyof typeof translations] as Record<string, string>
 
   useEffect(() => {
     const fetchShow = async () => {
@@ -78,14 +78,10 @@ const TVDetailMobile: React.FC = () => {
   }, [show])
 
   useEffect(() => {
+    if (!show?.id) return
     const fetchCredits = async () => {
-      if (!show?.id) return
-      try {
-        const credits = await tmdb.getTVCredits(show.id)
-        setCast(credits.cast || [])
-      } catch (error) {
-        console.error("Failed to fetch credits:", error)
-      }
+      const credits = await tmdb.getTVCredits(show.id)
+      setCast(credits.cast || [])
     }
     fetchCredits()
   }, [show?.id])
@@ -160,7 +156,7 @@ const TVDetailMobile: React.FC = () => {
         <GlobalNavbar />
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t.tv_not_found || 'Show not found'}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t.tv_not_found || 'Show not found'}</h2>
             <Link to="/" className="text-pink-600 dark:text-pink-400">Go Home</Link>
           </div>
         </div>
@@ -199,147 +195,76 @@ const TVDetailMobile: React.FC = () => {
           Back
         </Link>
 
-        {/* Hero Section */}
-        <div className="relative rounded-xl overflow-hidden mb-6">
-          <img 
-            src={show.poster_path ? tmdb.getImageUrl(show.poster_path, "w500") : "/placeholder-profile.png"}
-            alt={show.name}
-            className="w-full h-64 object-cover rounded-xl"
+        {/* Hybrid TV Header - This replaces the basic hero section with comprehensive show overview */}
+        <div className="mb-8">
+          <HybridTVHeader
+            show={show}
+            selectedSeason={selectedSeason}
+            onSeasonChange={setSelectedSeason}
+            isFavorited={isFavorited}
+            onToggleFavorite={toggleFavorite}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl">
-            <div className="absolute bottom-4 left-4 right-4">
-              <h1 className="text-2xl font-bold text-white mb-2">{show.name}</h1>
-              <div className="flex items-center space-x-2 text-white text-sm">
-                <Star className="w-4 h-4 text-yellow-400" />
-                <span>{show.vote_average?.toFixed(1)}</span>
-                <span>•</span>
-                <span>{show.first_air_date?.split('-')[0]}</span>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Show Info */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{show.name}</h1>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">{show.overview}</p>
-            </div>
-            <button
-              onClick={toggleFavorite}
-              className={`p-2 rounded-full ${isFavorited ? 'text-pink-500' : 'text-gray-400'}`}
-            >
-              <Heart className="w-6 h-6" fill={isFavorited ? 'currentColor' : 'none'} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600 dark:text-white">Rating</p>
-              <p className="font-semibold text-gray-600 dark:text-white">{show.vote_average?.toFixed(1)}/10</p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-white">First Air Date</p>
-              <p className="font-semibold text-gray-600 dark:text-white">{formatAirDate(show.first_air_date)}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-white">Episodes</p>
-              <p className="font-semibold text-gray-600 dark:text-white">{show.number_of_episodes}</p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-white">Status</p>
-              <p className="font-semibold text-gray-600 dark:text-white">{show.status}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Cast Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cast</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {cast.slice(0, 6).map((person) => (
-              <div key={person.id} className="text-center">
-                <img
-                  src={person.profile_path ? tmdb.getImageUrl(person.profile_path, "w185") : "/placeholder-profile.png"}
-                  alt={person.name}
-                  className="w-full h-24 object-cover rounded-lg mb-2"
-                />
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-300">{person.character}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Season Selector */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Seasons</h2>
-            <div className="flex items-center space-x-2">
-              <Link
-                to={`/tv/${id}/season/${selectedSeason}`}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-colors flex items-center space-x-2 shadow-lg"
-              >
-                <Grid />
-              </Link>
-
-              {/* Wrapping select for custom arrow */}
+        {/* Episodes Section */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-200/50 dark:border-gray-700/50 p-6 mb-8 transition-colors duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {t.episodes || 'Episodes'}
+            </h2>
+            <div className="flex items-center space-x-3">
+              {/* Grid button for view season */}
+              <Link
+                to={`/tv/${id}/season/${selectedSeason}`}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-colors flex items-center space-x-2 shadow-lg"
+              >
+                <Grid className="w-4 h-4" />
+              </Link>
+              
+              {/* Second season selector */}
               <div className="relative">
                 <select
                   value={selectedSeason}
                   onChange={(e) => setSelectedSeason(Number(e.target.value))}
-                  className="appearance-none bg-gray-100 dark:bg-gray-700 text-sm dark:text-white h-10 pl-3 pr-8 rounded-lg focus:outline-none border border-gray-300 dark:border-gray-600"
-                  style={{ lineHeight: '2.5rem' }} // align text vertically
+                  className="appearance-none bg-gray-100/95 dark:bg-gray-700/95 backdrop-blur-md rounded-xl border border-white/20 dark:border-gray-600/30 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-200 py-2 px-4 cursor-pointer font-semibold"
                 >
                   {show.seasons?.filter(s => s.season_number > 0).map(season => (
                     <option key={season.id} value={season.season_number}>
-                      Season {season.season_number}
+                      {t.season} {season.season_number}
                     </option>
                   ))}
                 </select>
-
-                {/* Custom dropdown arrow */}
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                  <svg
-                    className="w-4 h-4 text-gray-600 dark:text-gray-300"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
             {episodes.map((episode) => (
-              <div key={episode.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <div
+                key={episode.id}
+                className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 dark:text-white">
                       Episode {episode.episode_number}: {episode.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-white mt-1">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       {episode.overview}
-                      {" "}
                       <Link
                         to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
-                        className="text-pink-600 dark:text-pink-400 underline text-xs"
+                        className="text-pink-600 dark:text-pink-400 hover:underline ml-1"
                       >
-                        {t.details || "Details"}
+                        {t.details || 'Details'}
                       </Link>
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-white mt-2">{formatAirDate(episode.air_date)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-300 mt-2">
+                      {formatAirDate(episode.air_date)}
+                    </p>
                   </div>
                   <button
                     onClick={() => handleWatchEpisode(episode)}
-                    className="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-pink-600 transition-colors flex items-center justify-center"
-                    style={{ minWidth: '40px', minHeight: '40px' }}
+                    className="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-pink-600 transition-colors"
                   >
                     <Play className="w-4 h-4" />
                   </button>
@@ -348,7 +273,6 @@ const TVDetailMobile: React.FC = () => {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   )
