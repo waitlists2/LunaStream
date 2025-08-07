@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, Calendar, Star, X, Grid} from 'lucide-react';
+import { ArrowLeft, Play, Calendar, Star, X, Grid } from 'lucide-react';
 import { tmdb } from '../services/tmdb';
 import { analytics } from '../services/analytics';
 import { watchlistService } from '../services/watchlist';
@@ -50,7 +50,7 @@ const SeasonDetailMobile: React.FC = () => {
       try {
         const [showData, seasonData] = await Promise.all([
           tmdb.getTVDetails(parseInt(id)),
-          tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber))
+          tmdb.getTVSeasons(parseInt(id), parseInt(seasonNumber)),
         ]);
 
         setShow(showData);
@@ -115,8 +115,8 @@ const SeasonDetailMobile: React.FC = () => {
   if (!season || !show) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 py-8">
-        <h2 className="text-xl font-bold">{t.season_not_found || 'Season not found'}</h2>
-        <Link to="/" className="text-pink-600 mt-2 underline">
+        <h2 className="text-xl font-bold break-words">{t.season_not_found || 'Season not found'}</h2>
+        <Link to="/" className="text-pink-600 mt-2 underline break-words">
           {t.error_404_go_home}
         </Link>
       </div>
@@ -159,23 +159,27 @@ const SeasonDetailMobile: React.FC = () => {
     <div className="bg-gradient-to-br from-pink-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 min-h-screen px-4 py-4">
       <Link
         to={`/tv/${id}`}
-        className="inline-flex items-center text-pink-600 dark:text-pink-400 mb-4"
+        className="inline-flex items-center text-pink-600 dark:text-pink-400 mb-4 break-words"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         {t.back_to_show}
       </Link>
 
       <div className="mb-4">
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-3">
           <img
             src={tmdb.getImageUrl(season.poster_path || show.poster_path, 'w200')}
             alt={season.name}
             className="w-24 h-36 object-cover rounded-lg"
           />
-          <div className="flex-1">
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">{show.name}</h1>
-            <h2 className="text-pink-600 dark:text-pink-400 font-semibold">{season.name}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+          <div className="flex-1 min-w-0 break-words overflow-wrap break-word">
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white break-words">
+              {show.name}
+            </h1>
+            <h2 className="text-pink-600 dark:text-pink-400 font-semibold break-words">
+              {season.name}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
               {season.episodes.length} {t.episodes}
             </p>
             {season.vote_average > 0 && (
@@ -187,7 +191,9 @@ const SeasonDetailMobile: React.FC = () => {
           </div>
         </div>
         {season.overview && (
-          <p className="mt-3 text-sm text-gray-700 dark:text-gray-300">{season.overview}</p>
+          <p className="mt-3 text-sm text-gray-700 dark:text-gray-300 break-words overflow-wrap break-word">
+            {season.overview}
+          </p>
         )}
       </div>
 
@@ -197,15 +203,15 @@ const SeasonDetailMobile: React.FC = () => {
             key={ep.id}
             className="bg-white dark:bg-gray-700 p-3 rounded-lg shadow border border-gray-200 dark:border-gray-600"
           >
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap gap-3">
               <img
                 src={tmdb.getImageUrl(ep.still_path || show.backdrop_path, 'w300')}
                 alt={ep.name}
                 className="w-24 h-16 rounded object-cover"
               />
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              <div className="flex-1 min-w-0 break-words overflow-wrap break-word">
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white break-words overflow-wrap break-word">
                     {ep.episode_number}. {ep.name}
                   </h3>
                   {ep.vote_average > 0 && (
@@ -221,12 +227,12 @@ const SeasonDetailMobile: React.FC = () => {
                     {new Date(ep.air_date).toLocaleDateString()}
                   </p>
                 )}
-                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 break-words overflow-wrap break-word">
                   {ep.overview}
                 </p>
 
                 {/* Button Row */}
-                <div className="mt-2 flex items-center space-x-2">
+                <div className="mt-2 flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => handleWatchEpisode(ep)}
                     className="text-xs bg-pink-600 text-white px-3 py-1 rounded-full flex items-center space-x-1"
@@ -248,7 +254,6 @@ const SeasonDetailMobile: React.FC = () => {
           </div>
         ))}
       </div>
-
     </div>
   );
 };

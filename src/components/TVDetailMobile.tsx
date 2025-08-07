@@ -31,6 +31,7 @@ const TVDetailMobile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'episodes' | 'cast' | 'similar'>('episodes')
   const { language } = useLanguage()
   const isMobile = useIsMobile()
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const t = translations[language as keyof typeof translations] as Record<string, string>
 
