@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePageWrapper from './components/HomePageWrapper';
 import SearchResults from './components/SearchResults';
-import MovieDetail from './components/MovieDetail';
+import MovieDetailWrapper from './components/MovieDetailWrapper';
 import TVDetailWrapper from './components/TVDetailWrapper';
 import LastUpdated from './components/LastUpdated';
 import DonatePage from './components/DonatePage';
@@ -62,7 +62,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePageWrapper />} />
           <Route path="/search" element={<SearchResults />} />
-          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/movie/:id" element={<MovieDetailWrapper />} />
           <Route path="/tv/:id" element={<TVDetailWrapper />} />
           <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
           <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />

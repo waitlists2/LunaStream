@@ -254,6 +254,24 @@ const TVDetailMobile: React.FC = () => {
           </div>
         </div>
 
+        {/* Cast Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cast</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {cast.slice(0, 6).map((person) => (
+              <div key={person.id} className="text-center">
+                <img
+                  src={person.profile_path ? tmdb.getImageUrl(person.profile_path, "w185") : "/placeholder-profile.png"}
+                  alt={person.name}
+                  className="w-full h-24 object-cover rounded-lg mb-2"
+                />
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300">{person.character}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Season Selector */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -289,24 +307,6 @@ const TVDetailMobile: React.FC = () => {
                     <Play className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cast Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cast</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {cast.slice(0, 6).map((person) => (
-              <div key={person.id} className="text-center">
-                <img
-                  src={person.profile_path ? tmdb.getImageUrl(person.profile_path, "w185") : "/placeholder-profile.png"}
-                  alt={person.name}
-                  className="w-full h-24 object-cover rounded-lg mb-2"
-                />
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-300">{person.character}</p>
               </div>
             ))}
           </div>
