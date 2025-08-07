@@ -17,7 +17,7 @@ import Watchlist from './components/Watchlist';
 import Vault from './components/Vault'
 import ComingSoon from './components/ComingSoon';
 import Footer from './components/Footer';
-import SeasonDetail from './components/SeasonDetail';
+import SeasonDetailWrapper from './components/SeasonDetailWrapper';
 import EpisodeDetail from './components/EpisodeDetail';
 import { LanguageProvider } from './components/LanguageContext';
 
@@ -64,7 +64,7 @@ function App() {
           <Route path="/search" element={<SearchResults />} />
           <Route path="/movie/:id" element={<MovieDetailWrapper />} />
           <Route path="/tv/:id" element={<TVDetailWrapper />} />
-          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
+          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetailWrapper />} />
           <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
           <Route path="/v" element={<VersionPage />} />
           <Route path="/last-updated" element={<LastUpdated />} />

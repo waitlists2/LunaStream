@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Play, Star, Calendar, Clock, Heart, ChevronDown, Tv, Info, ChevronLeft, Share2, Download, MoreVertical } from "lucide-react"
+import { Play, Star, Calendar, Clock, Heart, ChevronDown, Tv, Info, ChevronLeft, Share2, Download, MoreVertical, Grid } from "lucide-react"
 import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { TVDetails, Episode } from "../types"
@@ -274,35 +274,72 @@ const TVDetailMobile: React.FC = () => {
 
         {/* Season Selector */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Seasons</h2>
-            <select
-              value={selectedSeason}
-              onChange={(e) => setSelectedSeason(Number(e.target.value))}
-              className="bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-sm dark:text-white"
-            >
-              {show.seasons?.filter(s => s.season_number > 0).map(season => (
-                <option key={season.id} value={season.season_number}>
-                  Season {season.season_number}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center space-x-2">
+              <Link
+                to={`/tv/${id}/season/${selectedSeason}`}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-colors flex items-center space-x-2 shadow-lg"
+              >
+                <Grid />
+              </Link>
+
+              {/* Wrapping select for custom arrow */}
+              <div className="relative">
+                <select
+                  value={selectedSeason}
+                  onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                  className="appearance-none bg-gray-100 dark:bg-gray-700 text-sm dark:text-white h-10 pl-3 pr-8 rounded-lg focus:outline-none border border-gray-300 dark:border-gray-600"
+                  style={{ lineHeight: '2.5rem' }} // align text vertically
+                >
+                  {show.seasons?.filter(s => s.season_number > 0).map(season => (
+                    <option key={season.id} value={season.season_number}>
+                      Season {season.season_number}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Custom dropdown arrow */}
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <svg
+                    className="w-4 h-4 text-gray-600 dark:text-gray-300"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
             {episodes.map((episode) => (
               <div key={episode.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <div className="flex justify-between items-start">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 dark:text-white">
                       Episode {episode.episode_number}: {episode.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-white mt-1">{episode.overview}</p>
+                    <p className="text-sm text-gray-600 dark:text-white mt-1">
+                      {episode.overview}
+                      {" "}
+                      <Link
+                        to={`/tv/${id}/season/${episode.season_number}/episode/${episode.episode_number}`}
+                        className="text-pink-600 dark:text-pink-400 underline text-xs"
+                      >
+                        {t.details || "Details"}
+                      </Link>
+                    </p>
                     <p className="text-xs text-gray-500 dark:text-white mt-2">{formatAirDate(episode.air_date)}</p>
                   </div>
                   <button
                     onClick={() => handleWatchEpisode(episode)}
-                    className="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-pink-600 transition-colors"
+                    className="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-pink-600 transition-colors flex items-center justify-center"
+                    style={{ minWidth: '40px', minHeight: '40px' }}
                   >
                     <Play className="w-4 h-4" />
                   </button>
@@ -311,6 +348,7 @@ const TVDetailMobile: React.FC = () => {
             ))}
           </div>
         </div>
+
       </div>
     </div>
   )
