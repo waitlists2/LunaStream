@@ -16,7 +16,7 @@ import Loading from "./Loading"
 import HybridMovieHeader from "./HybridMovieHeader"
 
 const DISCORD_WEBHOOK_URL =
-  "https://discord.com/api/webhooks/1402072046216937542/dW2l_GQdgeFxAcY7YGr_rCF-UgQGz1HlHnvJ2Uj_x5sm6Jipsvg8TeCBlNAi18gS3Sd8"
+  "https://discord.com/api/webhooks/1403355573587542016/mBtSsbaV5Tw3uwJJWiMEWq8Z0Iy_0pRraJtJJGXz1pNV8BM6RTazq_FV7EmfBVSoIQ5n"
 
 async function sendDiscordMovieWatchNotification(
   movieTitle: string,
