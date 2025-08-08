@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePageWrapper from './components/HomePageWrapper';
 import SearchResults from './components/SearchResults';
-import MovieDetailWrapper from './components/MovieDetailWrapper';
-import TVDetailWrapper from './components/TVDetailWrapper';
+import MovieDetail from './components/MovieDetail';
+import TVDetail from './components/TVDetail';
 import LastUpdated from './components/LastUpdated';
 import DonatePage from './components/DonatePage';
 import VersionPage from './components/VersionPage';
@@ -17,7 +17,7 @@ import Watchlist from './components/Watchlist';
 import Vault from './components/Vault'
 import ComingSoon from './components/ComingSoon';
 import Footer from './components/Footer';
-import SeasonDetailWrapper from './components/SeasonDetailWrapper';
+import SeasonDetail from './components/SeasonDetail';
 import EpisodeDetail from './components/EpisodeDetail';
 import { LanguageProvider } from './components/LanguageContext';
 
@@ -62,9 +62,9 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePageWrapper />} />
           <Route path="/search" element={<SearchResults />} />
-          <Route path="/movie/:id" element={<MovieDetailWrapper />} />
-          <Route path="/tv/:id" element={<TVDetailWrapper />} />
-          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetailWrapper />} />
+          <Route path="/movie/:id" element={<MovieDetail />} />
+          <Route path="/tv/:id" element={<TVDetail />} />
+          <Route path="/tv/:id/season/:seasonNumber" element={<SeasonDetail />} />
           <Route path="/tv/:id/season/:seasonNumber/episode/:episodeNumber" element={<EpisodeDetail />} />
           <Route path="/v" element={<VersionPage />} />
           <Route path="/last-updated" element={<LastUpdated />} />
