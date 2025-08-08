@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info, List, Grid } from "lucide-react"
+import { Play, Star, Calendar, Clock, Film, X, Heart, Eye, EyeOff, ChevronDown, Tv, Info, List, Grid, ChevronLeft } from "lucide-react"
 import { tmdb } from "../services/tmdb"
 import { analytics } from "../services/analytics"
 import type { TVDetails, Episode } from "../types"
@@ -417,6 +417,12 @@ const TVDetail: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hybrid TV Header */}
         <div className="mb-8">
+            <Link
+              to={`/`}
+              className="text-pink-600 dark:text-pink-400 hover:underline ml-1"
+            >
+              <ChevronLeft />
+            </Link>
           <HybridTVHeader
             show={show}
             selectedSeason={selectedSeason}

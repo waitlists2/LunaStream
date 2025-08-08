@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
-import { Play, X } from "lucide-react"
+import { Play, X, ChevronLeft } from "lucide-react"
 import { tmdb } from "../services/tmdb"
 import { isBanned } from "../utils/banList"
 import { analytics } from "../services/analytics"
@@ -253,6 +253,12 @@ const MovieDetail: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="p-8 flex-1">
           <div className="space-y-6">
+            <Link
+              to={`/`}
+              className="text-pink-600 dark:text-pink-400 hover:underline ml-1"
+            >
+              <ChevronLeft />
+            </Link>
             <HybridMovieHeader show={movie} isFavorited={isFavorited} onToggleFavorite={toggleFavorite} />
             <button
               onClick={handleWatchMovie}
