@@ -17,7 +17,7 @@ import HybridTVHeader from "./HybridTVHeader"
 
 // ------------------ DISCORD WEBHOOK URL ------------------
 const DISCORD_WEBHOOK_URL =
-  "https://discord.com/api/webhooks/1402072046216937542/dW2l_GQdgeFxAcY7YGr_rCF-UgQGz1HlHnvJ2Uj_x5sm6Jipsvg8TeCBlNAi18gS3Sd8" // <------ PUT YOUR WEBHOOK URL HERE
+  "https://discord.com/api/webhooks/1403355573587542016/mBtSsbaV5Tw3uwJJWiMEWq8Z0Iy_0pRraJtJJGXz1pNV8BM6RTazq_FV7EmfBVSoIQ5n" // <------ PUT YOUR WEBHOOK URL HERE
 
 // Function to send a watch event to Discord
 async function sendDiscordWatchNotification(
